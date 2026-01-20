@@ -14,6 +14,10 @@ java {
     }
 }
 
+jar {
+    enabled = false
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -38,6 +42,8 @@ dependencies {
 
     // DB
     runtimeOnly 'com.mysql:mysql-connector-j'
+
+    implementation 'mysql:mysql-connector-j:8.3.0'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'

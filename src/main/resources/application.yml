@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: cheongyeon-be
+
+  datasource:
+    url: jdbc:mysql://cheongyeondb.cx08gi0k0a48.ap-northeast-2.rds.amazonaws.com:3306/cheongyeon?useSSL=false&serverTimezone=Asia/Seoul
+    username: admin
+    password: cjddus1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
