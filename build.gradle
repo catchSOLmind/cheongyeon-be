@@ -39,10 +39,9 @@ dependencies {
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'
-    git checkout fix/013
+
     // DB
-    runtimeOnly 'com.mysql:mysql-connector-j'
-    implementation 'com.mysql:mysql-connector-j:8.3.0'
+    runtimeOnly 'com.mysql:mysql-connector-j:8.3.0'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
