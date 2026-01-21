@@ -1,7 +1,7 @@
 language: ko
 early_access: false
 reviews:
-  profile: assertive
+  profile: balanced
   request_changes_workflow: false
   high_level_summary: true
   poem: false
@@ -39,9 +39,7 @@ reviews:
       enabled: false
   path_filters:
     - "**/*.java"
-    - "**/*.kt"
     - "**/build.gradle"
-    - "**/build.gradle.kts"
     - "**/application.yml"
     - "**/application.yaml"
     - "**/application.properties"
@@ -102,7 +100,7 @@ reviews:
         - orphanRemoval 사용이 적절한지 확인해주세요
         - 테이블명이 스네이크케이스 + 복수형을 따르는지 확인해주세요 (예: users)
         - 컬럼명이 스네이크케이스를 따르는지 확인해주세요 (예: user_id)
-        - Long 타입 값이 'L'로 끝나는지 확인해주세요 (예: 1001L)
+        - Long 리터럴 사용 시 'L' suffix 사용 여부를 확인하고, 누락된 경우 권장 이유를 설명해주세요
         - static 선언 시 final도 함께 사용하는지 확인해주세요
         - 상수가 대문자와 언더스코어로 작성되었는지 확인해주세요
     - path: "**/*Dto.java"
@@ -148,6 +146,5 @@ guidelines:
   - 주니어 개발자가 이해할 수 있도록 문제가 발생하는 배경과 원인을 간단히 설명해주세요
   - 해결책을 제시할 때는 "왜 이렇게 해야 하는지" 이유를 함께 설명해주세요
   - 가능하면 간단한 예시 코드나 비유를 들어 설명해주세요
-  - 용어를 사용할 때는 간단한 부연 설명을 추가해주세요 (예: "N+1 문제(연관된 데이터를 조회할 때 불필요한 쿼리가 반복 실행되는 문제)")
   - 테스트가 필요한 핵심 비즈니스 로직인지 판단하고, 테스트 부재 시 테스트가 필요한 이유를 간단히 언급해주세요
   - 코딩 컨벤션 위반을 지적할 때는 "현재 코드 -> 수정 코드" 형식으로 구체적인 변경 예시를 제시해주세요
