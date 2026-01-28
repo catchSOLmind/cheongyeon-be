@@ -1,9 +1,14 @@
 spring:
+
+  config:
+    import: optional:file:.env[.properties]
+
 #  datasource:
 #    url: ${DB_URL}
 #    username: ${DB_USERNAME}
 #    password: ${DB_PASSWORD}
 #    driver-class-name: com.mysql.cj.jdbc.Driver
+
 
   datasource:
     url: jdbc:mysql://localhost:3306/cheongyeon
@@ -23,3 +28,11 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+kakao:
+  oauth:
+    token-uri: https://kauth.kakao.com/oauth/token
+    client-id: ${KAKAO_REST_API_KEY}
+    client-secret: ${KAKAO_CLIENT_SECRET}
+    redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8080}
+    user-info-uri: https://kapi.kakao.com/v2/user/me
