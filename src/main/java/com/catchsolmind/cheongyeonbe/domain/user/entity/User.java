@@ -1,77 +1,61 @@
 package com.catchsolmind.cheongyeonbe.domain.user.entity;
 
+import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
+import com.catchsolmind.cheongyeonbe.domain.point.PointTransaction;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(
-        name = "users",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_users_provider_provider_id", columnNames = {"provider", "provider_id"})
-        },
-        indexes = {
-                @Index(name = "ix_users_provider_provider_id", columnList = "provider, provider_id"),
-                @Index(name = "ix_users_created_at", columnList = "created_at")
-        }
-)
+@Table(name = "user", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_provider_id", columnNames = {"provider", "provider_id"})
+})
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id", updatable = false)
+    @Column(name = "user_id")
     private Long userId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "provider", nullable = false, length = 20)
-    private AuthProvider provider;
+    @Column(nullable = false, length = 50)
+    private String provider;
 
-    @Column(name = "provider_id", nullable = false, length = 100)
+    @Column(name = "provider_id", nullable = false)
     private String providerId;
 
-    @Column(name = "nickname", nullable = false, length = 30)
+    @Column(nullable = false, length = 100)
     private String nickname;
 
     @Column(name = "profile_img", length = 500)
     private String profileImg;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "point_balance")
+    @Builder.Default
+    private Integer pointBalance = 0;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at", nullable = false)
+    @UpdateTimestamp
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @PrePersist
-    private void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<GroupMember> groupMembers = new ArrayList<>();
 
-    @PreUpdate
-    private void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void updateProfile(String nickname, String profileImg) {
-        if (nickname != null && !nickname.isBlank()) {
-            this.nickname = nickname;
-        }
-        this.profileImg = profileImg;
-    }
-
-    public static User create(AuthProvider provider, String providerId, String nickname, String profileImg) {
-        return User.builder()
-                .provider(provider)
-                .providerId(providerId)
-                .nickname(nickname)
-                .profileImg(profileImg)
-                .build();
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PointTransaction> pointTransactions = new ArrayList<>();
 }
-
