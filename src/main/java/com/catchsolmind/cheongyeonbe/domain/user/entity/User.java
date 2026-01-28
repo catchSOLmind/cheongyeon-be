@@ -3,7 +3,6 @@ package com.catchsolmind.cheongyeonbe.domain.user.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.security.AuthProvider;
 import java.time.LocalDateTime;
 
 @Entity
