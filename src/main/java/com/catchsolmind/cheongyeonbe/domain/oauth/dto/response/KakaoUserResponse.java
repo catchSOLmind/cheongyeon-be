@@ -21,6 +21,8 @@ public record KakaoUserResponse(
     ) {
         @Builder
         public record Profile(
+                String name, // User.name
+                String email, // User.email
                 String nickname // User.nickname
         ) {
         }
