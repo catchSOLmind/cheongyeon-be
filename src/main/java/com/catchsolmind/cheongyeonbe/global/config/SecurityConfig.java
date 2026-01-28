@@ -36,7 +36,8 @@ public class SecurityConfig {
         // 프론트 주소들
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "http://127.0.0.1:5173"
+                "http://127.0.0.1:5173",
+                "https://d288u0ybsqpwmr.cloudfront.net"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
