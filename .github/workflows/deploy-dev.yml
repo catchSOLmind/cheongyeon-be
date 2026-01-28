@@ -20,7 +20,9 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          timeout: 30s
-          command_timeout: 10m
+
+          timeout: 2m
+          command_timeout: 60m
+
           script: |
             bash /home/ubuntu/deploy-dev.sh
