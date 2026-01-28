@@ -5,12 +5,14 @@ package com.catchsolmind.cheongyeonbe.domain.oauth.dto.response;
  * UserEntity 생성에 사용
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
 @Builder
 public record KakaoUserResponse(
         Long id, // providerId
 
+        @JsonProperty("kakao-account")
         KakaoAccount kakaoAccount
 ) {
     @Builder
