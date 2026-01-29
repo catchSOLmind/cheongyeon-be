@@ -8,6 +8,7 @@ public record KakaoLoginResponse(
         String accessToken,
         String refreshToken,
         Long userId,
+        String email,
         String nickname,
         String profileImg
 ) {
@@ -20,6 +21,7 @@ public record KakaoLoginResponse(
                 accessToken,
                 refreshToken,
                 user.getUserId(),
+                user.getEmail(),
                 user.getNickname(),
                 user.getProfileImg()
         );

@@ -1,4 +1,4 @@
-package com.catchsolmind.cheongyeonbe.global.fixture.oauth;
+package com.catchsolmind.cheongyeonbe.global.fixture.dto.oauth;
 
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse;
 
@@ -8,8 +8,9 @@ public class KakaoUserResponseFixture {
         return KakaoUserResponse.builder()
                 .id(1L)
                 .kakaoAccount(KakaoUserResponse.KakaoAccount.builder()
+                        .email("email@email.com")
                         .profile(KakaoUserResponse.KakaoAccount.Profile.builder()
-                                .nickname("유저1 닉네임")
+                                .nickname("nickname")
                                 .build())
                         .build())
                 .build();
