@@ -33,9 +33,6 @@ public class User {
     @Column(name = "provider_id", nullable = false)
     private String providerId;
 
-    @Column(nullable = false, length = 100)
-    private String name;
-
     @Column(length = 150)
     private String email;
 
