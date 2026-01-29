@@ -13,7 +13,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/cheongyeon
     username: root
-    password: { DB_PASSWORD }
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -36,3 +36,9 @@ kakao:
     client-secret: ${KAKAO_CLIENT_SECRET}
     redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8080}
     user-info-uri: https://kapi.kakao.com/v2/user/me
+
+cloud:
+  aws:
+    s3:
+      bucket: cheongyeon-fe-solmind
+      region: ap-northeast-2
