@@ -78,6 +78,6 @@ class BasicKakaoClientServiceTest {
 
         // then
         assertThat(result.id()).isEqualTo(1L);
-        assertThat(result.kakaoAccount().profile().nickname()).isEqualTo("유저1 닉네임");
+        assertThat(result.kakaoAccount().profile().nickname()).isEqualTo("nickname");
     }
 }
