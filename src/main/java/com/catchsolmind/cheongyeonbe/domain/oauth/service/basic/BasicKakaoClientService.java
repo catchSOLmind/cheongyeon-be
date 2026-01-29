@@ -3,8 +3,9 @@ package com.catchsolmind.cheongyeonbe.domain.oauth.service.basic;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoTokenResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoClientService;
+import com.catchsolmind.cheongyeonbe.global.BusinessException;
+import com.catchsolmind.cheongyeonbe.global.ErrorCode;
 import com.catchsolmind.cheongyeonbe.global.config.KakaoOAuthProperties;
-import com.catchsolmind.cheongyeonbe.global.exception.oauth.KakaoServerException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ public class BasicKakaoClientService implements KakaoClientService {
 
             return response.getBody();
         } catch (ResourceAccessException e) {
-            throw new KakaoServerException();
+            throw new BusinessException(ErrorCode.KAKAO_SERVER_ERROR);
         }
     }
 
