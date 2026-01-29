@@ -1,18 +1,23 @@
 package com.catchsolmind.cheongyeonbe.domain.oauth.service.basic;
 
+import com.catchsolmind.cheongyeonbe.domain.oauth.dto.data.KakaoOAuthUserInfo;
+import com.catchsolmind.cheongyeonbe.domain.oauth.dto.data.OAuthUserInfo;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoLoginResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoTokenResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoAuthService;
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoClientService;
+import com.catchsolmind.cheongyeonbe.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BasicKakaoAuthService implements KakaoAuthService {
     private final KakaoClientService kakaoClientService;
-
+    private final UserService userService;
 
     @Override
     public KakaoLoginResponse login(String code) {
@@ -23,6 +28,8 @@ public class BasicKakaoAuthService implements KakaoAuthService {
         KakaoUserResponse kakaoUserResponse = kakaoClientService.getKakaoUserInfo(kakaoTokenResponse.access_token());
 
         // 사용자 조회 or 생성
+        OAuthUserInfo oAuthUserInfo = new KakaoOAuthUserInfo(kakaoUserResponse).toOAuthUserInfo();
+        userService.findOrCreate(oAuthUserInfo);
 
         // JWT 발급
 
