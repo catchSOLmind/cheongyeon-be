@@ -4,11 +4,13 @@ import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoTokenRespons
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoClientService;
 import com.catchsolmind.cheongyeonbe.global.config.KakaoOAuthProperties;
+import com.catchsolmind.cheongyeonbe.global.exception.oauth.KakaoServerException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -19,25 +21,29 @@ public class BasicKakaoClientService implements KakaoClientService {
 
     @Override
     public KakaoTokenResponse requestToken(String code) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("grant_type", "authorization_code"); // 카카오 고정
-        body.add("client_id", kakaoOAuthProperties.getClientId());
-        body.add("redirect_uri", kakaoOAuthProperties.getRedirectUri());
-        body.add("code", code);
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("grant_type", "authorization_code"); // 카카오 고정
+            body.add("client_id", kakaoOAuthProperties.getClientId());
+            body.add("redirect_uri", kakaoOAuthProperties.getRedirectUri());
+            body.add("code", code);
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-        ResponseEntity<KakaoTokenResponse> response =
-                restTemplate.postForEntity(
-                        kakaoOAuthProperties.getTokenUri(),
-                        request,
-                        KakaoTokenResponse.class
-                );
+            ResponseEntity<KakaoTokenResponse> response =
+                    restTemplate.postForEntity(
+                            kakaoOAuthProperties.getTokenUri(),
+                            request,
+                            KakaoTokenResponse.class
+                    );
 
-        return response.getBody();
+            return response.getBody();
+        } catch (ResourceAccessException e) {
+            throw new KakaoServerException();
+        }
     }
 
     @Override
