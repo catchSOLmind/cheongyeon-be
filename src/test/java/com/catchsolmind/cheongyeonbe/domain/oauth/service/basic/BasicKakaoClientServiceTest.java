@@ -63,7 +63,7 @@ class BasicKakaoClientServiceTest {
     void getKakaoUserInfoUsingKakaoAccessToken() {
         // given
         String accessToken = KakaoTokenResponseFixture.valid().access_token();
-        KakaoUserResponse response = KakaoUserResponseFixture.valid();
+        KakaoUserResponse response = KakaoUserResponseFixture.user1();
 
         when(kakaoOAuthProperties.getUserInfoUri()).thenReturn("https://kapi.kakao.com/v2/user/me");
         when(restTemplate.exchange(
