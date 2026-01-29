@@ -36,6 +36,7 @@ public class User {
     @Column(name = "provider_id", nullable = false)
     private Long providerId;
 
+
     @Column(length = 150)
     private String email;
 
