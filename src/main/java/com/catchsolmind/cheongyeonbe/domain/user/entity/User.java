@@ -1,7 +1,9 @@
 package com.catchsolmind.cheongyeonbe.domain.user.entity;
 
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
+import com.catchsolmind.cheongyeonbe.domain.oauth.dto.data.OAuthUserInfo;
 import com.catchsolmind.cheongyeonbe.domain.point.PointTransaction;
+import com.catchsolmind.cheongyeonbe.global.enums.AuthProvider;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,11 +29,12 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String provider;
+    private AuthProvider provider;
 
     @Column(name = "provider_id", nullable = false)
-    private String providerId;
+    private Long providerId;
 
     @Column(length = 150)
     private String email;
@@ -61,4 +64,13 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<PointTransaction> pointTransactions = new ArrayList<>();
+
+    public static User createOAuthUser(OAuthUserInfo info) {
+        return User.builder()
+                .provider(info.provider())
+                .providerId(info.providerId())
+                .email(info.email())
+                .nickname(info.nickname())
+                .build();
+    }
 }
