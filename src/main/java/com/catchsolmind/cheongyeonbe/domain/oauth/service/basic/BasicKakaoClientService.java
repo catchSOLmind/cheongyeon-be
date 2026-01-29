@@ -28,6 +28,7 @@ public class BasicKakaoClientService implements KakaoClientService {
             MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
             body.add("grant_type", "authorization_code"); // 카카오 고정
             body.add("client_id", kakaoOAuthProperties.getClientId());
+            body.add("client_secret", kakaoOAuthProperties.getClientSecret());
             body.add("redirect_uri", kakaoOAuthProperties.getRedirectUri());
             body.add("code", code);
 
