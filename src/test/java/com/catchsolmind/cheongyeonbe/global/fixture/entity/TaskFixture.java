@@ -4,46 +4,34 @@ import com.catchsolmind.cheongyeonbe.domain.task.entity.Task;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TaskFixture {
 
-    public static Task task() {
+    private static Task.TaskBuilder baseBuilder() {
         return Task.builder()
                 .taskId(1L)
-                .group(GroupFixture.group())
-                .taskType(TaskTypeFixture.taskType())
                 .title("title")
                 .description("description")
-                .creatorMember(GroupMemberFixture.groupMember())
                 .repeatRule("repeat-rule")
                 .status(TaskStatus.UNCOMPLETED)
-                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0))
-                .occurrences(TaskOccurrenceFixture.taskOccurrences())
-                .build();
+                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0));
     }
 
-    public static Task task2() {
-        return Task.builder()
-                .taskId(2L)
-                .group(GroupFixture.group())
-                .taskType(TaskTypeFixture.taskType())
-                .title("title-2")
-                .description("description-2")
-                .creatorMember(GroupMemberFixture.groupMember())
-                .repeatRule("repeat-rule-2")
-                .status(TaskStatus.UNCOMPLETED)
-                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0))
-                .occurrences(TaskOccurrenceFixture.taskOccurrences())
-                .build();
+    public static Task base() {
+        return baseBuilder().build();
     }
 
-    public static List<Task> tasks() {
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(TaskFixture.task());
-        tasks.add(TaskFixture.task2());
-
-        return tasks;
+    public static List<Task> createList(int count) {
+        return IntStream.range(0, count)
+                .mapToObj(i -> baseBuilder()
+                        .taskId((long) (i + 1))
+                        .title("title-" + (i + 1))
+                        .description("description-" + (i + 1))
+                        .repeatRule("repeat-rule-" + (i + 1))
+                        .build())
+                .collect(Collectors.toList());
     }
 }

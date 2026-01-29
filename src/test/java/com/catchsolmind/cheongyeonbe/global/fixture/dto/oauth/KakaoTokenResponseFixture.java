@@ -1,4 +1,4 @@
-package com.catchsolmind.cheongyeonbe.global.fixture.oauth;
+package com.catchsolmind.cheongyeonbe.global.fixture.dto.oauth;
 
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoTokenResponse;
 

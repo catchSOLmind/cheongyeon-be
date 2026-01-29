@@ -1,4 +1,4 @@
-package com.catchsolmind.cheongyeonbe.global.fixture.oauth;
+package com.catchsolmind.cheongyeonbe.global.fixture.dto.oauth;
 
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoLoginResponse;
 
@@ -9,7 +9,7 @@ public class KakaoLoginResponseFixture {
                 .accessToken("access-token")
                 .refreshToken("refresh-token")
                 .userId(1L)
-                .nickname("유저1")
+                .nickname("nickname")
                 .profileImg("profile-img-url")
                 .build();
     }

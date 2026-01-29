@@ -7,14 +7,15 @@ import java.time.LocalDateTime;
 
 public class TaskTypeFixture {
 
-    public static TaskType taskType() {
+    private static TaskType.TaskTypeBuilder baseBuilder() {
         return TaskType.builder()
                 .taskTypeId(1L)
                 .category(TaskCategory.BATHROOM)
                 .name("name")
-                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0))
-                .tasks(TaskFixture.tasks())
-                .favoritedBy(MemberFavoriteTaskTypeFixture.memberFavoriteTaskTypes())
-                .build();
+                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0));
+    }
+
+    public static TaskType base() {
+        return baseBuilder().build();
     }
 }

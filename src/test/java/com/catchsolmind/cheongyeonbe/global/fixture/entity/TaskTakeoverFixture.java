@@ -3,35 +3,27 @@ package com.catchsolmind.cheongyeonbe.global.fixture.entity;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskTakeover;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TaskTakeoverFixture {
-    public static TaskTakeover taskTakeover() {
+
+    private static TaskTakeover.TaskTakeoverBuilder baseBuilder() {
         return TaskTakeover.builder()
                 .takeoverId(1L)
-                .occurrence(TaskOccurrenceFixture.taskOccurrence())
-                .fromMember(GroupMemberFixture.groupMember())
-                .toMember(GroupMemberFixture.groupMember2())
-                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0))
-                .build();
+                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0));
     }
 
-    public static TaskTakeover taskTakeover2() {
-        return TaskTakeover.builder()
-                .takeoverId(2L)
-                .occurrence(TaskOccurrenceFixture.taskOccurrence())
-                .fromMember(GroupMemberFixture.groupMember())
-                .toMember(GroupMemberFixture.groupMember2())
-                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0))
-                .build();
+    public static TaskTakeover base() {
+        return baseBuilder().build();
     }
 
-    public static List<TaskTakeover> takeovers() {
-        List<TaskTakeover> takeovers = new ArrayList<>();
-        takeovers.add(TaskTakeoverFixture.taskTakeover());
-        takeovers.add(TaskTakeoverFixture.taskTakeover2());
-
-        return takeovers;
+    public static List<TaskTakeover> createList(int count) {
+        return IntStream.range(0, count)
+                .mapToObj(i -> baseBuilder()
+                        .takeoverId((long) (i + 1))
+                        .build())
+                .collect(Collectors.toList());
     }
 }

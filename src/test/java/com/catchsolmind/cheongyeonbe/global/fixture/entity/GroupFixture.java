@@ -6,15 +6,15 @@ import java.time.LocalDateTime;
 
 public class GroupFixture {
 
-    public static Group group() {
+    private static Group.GroupBuilder baseBuilder() {
         return Group.builder()
                 .groupId(1L)
-                .name("group name1")
-                .ownerUser(UserFixture.user2())
+                .name("name")
                 .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0))
-                .updatedAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0))
-                .members(GroupMemberFixture.groupMembers())
-                .tasks(TaskFixture.tasks())
-                .build();
+                .updatedAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0));
+    }
+
+    public static Group base() {
+        return baseBuilder().build();
     }
 }

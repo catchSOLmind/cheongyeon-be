@@ -3,34 +3,27 @@ package com.catchsolmind.cheongyeonbe.global.fixture.entity;
 import com.catchsolmind.cheongyeonbe.domain.agreement.entity.AgreementSign;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class AgreementSignFixture {
 
-    public static AgreementSign agreementSign() {
+    private static AgreementSign.AgreementSignBuilder baseBuilder() {
         return AgreementSign.builder()
                 .signId(1L)
-                .agreement(AgreementFixture.agreement())
-                .member(GroupMemberFixture.groupMember())
-                .signedAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0))
-                .build();
+                .signedAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0));
     }
 
-    public static AgreementSign agreementSign2() {
-        return AgreementSign.builder()
-                .signId(2L)
-                .agreement(AgreementFixture.agreement())
-                .member(GroupMemberFixture.groupMember())
-                .signedAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0))
-                .build();
+    public static AgreementSign base() {
+        return baseBuilder().build();
     }
 
-    public static List<AgreementSign> agreementSigns() {
-        List<AgreementSign> agreementSigns = new ArrayList<>();
-        agreementSigns.add(AgreementSignFixture.agreementSign());
-        agreementSigns.add(AgreementSignFixture.agreementSign2());
-
-        return agreementSigns;
+    public static List<AgreementSign> createList(int count) {
+        return IntStream.range(0, count)
+                .mapToObj(i -> baseBuilder()
+                        .signId((long) (i + 1))
+                        .build())
+                .collect(Collectors.toList());
     }
 }

@@ -2,7 +2,7 @@ package com.catchsolmind.cheongyeonbe.domain.oauth.dto.response;
 
 /*
  * 카카오에서 제공받은 토큰으로 조회한 사용자 정보
- * UserEntity 생성에 사용
+ * 외부 API 응답 DTO
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,7 +21,6 @@ public record KakaoUserResponse(
     ) {
         @Builder
         public record Profile(
-                String name, // User.name
                 String email, // User.email
                 String nickname // User.nickname
         ) {

@@ -5,44 +5,29 @@ import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TaskOccurrenceFixture {
 
-    public static TaskOccurrence taskOccurrence() {
+    private static TaskOccurrence.TaskOccurrenceBuilder baseBuilder() {
         return TaskOccurrence.builder()
                 .occurrenceId(1L)
-                .task(TaskFixture.task())
-                .group(GroupFixture.group())
                 .occurDate(LocalDate.of(2026, 1, 1))
-                .primaryAssignedMember(GroupMemberFixture.groupMember())
                 .status(TaskStatus.UNCOMPLETED)
-                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0))
-                .logs(TaskLogFixture.taskLogs())
-                .takeovers(TaskTakeoverFixture.takeovers())
-                .build();
+                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0));
     }
 
-    public static TaskOccurrence taskOccurrence2() {
-        return TaskOccurrence.builder()
-                .occurrenceId(2L)
-                .task(TaskFixture.task())
-                .group(GroupFixture.group())
-                .occurDate(LocalDate.of(2026, 1, 1))
-                .primaryAssignedMember(GroupMemberFixture.groupMember())
-                .status(TaskStatus.COMPLETED)
-                .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0))
-                .logs(TaskLogFixture.taskLogs())
-                .takeovers(TaskTakeoverFixture.takeovers())
-                .build();
+    public static TaskOccurrence base() {
+        return baseBuilder().build();
     }
 
-    public static List<TaskOccurrence> taskOccurrences() {
-        List<TaskOccurrence> taskOccurrences = new ArrayList<>();
-        taskOccurrences.add(TaskOccurrenceFixture.taskOccurrence());
-        taskOccurrences.add(TaskOccurrenceFixture.taskOccurrence2());
-
-        return taskOccurrences;
+    public static List<TaskOccurrence> createList(int count) {
+        return IntStream.range(0, count)
+                .mapToObj(i -> baseBuilder()
+                        .occurrenceId((long) (i + 1))
+                        .build())
+                .collect(Collectors.toList());
     }
 }
