@@ -1,8 +1,9 @@
 package com.catchsolmind.cheongyeonbe.domain.oauth.dto.data;
 
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse;
+import com.catchsolmind.cheongyeonbe.global.BusinessException;
+import com.catchsolmind.cheongyeonbe.global.ErrorCode;
 import com.catchsolmind.cheongyeonbe.global.enums.AuthProvider;
-import com.catchsolmind.cheongyeonbe.global.exception.oauth.KakaoServerException;
 import lombok.RequiredArgsConstructor;
 
 /*
@@ -17,7 +18,7 @@ public class KakaoOAuthUserInfo {
         if (response == null ||
                 response.kakaoAccount() == null ||
                 response.kakaoAccount().profile() == null) {
-            throw new KakaoServerException();
+            throw new BusinessException(ErrorCode.KAKAO_SERVER_ERROR);
         }
 
         return new OAuthUserInfo(
