@@ -16,7 +16,7 @@ public class KakaoOAuthUserInfo {
         return new OAuthUserInfo(
                 AuthProvider.KAKAO,
                 response.id(),
-                response.kakaoAccount().profile().email(),
+                response.kakaoAccount().email(),
                 response.kakaoAccount().profile().nickname()
         );
     }

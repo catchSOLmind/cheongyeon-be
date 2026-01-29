@@ -12,16 +12,16 @@ import lombok.Builder;
 public record KakaoUserResponse(
         Long id, // providerId
 
-        @JsonProperty("kakao-account")
+        @JsonProperty("kakao_account")
         KakaoAccount kakaoAccount
 ) {
     @Builder
     public record KakaoAccount(
+            String email, // User.email
             Profile profile
     ) {
         @Builder
         public record Profile(
-                String email, // User.email
                 String nickname // User.nickname
         ) {
         }
