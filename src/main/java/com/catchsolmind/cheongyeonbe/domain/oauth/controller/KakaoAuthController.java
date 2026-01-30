@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/oauth/kakao")
+@RequestMapping("/api/oauth/kakao")
 @Validated
 @Slf4j
 public class KakaoAuthController {
