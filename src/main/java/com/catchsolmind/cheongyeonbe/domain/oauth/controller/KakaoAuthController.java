@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,13 +27,13 @@ public class KakaoAuthController {
     private final AuthTokenService authTokenService;
 
     @PostMapping("/kakao/login")
-    public ResponseEntity<KakaoLoginResponse> login(
+    public ApiResponse<KakaoLoginResponse> login(
             @NotBlank @RequestParam("code") String code
     ) {
         log.info("[OAuth] 인가코드 받기 성공: code={}", code);
         KakaoLoginResponse response = kakaoAuthService.login(code);
 
-        return ResponseEntity.ok(response);
+        return ApiResponse.success(response);
     }
 
     @PostMapping("/token/refresh")
