@@ -1,13 +1,17 @@
 package com.catchsolmind.cheongyeonbe.domain.oauth.service.basic;
 
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.data.OAuthUserInfo;
+import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoLoginResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoTokenResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoClientService;
+import com.catchsolmind.cheongyeonbe.domain.user.dto.UserDto;
 import com.catchsolmind.cheongyeonbe.domain.user.service.UserService;
 import com.catchsolmind.cheongyeonbe.global.enums.AuthProvider;
 import com.catchsolmind.cheongyeonbe.global.fixture.dto.oauth.KakaoTokenResponseFixture;
 import com.catchsolmind.cheongyeonbe.global.fixture.dto.oauth.KakaoUserResponseFixture;
+import com.catchsolmind.cheongyeonbe.global.fixture.dto.user.UserDtoFixture;
+import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,11 +36,22 @@ class BasicKakaoAuthServiceTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private JwtProvider jwtProvider;
+
     @Test
     @DisplayName("카카오톡 로그인 성공 테스트")
     void loginSuccess() {
         // given
         String authorizationCode = "auth-code";
+        String generatedAccessToken = "jwt-access-token";
+        String generatedRefreshToken = "jwt-refresh-token";
+
+        long accessExpMs = 3600000L;
+        long refreshExpMs = 1209600000L;
+
+        long expectedAccessExpSec = 3600L;
+        long expectedRefreshExpSec = 1209600L;
 
         KakaoTokenResponse tokenResponse = KakaoTokenResponseFixture.valid();
         KakaoUserResponse kakaoUserResponse = KakaoUserResponseFixture.valid();
@@ -44,20 +60,38 @@ class BasicKakaoAuthServiceTest {
         when(kakaoClientService.getKakaoUserInfo("access-token"))
                 .thenReturn(kakaoUserResponse);
 
+        UserDto mockUserDto = UserDtoFixture.valid();
+        when(userService.findOrCreate(any(OAuthUserInfo.class)))
+                .thenReturn(mockUserDto);
+
+        when(jwtProvider.createAccessToken(mockUserDto.userId())).thenReturn(generatedAccessToken);
+        when(jwtProvider.createRefreshToken(mockUserDto.userId())).thenReturn(generatedRefreshToken);
+
+        when(jwtProvider.getAccessTokenExpirationMs()).thenReturn(accessExpMs);
+        when(jwtProvider.getRefreshTokenExpirationMs()).thenReturn(refreshExpMs);
+
         // when
-        kakaoAuthService.login(authorizationCode);
+        KakaoLoginResponse response = kakaoAuthService.login(authorizationCode);
 
         // then
         verify(kakaoClientService).requestToken(authorizationCode);
-        verify(kakaoClientService).getKakaoUserInfo("access-token");
+        verify(kakaoClientService).getKakaoUserInfo(tokenResponse.access_token());
 
         ArgumentCaptor<OAuthUserInfo> captor = ArgumentCaptor.forClass(OAuthUserInfo.class);
         verify(userService).findOrCreate(captor.capture());
 
-        OAuthUserInfo userInfo = captor.getValue();
-        assertThat(userInfo.provider()).isEqualTo(AuthProvider.KAKAO);
-        assertThat(userInfo.providerId()).isEqualTo(1L);
-        assertThat(userInfo.email()).isEqualTo("email@email.com");
-        assertThat(userInfo.nickname()).isEqualTo("nickname");
+        OAuthUserInfo capturedUserInfo = captor.getValue();
+        assertThat(capturedUserInfo.provider()).isEqualTo(AuthProvider.KAKAO);
+
+        assertThat(response).isNotNull();
+
+        assertThat(response.accessToken()).isEqualTo(generatedAccessToken);
+
+        assertThat(response.expiresIn()).isEqualTo(expectedAccessExpSec);
+
+        assertThat(response.refreshToken()).isEqualTo(generatedRefreshToken);
+        assertThat(response.refreshTokenExpiresIn()).isEqualTo(expectedRefreshExpSec);
+
+        assertThat(response.user()).usingRecursiveComparison().isEqualTo(mockUserDto);
     }
 }
