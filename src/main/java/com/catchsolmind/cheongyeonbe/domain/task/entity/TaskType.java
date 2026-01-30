@@ -31,6 +31,9 @@ public class TaskType {
     @Column(nullable = false, length = 100)
     private String name;
 
+    @Column(nullable = false)
+    private int point;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
