@@ -45,28 +45,28 @@ public class ProfileController {
 
     @GetMapping
     @Operation(summary = "프로필 조회")
-    public ProfileGetResponse getProfile() {
-        return profileService.getProfile(mockUser(), mockMember());
+    public ProfileGetResponse getProfile(@RequestParam Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("user not found"));
+        return profileService.getProfile(user, null);
     }
 
     @PatchMapping
     @Operation(summary = "프로필 수정")
-    public ProfileUpdateResponse updateProfile(
-            @RequestBody ProfileUpdateRequest request
-    ) {
-        return profileService.updateProfile(
-                mockUser(), mockMember(), request
-        );
+    public ProfileUpdateResponse updateProfile(@RequestParam Long userId,
+                                               @RequestBody ProfileUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("user not found"));
+        return profileService.updateProfile(user, null, request);
     }
 
     @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "프로필 이미지 업로드/변경")
-    public ProfileImageUploadResponse uploadProfileImage(
-            @RequestPart("image") MultipartFile image
-    ) {
-        String url = profileImageService.upload(mockUser(), image);
-        return ProfileImageUploadResponse.builder()
-                .profileImageUrl(url)
-                .build();
+    public ProfileImageUploadResponse uploadProfileImage(@RequestParam Long userId,
+                                                         @RequestPart("image") MultipartFile image) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("user not found"));
+        String url = profileImageService.upload(user, image);
+        return ProfileImageUploadResponse.builder().profileImageUrl(url).build();
     }
 }
