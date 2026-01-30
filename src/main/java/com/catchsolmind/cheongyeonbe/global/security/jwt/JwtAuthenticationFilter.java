@@ -1,5 +1,7 @@
 package com.catchsolmind.cheongyeonbe.global.security.jwt;
 
+import com.catchsolmind.cheongyeonbe.global.enums.JwtTokenType;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +33,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null) {
             jwtProvider.validateToken(token);
+            Claims claims = jwtProvider.parseClaims(token);
+
+            String tokenType = claims.get("type", String.class);
+            if (!JwtTokenType.ACCESS.name().equals(tokenType)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
             Long userId = Long.valueOf(
                     jwtProvider.parseClaims(token).getSubject()
