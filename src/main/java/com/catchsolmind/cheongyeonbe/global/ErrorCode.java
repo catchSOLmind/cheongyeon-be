@@ -16,7 +16,12 @@ public enum ErrorCode {
     FILE_UPLOAD_FAILED("FILE003", "파일 업로드에 실패했습니다."),
 
     // OAuth
-    KAKAO_SERVER_ERROR("OAUTH001", "카카오 서버 오류가 발생했습니다.");
+    KAKAO_SERVER_ERROR("OAUTH001", "카카오 서버 오류가 발생했습니다."),
+    EXPIRED_TOKEN("AUTH002", "만료된 토큰입니다."),
+    UNSUPPORTED_TOKEN("AUTH003", "지원하지 않는 토큰입니다."),
+    AUTHENTICATION_FAILED("AUTH004", "인증에 실패했습니다."),
+    INVALID_TOKEN("AUTH005", "유효하지 않은 토큰입니다.")
+    ;
 
 
     private final String code;
