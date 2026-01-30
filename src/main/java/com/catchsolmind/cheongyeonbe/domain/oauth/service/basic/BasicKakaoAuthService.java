@@ -5,6 +5,7 @@ import com.catchsolmind.cheongyeonbe.domain.oauth.dto.data.OAuthUserInfo;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoLoginResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoTokenResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse;
+import com.catchsolmind.cheongyeonbe.domain.oauth.repository.RefreshTokenRepository;
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoAuthService;
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoClientService;
 import com.catchsolmind.cheongyeonbe.domain.user.dto.UserDto;
@@ -21,6 +22,7 @@ public class BasicKakaoAuthService implements KakaoAuthService {
     private final KakaoClientService kakaoClientService;
     private final UserService userService;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     public KakaoLoginResponse login(String code) {
@@ -37,6 +39,12 @@ public class BasicKakaoAuthService implements KakaoAuthService {
         // JWT 발급
         String accessToken = jwtProvider.createAccessToken(userDto.userId());
         String refreshToken = jwtProvider.createRefreshToken(userDto.userId());
+
+        refreshTokenRepository.save(
+                userDto.userId(),
+                refreshToken,
+                jwtProvider.getRefreshTokenExpirationMs()
+        );
 
         return KakaoLoginResponse.of(userDto,
                 accessToken,
