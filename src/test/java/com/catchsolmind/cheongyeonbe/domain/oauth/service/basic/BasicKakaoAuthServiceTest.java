@@ -4,12 +4,14 @@ import com.catchsolmind.cheongyeonbe.domain.oauth.dto.data.OAuthUserInfo;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoLoginResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoTokenResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse;
+import com.catchsolmind.cheongyeonbe.domain.oauth.repository.RefreshTokenRepository;
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoClientService;
 import com.catchsolmind.cheongyeonbe.domain.user.dto.UserDto;
 import com.catchsolmind.cheongyeonbe.domain.user.service.UserService;
 import com.catchsolmind.cheongyeonbe.global.enums.AuthProvider;
 import com.catchsolmind.cheongyeonbe.global.fixture.dto.oauth.KakaoTokenResponseFixture;
 import com.catchsolmind.cheongyeonbe.global.fixture.dto.oauth.KakaoUserResponseFixture;
+import com.catchsolmind.cheongyeonbe.global.fixture.dto.oauth.OAuthUserInfoFixture;
 import com.catchsolmind.cheongyeonbe.global.fixture.dto.user.UserDtoFixture;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtProvider;
 import org.junit.jupiter.api.DisplayName;
@@ -39,6 +41,9 @@ class BasicKakaoAuthServiceTest {
     @Mock
     private JwtProvider jwtProvider;
 
+    @Mock
+    private RefreshTokenRepository refreshTokenRepository;
+
     @Test
     @DisplayName("카카오톡 로그인 성공 테스트")
     void loginSuccess() {
@@ -54,21 +59,27 @@ class BasicKakaoAuthServiceTest {
         long expectedRefreshExpSec = 1209600L;
 
         KakaoTokenResponse tokenResponse = KakaoTokenResponseFixture.valid();
-        KakaoUserResponse kakaoUserResponse = KakaoUserResponseFixture.valid();
         when(kakaoClientService.requestToken(authorizationCode))
                 .thenReturn(tokenResponse);
+
+        KakaoUserResponse kakaoUserResponse = KakaoUserResponseFixture.valid();
         when(kakaoClientService.getKakaoUserInfo("access-token"))
                 .thenReturn(kakaoUserResponse);
 
+        OAuthUserInfo oAuthUserInfo = OAuthUserInfoFixture.kakaoUser();
         UserDto mockUserDto = UserDtoFixture.valid();
         when(userService.findOrCreate(any(OAuthUserInfo.class)))
                 .thenReturn(mockUserDto);
 
-        when(jwtProvider.createAccessToken(mockUserDto.userId())).thenReturn(generatedAccessToken);
-        when(jwtProvider.createRefreshToken(mockUserDto.userId())).thenReturn(generatedRefreshToken);
+        when(jwtProvider.createAccessToken(mockUserDto.userId()))
+                .thenReturn(generatedAccessToken);
+        when(jwtProvider.createRefreshToken(mockUserDto.userId()))
+                .thenReturn(generatedRefreshToken);
 
-        when(jwtProvider.getAccessTokenExpirationMs()).thenReturn(accessExpMs);
-        when(jwtProvider.getRefreshTokenExpirationMs()).thenReturn(refreshExpMs);
+        when(jwtProvider.getAccessTokenExpirationMs())
+                .thenReturn(accessExpMs);
+        when(jwtProvider.getRefreshTokenExpirationMs())
+                .thenReturn(refreshExpMs);
 
         // when
         KakaoLoginResponse response = kakaoAuthService.login(authorizationCode);
@@ -79,6 +90,12 @@ class BasicKakaoAuthServiceTest {
 
         ArgumentCaptor<OAuthUserInfo> captor = ArgumentCaptor.forClass(OAuthUserInfo.class);
         verify(userService).findOrCreate(captor.capture());
+
+        verify(refreshTokenRepository).save(
+                mockUserDto.userId(),
+                generatedRefreshToken,
+                refreshExpMs
+        );
 
         OAuthUserInfo capturedUserInfo = captor.getValue();
         assertThat(capturedUserInfo.provider()).isEqualTo(AuthProvider.KAKAO);
