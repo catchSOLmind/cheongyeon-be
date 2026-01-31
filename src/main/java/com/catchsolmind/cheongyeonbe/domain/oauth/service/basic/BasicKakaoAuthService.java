@@ -47,11 +47,14 @@ public class BasicKakaoAuthService implements KakaoAuthService {
         String accessToken = jwtProvider.createAccessToken(userDto.userId());
         String refreshToken = jwtProvider.createRefreshToken(userDto.userId());
 
+        refreshTokenRepository.deleteByUser_UserId(user.getUserId());
         refreshTokenRepository.save(
                 RefreshToken.builder()
                         .refreshToken(refreshToken)
                         .user(user)
-                        .expiresAt(LocalDateTime.now().plusDays(14))
+                        .expiresAt(LocalDateTime.now().plusSeconds(
+                                jwtProvider.getRefreshTokenExpirationMs() / 1000
+                        ))
                         .build()
         );
 

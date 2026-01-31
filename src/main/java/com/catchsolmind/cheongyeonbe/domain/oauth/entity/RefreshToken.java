@@ -43,6 +43,6 @@ public class RefreshToken {
 
     // 편의 메서드,
     public boolean isExpired() {
-        return expiresAt.isBefore(LocalDateTime.now());
+        return !expiresAt.isAfter(LocalDateTime.now());
     }
 }

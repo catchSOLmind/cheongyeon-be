@@ -30,7 +30,6 @@ public class KakaoAuthController {
     public ApiResponse<KakaoLoginResponse> login(
             @NotBlank @RequestParam("code") String code
     ) {
-        log.info("[OAuth] 인가코드 받기 성공: code={}", code);
         KakaoLoginResponse response = kakaoAuthService.login(code);
 
         return ApiResponse.success(response);

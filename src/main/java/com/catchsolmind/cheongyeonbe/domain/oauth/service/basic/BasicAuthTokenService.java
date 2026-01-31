@@ -10,6 +10,7 @@ import com.catchsolmind.cheongyeonbe.domain.user.repository.UserRepository;
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtProvider;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,9 +24,9 @@ public class BasicAuthTokenService implements AuthTokenService {
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-//    private final RefreshTokenRedisRepository refreshTokenRedisRepository;
 
     @Override
+    @Transactional
     public RefreshTokenResponse refresh(RefreshTokenRequest request) {
         String refreshToken = request.refreshToken();
 
