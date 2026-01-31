@@ -30,7 +30,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/oauth/**").permitAll() // 카카오 로그인
-                        .requestMatchers("/api/oauth/token/refresh").permitAll() // token 토큰 재발급
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
