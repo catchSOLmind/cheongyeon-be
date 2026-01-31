@@ -36,7 +36,7 @@ public class KakaoAuthController {
         return ApiResponse.success(response);
     }
 
-    @PostMapping("/token/refresh")
+    @PostMapping("/kakao/refresh")
     public ApiResponse<RefreshTokenResponse> refresh(
             @Valid @RequestBody RefreshTokenRequest request
     ) {
