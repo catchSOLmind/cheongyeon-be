@@ -10,7 +10,7 @@ public class KakaoLoginResponseFixture {
                 .accessToken("access-token")
                 .expiresIn(3600)
                 .refreshToken("refresh-token")
-                .refreshTokenExpiresIn(1209600000)
+                .refreshTokenExpiresIn(1209600)
                 .user(UserDtoFixture.valid()).build();
     }
 }
