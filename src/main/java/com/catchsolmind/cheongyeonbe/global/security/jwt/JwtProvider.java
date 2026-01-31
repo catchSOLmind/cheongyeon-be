@@ -78,6 +78,7 @@ public class JwtProvider {
 
     // Refresh Token 검증
     public void validateRefreshToken(String token) {
+        validateToken(token);
         Claims claims = parseClaims(token);
 
         String type = claims.get("type", String.class);
