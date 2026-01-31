@@ -28,9 +28,10 @@ public class KakaoAuthController {
 
     @PostMapping("/kakao/login")
     public ApiResponse<KakaoLoginResponse> login(
-            @NotBlank @RequestParam("code") String code
+            @NotBlank @RequestParam("code") String code,
+            @RequestParam(value = "redirectUri", required = false) String redirectUri
     ) {
-        KakaoLoginResponse response = kakaoAuthService.login(code);
+        KakaoLoginResponse response = kakaoAuthService.login(code, redirectUri);
 
         return ApiResponse.success(response);
     }

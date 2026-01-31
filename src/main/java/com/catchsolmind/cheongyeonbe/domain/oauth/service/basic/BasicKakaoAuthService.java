@@ -31,9 +31,13 @@ public class BasicKakaoAuthService implements KakaoAuthService {
     private final UserMapper userMapper;
 
     @Override
-    public KakaoLoginResponse login(String code) {
+    public KakaoLoginResponse login(String code, String redirectUri) {
+        String finalRedirectUri = (redirectUri != null && !redirectUri.isBlank())
+                ? redirectUri
+                : kakaoClientService.getDefaultRedirectUri();
+
         // 인가코드로 카카오 토큰 요청
-        KakaoTokenResponse kakaoTokenResponse = kakaoClientService.requestToken(code);
+        KakaoTokenResponse kakaoTokenResponse = kakaoClientService.requestToken(code, finalRedirectUri);
 
         // 카카오 사용자 정보 조회
         KakaoUserResponse kakaoUserResponse = kakaoClientService.getKakaoUserInfo(kakaoTokenResponse.access_token());

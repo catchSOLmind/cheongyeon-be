@@ -21,7 +21,7 @@ public class BasicKakaoClientService implements KakaoClientService {
     private final KakaoOAuthProperties kakaoOAuthProperties;
 
     @Override
-    public KakaoTokenResponse requestToken(String code) {
+    public KakaoTokenResponse requestToken(String code, String redirectUri) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -30,7 +30,7 @@ public class BasicKakaoClientService implements KakaoClientService {
             body.add("grant_type", "authorization_code"); // 카카오 고정
             body.add("client_id", kakaoOAuthProperties.getClientId());
             body.add("client_secret", kakaoOAuthProperties.getClientSecret());
-            body.add("redirect_uri", kakaoOAuthProperties.getRedirectUri());
+            body.add("redirect_uri", redirectUri);
             body.add("code", code);
 
             HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
@@ -46,6 +46,11 @@ public class BasicKakaoClientService implements KakaoClientService {
         } catch (ResourceAccessException e) {
             throw new BusinessException(ErrorCode.KAKAO_SERVER_ERROR);
         }
+    }
+
+    @Override
+    public String getDefaultRedirectUri() {
+        return kakaoOAuthProperties.getRedirectUri();
     }
 
     @Override

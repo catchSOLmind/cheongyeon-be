@@ -62,7 +62,7 @@ class BasicKakaoAuthServiceTest {
         long expectedRefreshExpSec = 1209600L;
 
         KakaoTokenResponse tokenResponse = KakaoTokenResponseFixture.valid();
-        when(kakaoClientService.requestToken(authorizationCode))
+        when(kakaoClientService.requestToken(authorizationCode, null))
                 .thenReturn(tokenResponse);
 
         KakaoUserResponse kakaoUserResponse = KakaoUserResponseFixture.valid();
@@ -88,10 +88,10 @@ class BasicKakaoAuthServiceTest {
                 .thenReturn(refreshExpMs);
 
         // when
-        KakaoLoginResponse response = kakaoAuthService.login(authorizationCode);
+        KakaoLoginResponse response = kakaoAuthService.login(authorizationCode, null);
 
         // then
-        verify(kakaoClientService).requestToken(authorizationCode);
+        verify(kakaoClientService).requestToken(authorizationCode, null);
         verify(kakaoClientService).getKakaoUserInfo(tokenResponse.access_token());
 
         ArgumentCaptor<OAuthUserInfo> captor = ArgumentCaptor.forClass(OAuthUserInfo.class);

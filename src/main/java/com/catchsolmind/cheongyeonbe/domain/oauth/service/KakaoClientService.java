@@ -5,7 +5,9 @@ import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse
 
 public interface KakaoClientService {
 
-    KakaoTokenResponse requestToken(String code);
+    KakaoTokenResponse requestToken(String code, String redirectUri);
+
+    String getDefaultRedirectUri();
 
     KakaoUserResponse getKakaoUserInfo(String accessToken);
 }
