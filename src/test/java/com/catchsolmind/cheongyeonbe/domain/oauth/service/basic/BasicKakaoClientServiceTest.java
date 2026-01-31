@@ -48,7 +48,7 @@ class BasicKakaoClientServiceTest {
         )).thenReturn(ResponseEntity.ok(response));
 
         // when
-        KakaoTokenResponse result = kakaoClientService.requestToken(code);
+        KakaoTokenResponse result = kakaoClientService.requestToken(code, kakaoOAuthProperties.getRedirectUri());
 
         // then
         assertThat(result.token_type()).isEqualTo("bearer");

@@ -24,6 +24,12 @@ public class BasicUserService implements UserService {
                 .orElseGet(() -> createUser(info));
     }
 
+    @Override
+    public User findEntityById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
     private UserDto createUser(OAuthUserInfo info) {
         User user = User.createOAuthUser(info);
 
