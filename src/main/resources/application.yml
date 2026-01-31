@@ -3,11 +3,11 @@ spring:
   config:
     import: optional:file:.env[.properties]
 
-#  datasource:
-#    url: ${DB_URL}
-#    username: ${DB_USERNAME}
-#    password: ${DB_PASSWORD}
-#    driver-class-name: com.mysql.cj.jdbc.Driver
+  #  datasource:
+  #    url: ${DB_URL}
+  #    username: ${DB_USERNAME}
+  #    password: ${DB_PASSWORD}
+  #    driver-class-name: com.mysql.cj.jdbc.Driver
 
 
   datasource:
@@ -34,7 +34,7 @@ kakao:
     token-uri: https://kauth.kakao.com/oauth/token
     client-id: ${KAKAO_REST_API_KEY}
     client-secret: ${KAKAO_CLIENT_SECRET}
-    redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:8080}
+    redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:5173/auth/kakao/callback}
     user-info-uri: https://kapi.kakao.com/v2/user/me
 
 cloud:
@@ -42,3 +42,10 @@ cloud:
     s3:
       bucket: cheongyeon-fe-solmind
       region: ap-northeast-2
+
+security:
+  jwt:
+    secret: ${JWT_SECRET_KEY}
+    access-token-expiration: 900000 # 15분
+    refresh-token-expiration: 1209600000 # 14일
+

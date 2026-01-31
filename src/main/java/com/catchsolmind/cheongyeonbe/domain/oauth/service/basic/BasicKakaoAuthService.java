@@ -5,12 +5,20 @@ import com.catchsolmind.cheongyeonbe.domain.oauth.dto.data.OAuthUserInfo;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoLoginResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoTokenResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse;
+import com.catchsolmind.cheongyeonbe.domain.oauth.entity.RefreshToken;
+import com.catchsolmind.cheongyeonbe.domain.oauth.repository.RefreshTokenRepository;
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoAuthService;
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoClientService;
+import com.catchsolmind.cheongyeonbe.domain.user.dto.UserDto;
+import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
+import com.catchsolmind.cheongyeonbe.domain.user.mapper.UserMapper;
 import com.catchsolmind.cheongyeonbe.domain.user.service.UserService;
+import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +26,9 @@ import org.springframework.stereotype.Service;
 public class BasicKakaoAuthService implements KakaoAuthService {
     private final KakaoClientService kakaoClientService;
     private final UserService userService;
+    private final JwtProvider jwtProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final UserMapper userMapper;
 
     @Override
     public KakaoLoginResponse login(String code) {
@@ -29,10 +40,29 @@ public class BasicKakaoAuthService implements KakaoAuthService {
 
         // 사용자 조회 or 생성
         OAuthUserInfo oAuthUserInfo = new KakaoOAuthUserInfo(kakaoUserResponse).toOAuthUserInfo();
-        userService.findOrCreate(oAuthUserInfo);
+        UserDto userDto = userService.findOrCreate(oAuthUserInfo);
+        User user = userService.findEntityById(userDto.userId());
 
         // JWT 발급
+        String accessToken = jwtProvider.createAccessToken(userDto.userId());
+        String refreshToken = jwtProvider.createRefreshToken(userDto.userId());
 
-        return null;
+        refreshTokenRepository.deleteByUser_UserId(user.getUserId());
+        refreshTokenRepository.save(
+                RefreshToken.builder()
+                        .refreshToken(refreshToken)
+                        .user(user)
+                        .expiresAt(LocalDateTime.now().plusSeconds(
+                                jwtProvider.getRefreshTokenExpirationMs() / 1000
+                        ))
+                        .build()
+        );
+
+        return KakaoLoginResponse.of(userDto,
+                accessToken,
+                jwtProvider.getAccessTokenExpirationMs(),
+                refreshToken,
+                jwtProvider.getRefreshTokenExpirationMs()
+        );
     }
 }

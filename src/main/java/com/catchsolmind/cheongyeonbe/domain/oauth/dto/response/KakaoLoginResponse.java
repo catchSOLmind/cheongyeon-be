@@ -1,29 +1,29 @@
 package com.catchsolmind.cheongyeonbe.domain.oauth.dto.response;
 
-import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
+import com.catchsolmind.cheongyeonbe.domain.user.dto.UserDto;
 import lombok.Builder;
 
 @Builder
 public record KakaoLoginResponse(
         String accessToken,
+        Integer expiresIn,
         String refreshToken,
-        Long userId,
-        String email,
-        String nickname,
-        String profileImg
+        Integer refreshTokenExpiresIn,
+        UserDto user
 ) {
     public static KakaoLoginResponse of(
-            User user,
+            UserDto userDto,
             String accessToken,
-            String refreshToken
+            long accessTokenExpirationMs,
+            String refreshToken,
+            long refreshTokenExpirationMs
     ) {
         return new KakaoLoginResponse(
                 accessToken,
+                (int) (accessTokenExpirationMs / 1000),
                 refreshToken,
-                user.getUserId(),
-                user.getEmail(),
-                user.getNickname(),
-                user.getProfileImg()
+                (int) (refreshTokenExpirationMs / 1000),
+                userDto
         );
     }
 }

@@ -1,16 +1,17 @@
 package com.catchsolmind.cheongyeonbe.domain.oauth.controller;
 
+import com.catchsolmind.cheongyeonbe.domain.oauth.dto.request.RefreshTokenRequest;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoLoginResponse;
+import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.RefreshTokenResponse;
+import com.catchsolmind.cheongyeonbe.domain.oauth.service.AuthTokenService;
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoAuthService;
+import com.catchsolmind.cheongyeonbe.global.ApiResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /*
  * FE가 준 인가코드를 받아서 Service로 위임
@@ -18,18 +19,28 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/oauth/kakao")
+@RequestMapping("/api/oauth")
 @Validated
 @Slf4j
 public class KakaoAuthController {
     private final KakaoAuthService kakaoAuthService;
+    private final AuthTokenService authTokenService;
 
-    @PostMapping("/login")
-    public ResponseEntity<KakaoLoginResponse> login(
+    @PostMapping("/kakao/login")
+    public ApiResponse<KakaoLoginResponse> login(
             @NotBlank @RequestParam("code") String code
     ) {
         KakaoLoginResponse response = kakaoAuthService.login(code);
 
-        return ResponseEntity.ok(response);
+        return ApiResponse.success(response);
+    }
+
+    @PostMapping("/kakao/refresh")
+    public ApiResponse<RefreshTokenResponse> refresh(
+            @Valid @RequestBody RefreshTokenRequest request
+    ) {
+        return ApiResponse.success(
+                authTokenService.refresh(request)
+        );
     }
 }

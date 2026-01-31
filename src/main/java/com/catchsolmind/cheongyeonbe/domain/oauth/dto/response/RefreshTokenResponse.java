@@ -1,0 +1,12 @@
+package com.catchsolmind.cheongyeonbe.domain.oauth.dto.response;
+
+import lombok.Builder;
+
+@Builder
+public record RefreshTokenResponse(
+        String accessToken,
+        Integer expiresIn,
+        String refreshToken,
+        Integer refreshTokenExpiresIn
+) {
+}
