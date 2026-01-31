@@ -9,6 +9,7 @@ import com.catchsolmind.cheongyeonbe.domain.task.dto.response.MyTaskListResponse
 import com.catchsolmind.cheongyeonbe.domain.task.dto.response.MyTaskStatusUpdateResponse;
 import com.catchsolmind.cheongyeonbe.domain.task.service.MyTaskCommandService;
 import com.catchsolmind.cheongyeonbe.domain.task.service.MyTaskQueryService;
+import com.catchsolmind.cheongyeonbe.domain.user.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,6 +25,8 @@ public class MyTaskController {
     private final MyTaskQueryService queryService;
     private final MyTaskCommandService commandService;
     private final GroupMemberService groupMemberService;
+    private final UserRepository userRepository;
+
 
     // jwt 해결전 임시
     private Long resolveMyMemberId(Long groupId, Long userId) {
