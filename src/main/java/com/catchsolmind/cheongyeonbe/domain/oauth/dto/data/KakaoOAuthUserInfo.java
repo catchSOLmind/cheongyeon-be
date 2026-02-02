@@ -25,7 +25,8 @@ public class KakaoOAuthUserInfo {
                 AuthProvider.KAKAO,
                 response.id(),
                 response.kakaoAccount().email(),
-                response.kakaoAccount().profile().nickname()
+                response.kakaoAccount().profile().nickname(),
+                response.kakaoAccount().profile().profileImageUrl()
         );
     }
 }

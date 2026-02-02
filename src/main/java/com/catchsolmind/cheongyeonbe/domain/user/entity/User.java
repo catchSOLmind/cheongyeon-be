@@ -71,6 +71,7 @@ public class User {
                 .providerId(info.providerId())
                 .email(info.email())
                 .nickname(info.nickname())
+                .profileImg(info.profileImageUrl())
                 .build();
     }
 }

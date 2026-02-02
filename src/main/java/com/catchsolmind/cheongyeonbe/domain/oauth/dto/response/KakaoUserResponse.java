@@ -22,7 +22,10 @@ public record KakaoUserResponse(
     ) {
         @Builder
         public record Profile(
-                String nickname // User.nickname
+                String nickname, // User.nickname
+
+                @JsonProperty("profile_image_url")
+                String profileImageUrl // User.profileImg
         ) {
         }
     }
