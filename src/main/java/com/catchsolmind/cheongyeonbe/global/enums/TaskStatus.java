@@ -1,5 +1,5 @@
 package com.catchsolmind.cheongyeonbe.global.enums;
 
 public enum TaskStatus {
-    UNCOMPLETED, COMPLETED
+    WAITING, IN_PROGRESS, INCOMPLETED, COMPLETED
 }
