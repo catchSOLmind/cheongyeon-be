@@ -15,7 +15,7 @@ public class TaskOccurrenceFixture {
         return TaskOccurrence.builder()
                 .occurrenceId(1L)
                 .occurDate(LocalDate.of(2026, 1, 1))
-                .status(TaskStatus.UNCOMPLETED)
+                .status(TaskStatus.COMPLETED)
                 .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0));
     }
 
