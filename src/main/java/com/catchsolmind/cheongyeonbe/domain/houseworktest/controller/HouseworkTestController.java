@@ -5,15 +5,13 @@ import com.catchsolmind.cheongyeonbe.domain.houseworktest.dto.response.Housework
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.dto.response.HouseworkTestResultResponse;
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.service.HouseworkTestService;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/housework-test")
-public class HouseworkTestController implements HouseworkTestApi{
+public class HouseworkTestController implements HouseworkTestApi {
     private final HouseworkTestService houseworkTestService;
 
     @Override
