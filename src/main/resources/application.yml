@@ -25,6 +25,10 @@ spring:
         format_sql: true
         use_sql_comments: true
 
+  sql:
+    init:
+      mode: always
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
