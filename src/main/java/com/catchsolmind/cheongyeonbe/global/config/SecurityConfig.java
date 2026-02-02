@@ -28,12 +28,15 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/housework-test/**").permitAll() // 가사성향테스트
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/oauth/**").permitAll() // 카카오 로그인
-                        .requestMatchers(
+
+                        .requestMatchers( // 스웨거
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
+
                         .anyRequest().authenticated()
                 )
 
