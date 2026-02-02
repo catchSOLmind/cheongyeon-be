@@ -1,27 +1,24 @@
 package com.catchsolmind.cheongyeonbe.domain.task.dto.response;
 
 import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
-import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Builder
-public class MyTaskDetailResponse {
+public class MyTaskUpdateResponse {
 
     private Long occurrenceId;
     private Long taskId;
-    private Long groupId;
-
-    // 중첩구조
     private TaskTypeDto taskType;
     private String date;
     private String time;
     private RepeatDto repeat;
     private AssigneeDto assignee;
-    private TaskStatus status;
+    private LocalDateTime updatedAt;
 
     @Getter
     @Builder

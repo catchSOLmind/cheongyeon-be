@@ -46,6 +46,9 @@ public class Task {
     @Column(name = "repeat_rule", length = 500)
     private String repeatRule; // RRULE 문자열
 
+    @Column(name = "time", length = 10)
+    private String time; // "11:00" 형식
+    
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

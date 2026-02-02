@@ -11,6 +11,8 @@ public class ProfileUpdateResponse {
 
     private String nickname;
     private String email;
+    private String profileImageUrl;
     private String houseworkType;
+    private String houseworkTypeLabel;
     private LocalDateTime updatedAt;
 }
