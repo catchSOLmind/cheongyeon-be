@@ -16,7 +16,7 @@ public class TaskFixture {
                 .title("title")
                 .description("description")
                 .repeatRule("repeat-rule")
-                .status(TaskStatus.UNCOMPLETED)
+                .status(TaskStatus.COMPLETED)
                 .createdAt(LocalDateTime.of(2026, 1, 1, 12, 0, 0));
     }
 
