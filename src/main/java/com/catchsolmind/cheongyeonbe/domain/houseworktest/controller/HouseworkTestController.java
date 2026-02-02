@@ -19,7 +19,6 @@ public class HouseworkTestController implements HouseworkTestApi {
     @Override
     @GetMapping("/questions")
     public ApiResponse<HouseworkTestQuestionsResponse> questions() {
-        log.info("컨트롤러 진입");
         return ApiResponse.success(houseworkTestService.getQuestions());
     }
 

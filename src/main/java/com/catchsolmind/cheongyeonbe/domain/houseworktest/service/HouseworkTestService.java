@@ -24,7 +24,6 @@ public class HouseworkTestService {
     private final HouseworkTestChoiceRepository choiceRepository;
 
     public HouseworkTestQuestionsResponse getQuestions() {
-        log.info("서비스 코드 진입");
         List<HouseworkTestQuestion> questions = questionRepository.findAllByOrderByQuestionOrderAsc();
         if (questions.isEmpty()) {
             throw new BusinessException(ErrorCode.INVALID_CHOICE);
