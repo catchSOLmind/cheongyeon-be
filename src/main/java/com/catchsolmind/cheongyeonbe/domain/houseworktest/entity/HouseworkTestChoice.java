@@ -2,6 +2,10 @@ package com.catchsolmind.cheongyeonbe.domain.houseworktest.entity;
 
 import com.catchsolmind.cheongyeonbe.global.enums.ChoiceType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 // 선택에 대한 가중치
 
@@ -11,6 +15,10 @@ import jakarta.persistence.*;
                 @UniqueConstraint(columnNames = {"question_id", "choice_type"})
         }
 )
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class HouseworkTestChoice {
 
     @Id
@@ -23,6 +31,7 @@ public class HouseworkTestChoice {
     private HouseworkTestQuestion question;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private ChoiceType choiceType; // A, B 중 선택
 
     @Column(nullable = false)
