@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface HouseworkTestChoiceRepository extends JpaRepository<HouseworkTestChoice, Long> {
 
-    List<HouseworkTestChoice> findAllByQuestion(HouseworkTestQuestion question);
+    List<HouseworkTestChoice> findAllByQuestionIn(List<HouseworkTestQuestion> question);
 }

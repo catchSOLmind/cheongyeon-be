@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,19 +31,29 @@ public class HouseworkTestService {
             throw new BusinessException(ErrorCode.QUESTION_NOT_FOUND);
         }
 
+        List<HouseworkTestChoice> allChoices =
+                choiceRepository.findAllByQuestionIn(questions);
+
+        Map<Long, List<HouseworkTestChoice>> choiceMap =
+                allChoices.stream()
+                        .collect(Collectors.groupingBy(
+                                choice -> choice.getQuestion().getQuestionId()
+                        ));
+
         List<HouseworkTestQuestionResponse> responses =
                 questions.stream()
                         .map(question -> {
                             List<HouseworkTestChoice> choices =
-                                    choiceRepository.findAllByQuestion(question);
+                                    choiceMap.get(question.getQuestionId());
 
-                            if (choices.isEmpty()) {
+                            if (choices == null || choices.isEmpty()) {
                                 throw new BusinessException(ErrorCode.CHOICE_NOT_FOUND);
                             }
 
                             return HouseworkTestQuestionResponse.from(question, choices);
                         })
                         .toList();
+
         return HouseworkTestQuestionsResponse.of(responses);
     }
 }

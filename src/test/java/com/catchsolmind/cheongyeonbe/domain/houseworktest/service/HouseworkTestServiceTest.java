@@ -43,11 +43,13 @@ class HouseworkTestServiceTest {
                 .build();
 
         HouseworkTestChoice choiceA = HouseworkTestChoice.builder()
+                .question(question)
                 .choiceType(ChoiceType.A)
                 .content("선택지 A")
                 .build();
 
         HouseworkTestChoice choiceB = HouseworkTestChoice.builder()
+                .question(question)
                 .choiceType(ChoiceType.B)
                 .content("선택지 B")
                 .build();
@@ -55,7 +57,7 @@ class HouseworkTestServiceTest {
         given(questionRepository.findAllByOrderByQuestionOrderAsc())
                 .willReturn(List.of(question));
 
-        given(choiceRepository.findAllByQuestion(question))
+        given(choiceRepository.findAllByQuestionIn(List.of(question)))
                 .willReturn(List.of(choiceA, choiceB));
 
         // when
@@ -79,7 +81,7 @@ class HouseworkTestServiceTest {
         assertThatThrownBy(() -> houseworkTestService.getQuestions())
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
-                .isEqualTo(ErrorCode.INVALID_CHOICE);
+                .isEqualTo(ErrorCode.QUESTION_NOT_FOUND);
     }
 
     @Test
@@ -95,14 +97,14 @@ class HouseworkTestServiceTest {
         given(questionRepository.findAllByOrderByQuestionOrderAsc())
                 .willReturn(List.of(question));
 
-        given(choiceRepository.findAllByQuestion(question))
+        given(choiceRepository.findAllByQuestionIn(List.of(question)))
                 .willReturn(List.of());
 
         // when & then
         assertThatThrownBy(() -> houseworkTestService.getQuestions())
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
-                .isEqualTo(ErrorCode.QUESTION_NOT_FOUND);
+                .isEqualTo(ErrorCode.CHOICE_NOT_FOUND);
     }
 
 }
