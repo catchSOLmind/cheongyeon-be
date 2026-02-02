@@ -26,7 +26,7 @@ public class HouseworkTestService {
     public HouseworkTestQuestionsResponse getQuestions() {
         List<HouseworkTestQuestion> questions = questionRepository.findAllByOrderByQuestionOrderAsc();
         if (questions.isEmpty()) {
-            throw new BusinessException(ErrorCode.INVALID_CHOICE);
+            throw new BusinessException(ErrorCode.QUESTION_NOT_FOUND);
         }
 
         List<HouseworkTestQuestionResponse> responses =
@@ -36,7 +36,7 @@ public class HouseworkTestService {
                                     choiceRepository.findAllByQuestion(question);
 
                             if (choices.isEmpty()) {
-                                throw new BusinessException(ErrorCode.QUESTION_NOT_FOUND);
+                                throw new BusinessException(ErrorCode.CHOICE_NOT_FOUND);
                             }
 
                             return HouseworkTestQuestionResponse.from(question, choices);
