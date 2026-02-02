@@ -46,10 +46,13 @@ public class Task {
     @Column(name = "repeat_rule", length = 500)
     private String repeatRule; // RRULE 문자열
 
+    @Column(name = "time", length = 10)
+    private String time; // "11:00" 형식
+    
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private TaskStatus status = TaskStatus.UNCOMPLETED;
+    private TaskStatus status = TaskStatus.WAITING;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

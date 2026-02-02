@@ -36,7 +36,6 @@ public class User {
     @Column(name = "provider_id", nullable = false)
     private Long providerId;
 
-
     @Column(length = 150)
     private String email;
 
@@ -72,6 +71,7 @@ public class User {
                 .providerId(info.providerId())
                 .email(info.email())
                 .nickname(info.nickname())
+                .profileImg(info.profileImageUrl())
                 .build();
     }
 }

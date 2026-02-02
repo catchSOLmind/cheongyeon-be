@@ -13,9 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-/*
- * FE가 준 인가코드를 받아서 Service로 위임
- */
 
 @RestController
 @RequiredArgsConstructor
@@ -44,4 +41,5 @@ public class KakaoAuthController {
                 authTokenService.refresh(request)
         );
     }
+
 }

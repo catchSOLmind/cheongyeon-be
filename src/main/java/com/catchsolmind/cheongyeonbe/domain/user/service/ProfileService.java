@@ -12,6 +12,9 @@ import com.catchsolmind.cheongyeonbe.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
+
 @Service
 @RequiredArgsConstructor
 public class ProfileService {
@@ -29,6 +32,7 @@ public class ProfileService {
             type = (pref != null) ? pref.getPersonalityType() : null;
         }
 
+        // TODO: 실제 데이터로 summary, monthlyActivity 구현 필요
         return ProfileGetResponse.builder()
                 .profile(ProfileGetResponse.Profile.builder()
                         .nickname(user.getNickname())
@@ -37,16 +41,25 @@ public class ProfileService {
                         .houseworkType(type)
                         .houseworkTypeLabel(HouseworkTypeMapper.labelOf(type))
                         .build())
+                .summary(ProfileGetResponse.Summary.builder()
+                        .streakDays(0)
+                        .totalPoints(0)
+                        .completedTaskCount(0)
+                        .build())
+                .monthlyActivity(ProfileGetResponse.MonthlyActivity.builder()
+                        .month(java.time.YearMonth.now().toString())
+                        .totalCount(0)
+                        .categories(Collections.emptyList())
+                        .build())
                 .build();
     }
 
-    public ProfileUpdateResponse updateProfile(User user, GroupMember member, ProfileUpdateRequest request
-    ) {
+    public ProfileUpdateResponse updateProfile(User user, GroupMember member, ProfileUpdateRequest request) {
+
+        String type = null;
+
         if (request.getNickname() != null) {
             user.setNickname(request.getNickname());
-        }
-        if (request.getEmail() != null) {
-            user.setEmail(request.getEmail());
         }
 
         userRepository.save(user);
@@ -54,6 +67,7 @@ public class ProfileService {
         // 성향 테스트는 member 가 존재할떄 수행
         if (request.getHouseworkType() != null) {
             if (member == null || member.getGroupMemberId() == null) {
+                type = request.getHouseworkType();
             } else {
                 MemberPreference pref = memberPreferenceRepository.findByMember(member)
                         .orElseGet(() -> memberPreferenceRepository.save(
@@ -64,14 +78,17 @@ public class ProfileService {
 
                 pref.setPersonalityType(request.getHouseworkType());
                 memberPreferenceRepository.save(pref);
+                type = pref.getPersonalityType();
             }
         }
 
         return ProfileUpdateResponse.builder()
                 .nickname(user.getNickname())
                 .email(user.getEmail())
-                .houseworkType(request.getHouseworkType())
-                .updatedAt(user.getUpdatedAt())
+                .profileImageUrl(user.getProfileImg())
+                .houseworkType(type)
+                .houseworkTypeLabel(HouseworkTypeMapper.labelOf(type))
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 }

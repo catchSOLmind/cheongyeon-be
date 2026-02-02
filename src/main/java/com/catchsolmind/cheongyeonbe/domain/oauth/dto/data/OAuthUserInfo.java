@@ -12,6 +12,7 @@ public record OAuthUserInfo(
         AuthProvider provider,
         Long providerId,
         String email,
-        String nickname
+        String nickname,
+        String profileImageUrl
 ) {
 }
