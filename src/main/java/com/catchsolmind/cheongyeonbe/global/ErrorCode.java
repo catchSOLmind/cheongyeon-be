@@ -20,7 +20,11 @@ public enum ErrorCode {
     EXPIRED_TOKEN("AUTH002", "만료된 토큰입니다."),
     UNSUPPORTED_TOKEN("AUTH003", "지원하지 않는 토큰입니다."),
     AUTHENTICATION_FAILED("AUTH004", "인증에 실패했습니다."),
-    INVALID_TOKEN("AUTH005", "유효하지 않은 토큰입니다.")
+    INVALID_TOKEN("AUTH005", "유효하지 않은 토큰입니다."),
+
+    // Housework Test
+    INVALID_CHOICE("TEST001", "가사 성향 테스트 질문이 존재하지 않습니다."),
+    QUESTION_NOT_FOUND("TEST002", "질문에 대한 선택지가 존재하지 않습니다.")
     ;
 
 
