@@ -3,9 +3,7 @@ package com.catchsolmind.cheongyeonbe.domain.task.controller;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
 import com.catchsolmind.cheongyeonbe.domain.group.service.GroupMemberService;
-import com.catchsolmind.cheongyeonbe.domain.task.dto.request.MyTaskCreateRequest;
-import com.catchsolmind.cheongyeonbe.domain.task.dto.request.MyTaskStatusUpdateRequest;
-import com.catchsolmind.cheongyeonbe.domain.task.dto.request.MyTaskUpdateRequest;
+import com.catchsolmind.cheongyeonbe.domain.task.dto.request.*;
 import com.catchsolmind.cheongyeonbe.domain.task.dto.response.*;
 import com.catchsolmind.cheongyeonbe.domain.task.service.MyTaskCommandService;
 import com.catchsolmind.cheongyeonbe.domain.task.service.MyTaskQueryService;
@@ -69,17 +67,7 @@ public class MyTaskController {
         return commandService.createMyTasks(member.getGroupMemberId(), request);
     }
 
-    @PatchMapping("/{occurrenceId}")
-    @Operation(summary = "내 할 일 수정 저장")
-    public MyTaskUpdateResponse updateMyTask(
-            @RequestParam Long groupId,
-            @PathVariable Long occurrenceId,
-            @RequestBody MyTaskUpdateRequest request,
-            @AuthenticationPrincipal User user
-    ) {
-        getGroupMember(groupId, user); // 권한 체크
-        return commandService.updateMyTask(groupId, occurrenceId, request);
-    }
+
 
     @PatchMapping("/{occurrenceId}/status")
     @Operation(summary = "내 할 일 상태 변경")
@@ -96,5 +84,57 @@ public class MyTaskController {
                 occurrenceId,
                 request
         );
+    }
+
+    @PatchMapping("/{occurrenceId}/schedule")
+    @Operation(summary = "내 할 일 일정 변경")
+    public MyTaskScheduleUpdateResponse updateSchedule(
+            @RequestParam Long groupId,
+            @PathVariable Long occurrenceId,
+            @RequestBody MyTaskScheduleUpdateRequest request,
+            @AuthenticationPrincipal User user
+    ) {
+        GroupMember member = getGroupMember(groupId, user);
+        return commandService.updateSchedule(member.getGroupMemberId(), groupId, occurrenceId, request);
+    }
+
+    @PostMapping("/{occurrenceId}/request")
+    @Operation(summary = "내 할 일 멤버에게 부탁하기")
+    public MyTaskRequestToMemberResponse requestToMember(
+            @RequestParam Long groupId,
+            @PathVariable Long occurrenceId,
+            @RequestBody MyTaskRequestToMemberRequest request,
+            @AuthenticationPrincipal User user
+    ) {
+        GroupMember member = getGroupMember(groupId, user);
+        return commandService.requestToMember(
+                member.getGroupMemberId(),
+                groupId,
+                occurrenceId,
+                request
+        );
+    }
+
+    @PatchMapping("/{occurrenceId}")
+    @Operation(summary = "내 할 일 수정")
+    public MyTaskUpdateResponse updateMyTask(
+            @RequestParam Long groupId,
+            @PathVariable Long occurrenceId,
+            @RequestBody MyTaskUpdateRequest request,
+            @AuthenticationPrincipal User user
+    ) {
+        getGroupMember(groupId, user); // 권한 체크
+        return commandService.updateMyTask(groupId, occurrenceId, request);
+    }
+
+    @DeleteMapping("/{occurrenceId}")
+    @Operation(summary = "내 할 일 삭제")
+    public MyTaskDeleteResponse deleteMyTask(
+            @RequestParam Long groupId,
+            @PathVariable Long occurrenceId,
+            @AuthenticationPrincipal User user
+    ) {
+        getGroupMember(groupId, user); // 권한 체크
+        return commandService.deleteMyTask(groupId, occurrenceId);
     }
 }

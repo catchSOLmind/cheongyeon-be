@@ -52,7 +52,7 @@ public class Task {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private TaskStatus status = TaskStatus.UNCOMPLETED;
+    private TaskStatus status = TaskStatus.WAITING;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

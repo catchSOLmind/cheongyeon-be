@@ -15,7 +15,7 @@ public class MyTaskItemDto {
     private Integer point;
 
     private String time;
-    private TaskStatus status;        // UNCOMPLETED/COMPLETED
+    private TaskStatus status;        // WAITING, IN_PROGRESS, INCOMPLETED, COMPLETED
     private boolean isTakeover;
 
     private Long primaryAssignedMemberId;

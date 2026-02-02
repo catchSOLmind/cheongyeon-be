@@ -26,6 +26,7 @@ public class MyTaskUpdateResponse {
         private Long taskTypeId;
         private TaskCategory category;
         private String name;
+        private Integer point;
     }
 
     @Getter

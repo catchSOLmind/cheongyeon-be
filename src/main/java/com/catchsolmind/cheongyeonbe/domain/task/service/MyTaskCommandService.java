@@ -3,12 +3,8 @@ package com.catchsolmind.cheongyeonbe.domain.task.service;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.Group;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
-import com.catchsolmind.cheongyeonbe.domain.task.dto.request.MyTaskCreateRequest;
-import com.catchsolmind.cheongyeonbe.domain.task.dto.request.MyTaskStatusUpdateRequest;
-import com.catchsolmind.cheongyeonbe.domain.task.dto.request.MyTaskUpdateRequest;
-import com.catchsolmind.cheongyeonbe.domain.task.dto.response.MyTaskCreateResponse;
-import com.catchsolmind.cheongyeonbe.domain.task.dto.response.MyTaskStatusUpdateResponse;
-import com.catchsolmind.cheongyeonbe.domain.task.dto.response.MyTaskUpdateResponse;
+import com.catchsolmind.cheongyeonbe.domain.task.dto.request.*;
+import com.catchsolmind.cheongyeonbe.domain.task.dto.response.*;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.*;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.*;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
@@ -30,6 +26,9 @@ public class MyTaskCommandService {
     private final TaskRepository taskRepository;
     private final TaskOccurrenceRepository occurrenceRepository;
     private final TaskLogRepository taskLogRepository;
+    private final TaskTakeoverRepository taskTakeoverRepository;
+    private final TaskPostponeLogRepository taskPostponeLogRepository;
+    private final TaskIncompleteLogRepository taskIncompleteLogRepository;
     private final GroupMemberRepository groupMemberRepository;
 
     public MyTaskCreateResponse createMyTasks(Long myMemberId, MyTaskCreateRequest req) {
@@ -54,7 +53,7 @@ public class MyTaskCommandService {
                     .creatorMember(me)
                     .repeatRule(null)
                     .time(null)
-                    .status(TaskStatus.UNCOMPLETED)
+                    .status(TaskStatus.WAITING)
                     .build();
             taskRepository.save(task);
 
@@ -63,7 +62,7 @@ public class MyTaskCommandService {
                     .group(group)
                     .occurDate(req.getDate())
                     .primaryAssignedMember(me)
-                    .status(TaskStatus.UNCOMPLETED)
+                    .status(TaskStatus.WAITING)
                     .build();
             occurrenceRepository.save(occ);
 
@@ -82,84 +81,7 @@ public class MyTaskCommandService {
                 .build();
     }
 
-    // 내 할 일 수정
-    public MyTaskUpdateResponse updateMyTask(
-            Long groupId,
-            Long occurrenceId,
-            MyTaskUpdateRequest request
-    ) {
-        TaskOccurrence occ = occurrenceRepository
-                .findByOccurrenceIdAndGroup_GroupId(occurrenceId, groupId)
-                .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
-
-        Task task = occ.getTask();
-
-        // ✅ 1. taskTypeId 변경
-        if (request.getTaskTypeId() != null) {
-            TaskType newType = taskTypeRepository.findById(request.getTaskTypeId())
-                    .orElseThrow(() -> new IllegalArgumentException("TaskType not found"));
-            task.setTaskType(newType);
-            task.setTitle(newType.getName());
-        }
-
-        // ✅ 2. date 변경
-        if (request.getDate() != null) {
-            occ.setOccurDate(LocalDate.parse(request.getDate()));
-        }
-
-        // ✅ 3. time 변경
-        if (request.getTime() != null) {
-            task.setTime(request.getTime());
-        }
-
-        // ✅ 4. repeat 변경
-        if (request.getRepeat() != null) {
-            if (Boolean.TRUE.equals(request.getRepeat().getEnabled())) {
-                // 요일 목록 → RRULE 변환
-                String rrule = convertDaysToRRule(request.getRepeat().getDaysOfWeek());
-                task.setRepeatRule(rrule);
-            } else {
-                task.setRepeatRule(null);
-            }
-        }
-
-        // ✅ 5. assigneeMemberId 변경
-        if (request.getAssigneeMemberId() != null) {
-            GroupMember newAssignee = groupMemberRepository.findById(request.getAssigneeMemberId())
-                    .orElseThrow(() -> new IllegalArgumentException("Assignee not found"));
-            occ.setPrimaryAssignedMember(newAssignee);
-        }
-
-        taskRepository.save(task);
-        occurrenceRepository.save(occ);
-
-        // ✅ 응답 구성
-        GroupMember assignee = occ.getPrimaryAssignedMember();
-        String repeatRule = task.getRepeatRule();
-
-        return MyTaskUpdateResponse.builder()
-                .occurrenceId(occ.getOccurrenceId())
-                .taskId(task.getTaskId())
-                .taskType(MyTaskUpdateResponse.TaskTypeDto.builder()
-                        .taskTypeId(task.getTaskType().getTaskTypeId())
-                        .category(task.getTaskType().getCategory())
-                        .name(task.getTaskType().getName())
-                        .build())
-                .date(occ.getOccurDate().toString())
-                .time(task.getTime())
-                .repeat(MyTaskUpdateResponse.RepeatDto.builder()
-                        .enabled(repeatRule != null && !repeatRule.isBlank())
-                        .daysOfWeek(parseRRuleToDaysOfWeek(repeatRule))
-                        .build())
-                .assignee(MyTaskUpdateResponse.AssigneeDto.builder()
-                        .memberId(assignee.getGroupMemberId())
-                        .nickname(assignee.getUser().getNickname())
-                        .profileImageUrl(assignee.getUser().getProfileImg())
-                        .build())
-                .updatedAt(LocalDateTime.now())
-                .build();
-    }
-
+    // 내 할 일 상태 변경하기
     public MyTaskStatusUpdateResponse updateStatus(
             Long myMemberId,
             Long groupId,
@@ -176,9 +98,6 @@ public class MyTaskCommandService {
         LocalDateTime now = LocalDateTime.now();
         TaskStatus target = req.getStatus();
 
-        Long doneByMemberId = null;
-        LocalDateTime doneAt = null;
-
         if (target == TaskStatus.COMPLETED) {
             occ.setStatus(TaskStatus.COMPLETED);
 
@@ -192,26 +111,235 @@ public class MyTaskCommandService {
                 );
             }
 
-            doneByMemberId = myMemberId;
-            doneAt = now;
-
         } else {
-            occ.setStatus(TaskStatus.UNCOMPLETED);
+            occ.setStatus(target);
             taskLogRepository.deleteByOccurrence_OccurrenceId(occurrenceId);
+        }
+
+        // INCOMPLETED 사유 처리 및 로그 저장
+        MyTaskStatusUpdateResponse.IncompleteReasonDto incompleteReason = null;
+        if (target == TaskStatus.INCOMPLETED && req.getReasonCode() != null) {
+            incompleteReason = MyTaskStatusUpdateResponse.IncompleteReasonDto.builder()
+                    .reasonCode(req.getReasonCode())
+                    .reasonText(req.getReasonText())
+                    .build();
+
+            // 미완료 로그 저장 (리포트용)
+            taskIncompleteLogRepository.save(
+                    TaskIncompleteLog.builder()
+                            .occurrence(occ)
+                            .member(me)
+                            .reasonCode(req.getReasonCode())
+                            .build()
+            );
         }
 
         return MyTaskStatusUpdateResponse.builder()
                 .occurrenceId(occurrenceId)
                 .status(occ.getStatus())
-                .doneByMemberId(doneByMemberId)
-                .doneAt(doneAt)
+                .incompleteReason(incompleteReason)
                 .updatedAt(now)
                 .build();
     }
 
-    /**
-     * ["MON", "WED", "FRI"] → "FREQ=WEEKLY;BYDAY=MO,WE,FR"
-     */
+    // 내 할 일 일정 변경하기
+    public MyTaskScheduleUpdateResponse updateSchedule(
+            Long myMemberId,
+            Long groupId,
+            Long occurrenceId,
+            MyTaskScheduleUpdateRequest req
+    ) {
+        TaskOccurrence occ = occurrenceRepository
+                .findByOccurrenceIdAndGroup_GroupId(occurrenceId, groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
+
+        GroupMember me = groupMemberRepository.findById(myMemberId)
+                .orElseThrow(() -> new IllegalArgumentException("GroupMember not found"));
+
+        Task task = occ.getTask();
+        LocalDate originalDate = occ.getOccurDate();
+
+        // 일시 변경
+        if (req.getDate() != null) {
+            occ.setOccurDate(LocalDate.parse(req.getDate()));
+        }
+
+        // 시간 변경
+        if (req.getTime() != null) {
+            task.setTime(req.getTime());
+        }
+
+        taskRepository.save(task);
+        occurrenceRepository.save(occ);
+
+        // 미루는 사유 처리 및 로그 저장
+        MyTaskScheduleUpdateResponse.PostponeReasonDto postponeReason = null;
+        if (req.getPostponeReasonCode() != null) {
+            postponeReason = MyTaskScheduleUpdateResponse.PostponeReasonDto.builder()
+                    .reasonCode(req.getPostponeReasonCode())
+                    .reasonText(req.getPostponeReasonText())
+                    .build();
+
+            // 일정 미룸 로그 저장 (리포트용)
+            taskPostponeLogRepository.save(
+                    TaskPostponeLog.builder()
+                            .occurrence(occ)
+                            .member(me)
+                            .originalDate(originalDate)
+                            .newDate(occ.getOccurDate())
+                            .reasonCode(req.getPostponeReasonCode())
+                            .build()
+            );
+        }
+
+        return MyTaskScheduleUpdateResponse.builder()
+                .occurrenceId(occurrenceId)
+                .date(occ.getOccurDate().toString())
+                .time(task.getTime())
+                .postponeReason(postponeReason)
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    // 내 할 일 멤버에게 부탁하기
+    public MyTaskRequestToMemberResponse requestToMember(
+            Long myMemberId,
+            Long groupId,
+            Long occurrenceId,
+            MyTaskRequestToMemberRequest req
+    ) {
+        TaskOccurrence occ = occurrenceRepository
+                .findByOccurrenceIdAndGroup_GroupId(occurrenceId, groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
+
+        GroupMember fromMember = groupMemberRepository.findById(myMemberId)
+                .orElseThrow(() -> new IllegalArgumentException("From member not found"));
+
+        GroupMember toMember = groupMemberRepository.findById(req.getToMemberId())
+                .orElseThrow(() -> new IllegalArgumentException("To member not found"));
+
+        // 담당자 변경
+        occ.setPrimaryAssignedMember(toMember);
+        occurrenceRepository.save(occ);
+
+        // 부탁하기 로그 저장 (리포트용)
+        taskTakeoverRepository.save(
+                TaskTakeover.builder()
+                        .occurrence(occ)
+                        .fromMember(fromMember)
+                        .toMember(toMember)
+                        .build()
+        );
+
+        return MyTaskRequestToMemberResponse.builder()
+                .occurrenceId(occurrenceId)
+                .fromMemberId(myMemberId)
+                .toMemberId(req.getToMemberId())
+                .updatedAssigneeMemberId(toMember.getGroupMemberId())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    // 내 할 일 수정
+    public MyTaskUpdateResponse updateMyTask(
+            Long groupId,
+            Long occurrenceId,
+            MyTaskUpdateRequest request
+    ) {
+        TaskOccurrence occ = occurrenceRepository
+                .findByOccurrenceIdAndGroup_GroupId(occurrenceId, groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
+
+        Task task = occ.getTask();
+
+        // 1. taskTypeId 변경
+        if (request.getTaskTypeId() != null) {
+            TaskType newType = taskTypeRepository.findById(request.getTaskTypeId())
+                    .orElseThrow(() -> new IllegalArgumentException("TaskType not found"));
+            task.setTaskType(newType);
+            task.setTitle(newType.getName());
+        }
+
+        // 2. date 변경
+        if (request.getDate() != null) {
+            occ.setOccurDate(LocalDate.parse(request.getDate()));
+        }
+
+        // 3. time 변경
+        if (request.getTime() != null) {
+            task.setTime(request.getTime());
+        }
+
+        // 4. repeat 변경
+        if (request.getRepeat() != null) {
+            if (Boolean.TRUE.equals(request.getRepeat().getEnabled())) {
+                // 요일 목록 → RRULE 변환
+                String rrule = convertDaysToRRule(request.getRepeat().getDaysOfWeek());
+                task.setRepeatRule(rrule);
+            } else {
+                task.setRepeatRule(null);
+            }
+        }
+
+        // 5. assigneeMemberId 변경
+        if (request.getAssigneeMemberId() != null) {
+            GroupMember newAssignee = groupMemberRepository.findById(request.getAssigneeMemberId())
+                    .orElseThrow(() -> new IllegalArgumentException("Assignee not found"));
+            occ.setPrimaryAssignedMember(newAssignee);
+        }
+
+        taskRepository.save(task);
+        occurrenceRepository.save(occ);
+
+        // 응답 구성
+        GroupMember assignee = occ.getPrimaryAssignedMember();
+        String repeatRule = task.getRepeatRule();
+
+        return MyTaskUpdateResponse.builder()
+                .occurrenceId(occ.getOccurrenceId())
+                .taskId(task.getTaskId())
+                .taskType(MyTaskUpdateResponse.TaskTypeDto.builder()
+                        .taskTypeId(task.getTaskType().getTaskTypeId())
+                        .category(task.getTaskType().getCategory())
+                        .name(task.getTaskType().getName())
+                        .point(task.getTaskType().getPoint())
+                        .build())
+                .date(occ.getOccurDate().toString())
+                .time(task.getTime())
+                .repeat(MyTaskUpdateResponse.RepeatDto.builder()
+                        .enabled(repeatRule != null && !repeatRule.isBlank())
+                        .daysOfWeek(parseRRuleToDaysOfWeek(repeatRule))
+                        .build())
+                .assignee(MyTaskUpdateResponse.AssigneeDto.builder()
+                        .memberId(assignee.getGroupMemberId())
+                        .nickname(assignee.getUser().getNickname())
+                        .profileImageUrl(assignee.getUser().getProfileImg())
+                        .build())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    // 내 할 일 삭제하기
+    public MyTaskDeleteResponse deleteMyTask(
+            Long groupId,
+            Long occurrenceId
+    ) {
+        TaskOccurrence occ = occurrenceRepository
+                .findByOccurrenceIdAndGroup_GroupId(occurrenceId, groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
+
+        // 관련 로그 삭제
+        taskLogRepository.deleteByOccurrence_OccurrenceId(occurrenceId);
+
+        // occurrence 삭제
+        occurrenceRepository.delete(occ);
+
+        return MyTaskDeleteResponse.builder()
+                .occurrenceId(occurrenceId)
+                .deletedAt(LocalDateTime.now())
+                .build();
+    }
+
     private String convertDaysToRRule(List<String> daysOfWeek) {
         if (daysOfWeek == null || daysOfWeek.isEmpty()) {
             return null;
@@ -224,9 +352,6 @@ public class MyTaskCommandService {
         return "FREQ=WEEKLY;BYDAY=" + byDay;
     }
 
-    /**
-     * MON → MO, TUE → TU 등으로 변환
-     */
     private String convertToShortDayName(String fullDay) {
         switch (fullDay.toUpperCase()) {
             case "MON": return "MO";
