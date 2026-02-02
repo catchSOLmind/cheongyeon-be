@@ -30,9 +30,12 @@ public class HouseworkTestChoice {
     @JoinColumn(name = "question_id", nullable = false)
     private HouseworkTestQuestion question;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 5)
     @Enumerated(EnumType.STRING)
     private ChoiceType choiceType; // A, B 중 선택
+
+    @Column(nullable = false)
+    private String content; // 선택지 문구
 
     @Column(nullable = false)
     private int activeScore; // 행동성
