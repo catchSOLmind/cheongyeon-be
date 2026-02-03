@@ -14,11 +14,11 @@ public interface HouseworkTestApi {
             summary = "가사 성향 테스트 질문 조회",
             description = "가사 성향 테스트를 위한 9개의 질문과 각 질문의 선택지(A/B) 조회"
     )
-    ApiResponse<HouseworkTestQuestionsResponse> questions();
+    ApiResponse<HouseworkTestQuestionsResponse> getQuestions();
 
     @Operation(
             summary = "가사 성향 테스트 제출 및 결과 생성",
             description = "사용자의 답변을 제출하고 가사 성향 테스트 결과를 계산하여 반환"
     )
-    ApiResponse<HouseworkTestResultResponse> result(HouseworkTestSubmitRequest request, JwtUserDetails principal);
+    ApiResponse<HouseworkTestResultResponse> submitResult(HouseworkTestSubmitRequest request, JwtUserDetails principal);
 }

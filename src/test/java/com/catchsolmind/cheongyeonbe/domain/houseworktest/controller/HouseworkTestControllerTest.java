@@ -42,7 +42,7 @@ class HouseworkTestControllerTest {
 
     @Test
     @DisplayName("가사성향테스트 질문 목록 조회")
-    void getListOfQuestions() throws Exception {
+    void getListOfGetQuestions() throws Exception {
         // given
         HouseworkTestQuestionResponse q1 =
                 HouseworkTestQuestionResponse.builder()
