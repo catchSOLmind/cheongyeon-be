@@ -16,10 +16,10 @@ import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
 import com.catchsolmind.cheongyeonbe.global.enums.ChoiceType;
 import com.catchsolmind.cheongyeonbe.global.enums.TestResultType;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 @Slf4j
 public class HouseworkTestService {
     private final HouseworkTestQuestionRepository questionRepository;
@@ -66,6 +66,7 @@ public class HouseworkTestService {
         return HouseworkTestQuestionsResponse.of(responses);
     }
 
+    @Transactional
     public HouseworkTestResultResponse submitTest(
             HouseworkTestSubmitRequest request,
             User user
