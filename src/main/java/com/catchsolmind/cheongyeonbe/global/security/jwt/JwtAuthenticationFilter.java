@@ -1,5 +1,6 @@
 package com.catchsolmind.cheongyeonbe.global.security.jwt;
 
+import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.enums.JwtTokenType;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -15,6 +16,12 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+
+/*
+ * Authorization 헤더에서 토큰 추출
+ * 토큰 검증
+ * ACCESS 토큰만 SecurityContext에 인증 등록
+ */
 
 @Component
 @RequiredArgsConstructor
@@ -32,7 +39,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = resolveToken(request);
 
         if (token != null) {
-            jwtProvider.validateToken(token);
+            try {
+                jwtProvider.validateToken(token);
+            } catch (BusinessException e) {
+                SecurityContextHolder.clearContext();
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             Claims claims = jwtProvider.parseClaims(token);
 
             String tokenType = claims.get("type", String.class);
@@ -41,9 +55,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            Long userId = Long.valueOf(
-                    jwtProvider.parseClaims(token).getSubject()
-            );
+            Long userId = Long.valueOf(claims.getSubject());
 
             JwtUserDetails userDetails =
                     jwtUserDetailsService.loadUserByUserId(userId);
