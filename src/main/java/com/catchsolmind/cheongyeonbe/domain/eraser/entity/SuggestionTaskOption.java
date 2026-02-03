@@ -23,7 +23,7 @@ public class SuggestionTaskOption {
     private SuggestionTask suggestionTask;
 
     @Column(length = 50, nullable = false)
-    private String name;
+    private String count;
 
     @Column(name = "estimated_minutes", nullable = false)
     private Integer estimatedMinutes;
