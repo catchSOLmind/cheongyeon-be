@@ -7,26 +7,38 @@ import com.catchsolmind.cheongyeonbe.domain.task.dto.response.TaskTypeCreateResp
 import com.catchsolmind.cheongyeonbe.domain.task.dto.response.TaskTypeFavoriteResponse;
 import com.catchsolmind.cheongyeonbe.domain.task.dto.response.TaskTypeListResponse;
 import com.catchsolmind.cheongyeonbe.domain.task.service.TaskTypeService;
-import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
+import com.catchsolmind.cheongyeonbe.global.BusinessException;
+import com.catchsolmind.cheongyeonbe.global.ErrorCode;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
+import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/task-types")
+@Slf4j
 public class TaskTypeController {
 
     private final TaskTypeService taskTypeService;
     private final GroupMemberRepository groupMemberRepository;
 
-    private GroupMember getGroupMember(Long groupId, User user) {
-        return groupMemberRepository.findByGroup_GroupIdAndUser_UserId(groupId, user.getUserId())
+    private void validatePrincipal(JwtUserDetails principal) {
+        if (principal == null) {
+            log.error("[Auth] @AuthenticationPrincipal 주입 실패: principal is null");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED_USER);
+        }
+    }
+
+    private GroupMember getGroupMember(Long groupId, JwtUserDetails principal) {
+        validatePrincipal(principal);
+        return groupMemberRepository.findByGroup_GroupIdAndUser_UserId(groupId, principal.user().getUserId())
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "User " + user.getUserId() + " is not a member of group " + groupId
+                        "User " + principal.user().getUserId() + " is not a member of group " + groupId
                 ));
     }
 
@@ -37,9 +49,9 @@ public class TaskTypeController {
             @RequestParam(required = false) TaskCategory category,
             @RequestParam(required = false) Boolean favorite,
             @RequestParam(required = false) String q,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
-        GroupMember member = getGroupMember(groupId, user);
+        GroupMember member = getGroupMember(groupId, principal);
         TaskTypeListResponse response = taskTypeService.getTaskTypes(
                 member.getGroupMemberId(),
                 category,
@@ -53,8 +65,9 @@ public class TaskTypeController {
     @Operation(summary = "세부 업무 등록", description = "DB에 없는 세부 업무를 직접 등록합니다")
     public ApiResponse<TaskTypeCreateResponse> createTaskType(
             @RequestBody TaskTypeCreateRequest request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        validatePrincipal(principal);
         TaskTypeCreateResponse response = taskTypeService.createTaskType(request);
         return ApiResponse.success("세부 업무 직접 등록 성공", response);
     }
@@ -64,9 +77,9 @@ public class TaskTypeController {
     public ApiResponse<TaskTypeFavoriteResponse> addFavorite(
             @RequestParam Long groupId,
             @PathVariable Long taskTypeId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
-        GroupMember member = getGroupMember(groupId, user);
+        GroupMember member = getGroupMember(groupId, principal);
         TaskTypeFavoriteResponse response = taskTypeService.addFavorite(member.getGroupMemberId(), taskTypeId);
         return ApiResponse.success("즐겨찾기 추가 성공", response);
     }
@@ -76,9 +89,9 @@ public class TaskTypeController {
     public ApiResponse<TaskTypeFavoriteResponse> removeFavorite(
             @RequestParam Long groupId,
             @PathVariable Long taskTypeId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
-        GroupMember member = getGroupMember(groupId, user);
+        GroupMember member = getGroupMember(groupId, principal);
         TaskTypeFavoriteResponse response = taskTypeService.removeFavorite(member.getGroupMemberId(), taskTypeId);
         return ApiResponse.success("즐겨찾기 해제 성공", response);
     }
