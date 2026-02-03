@@ -37,7 +37,7 @@ public class SuggestionTask {
     private Integer defaultEstimatedMinutes;
 
     @Column(name = "reward_point", nullable = false)
-    private Integer rewardPoint; // TODO: 결제하면 포인트를 더 많이 줄수도, 제거 가능
+    private Integer rewardPoint; // TODO: 결제하면 포인트를 더 많이 줄수도, 제거 가능(제거 후 TaskType의 point와 연계)
 
     @Column(name = "desc_delayed", length = 500)
     private String descDelayed; // [미루어진 작업] 멘트
@@ -51,7 +51,7 @@ public class SuggestionTask {
     @Column(name = "desc_repeat", length = 500)
     private String descRepeat; // [반복 작업] 멘트
 
-    @OneToMany(mappedBy = "SuggestionTask", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "suggestionTask", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<SuggestionTaskOption> options = new ArrayList<>();
 }
