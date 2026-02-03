@@ -12,16 +12,14 @@ VALUES (1, '주말 아침, 집이 어질러져 있다면?'),
        (9, '평소 청소할 때 나는?');
 
 -- 1번 질문
-INSERT INTO housework_test_choice (question_id, choice_type, content, active_score, clean_score, routine_score,
-                                   sloppy_score)
-VALUES (1, 'A', '바로 정리부터 시작', 5, 2, 0, -2),
-       (1, 'B', '일단 커피부터, 천천히 나중에', -5, 0, 0, 3);
+INSERT INTO housework_test_choice
+(question_id, choice_type, content, active_score, clean_score, routine_score, sloppy_score)
+VALUES (1, 'A', '바로 정리부터 시작', 5, 2, 0, -2);
 
--- 2번 질문
-INSERT INTO housework_test_choice (question_id, choice_type, content, active_score, clean_score, routine_score,
-                                   sloppy_score)
-VALUES (2, 'A', '밥 먹자마자 바로 설거지', 5, 0, 3, -3),
-       (2, 'B', '싱크대에 쌓아뒀다가 한 번에', -5, 0, -2, 5);
+INSERT INTO housework_test_choice
+(question_id, choice_type, content, active_score, clean_score, routine_score, sloppy_score)
+VALUES (1, 'B', '일단 커피부터, 천천히 나중에', -5, 0, 0, 3);
+
 
 -- 3번 질문
 INSERT INTO housework_test_choice (question_id, choice_type, content, active_score, clean_score, routine_score,
