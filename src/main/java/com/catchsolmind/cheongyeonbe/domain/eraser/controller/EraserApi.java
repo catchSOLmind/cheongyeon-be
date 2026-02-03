@@ -24,7 +24,7 @@ public interface EraserApi {
     @Operation(
             summary = "옵션 선택",
             description = "선택한 추천 업무들의 옵션 목록을 조회한다. \n\n" +
-                    " options - DELAYED: 미루어진 작업, NOASSIGNEE: 무담당 작업, GENERAL: 시즌 추천, REPEAT: 반복 작업"
+                    " options - DELAYED: 미루어진 작업, NO_ASSIGNEE: 무담당 작업, GENERAL: 시즌 추천, REPEAT: 반복 작업"
     )
     ApiResponse<List<EraserTaskOptionsResponse>> getTaskOptions(
             @RequestParam List<Long> taskIds

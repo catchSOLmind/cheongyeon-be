@@ -9,7 +9,7 @@ public enum SuggestionType {
     DELAYED(
             "미루어진 작업"
     ),
-    NOASSIGNEE(
+    NO_ASSIGNEE(
             "무담당 작업"
     ),
     GENERAL(
