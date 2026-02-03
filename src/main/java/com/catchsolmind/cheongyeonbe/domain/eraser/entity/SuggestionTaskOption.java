@@ -1,4 +1,4 @@
-package com.catchsolmind.cheongyeonbe.domain.task.entity;
+package com.catchsolmind.cheongyeonbe.domain.eraser.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
