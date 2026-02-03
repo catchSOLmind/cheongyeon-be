@@ -1,14 +1,12 @@
-package com.catchsolmind.cheongyeonbe.domain.task.service;
+package com.catchsolmind.cheongyeonbe.domain.group.service;
 
+import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskDetailResponse;
+import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskListResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
-import com.catchsolmind.cheongyeonbe.domain.task.dto.data.MyTaskItemDto;
-import com.catchsolmind.cheongyeonbe.domain.task.dto.response.MyTaskDetailResponse;
-import com.catchsolmind.cheongyeonbe.domain.task.dto.response.MyTaskListResponse;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.Task;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskOccurrence;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskOccurrenceRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskTakeoverRepository;
-import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +20,15 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class MyTaskQueryService {
+public class GroupTaskQueryService {
 
     private final TaskOccurrenceRepository occurrenceRepository;
     private final TaskTakeoverRepository takeoverRepository;
 
-    public MyTaskListResponse getMyTasks(Long groupId, Long myMemberId, LocalDate selectedDate) {
+    /**
+     * 전체 할일 목록 조회 - 그룹 전체 멤버의 할일을 조회
+     */
+    public GroupTaskListResponse getGroupTasks(Long groupId, LocalDate selectedDate) {
         LocalDate weekStart = selectedDate.with(DayOfWeek.MONDAY);
         LocalDate weekEnd = weekStart.plusDays(6);
 
@@ -35,28 +36,33 @@ public class MyTaskQueryService {
                 .collect(Collectors.toList());
 
         List<TaskOccurrence> occurrences =
-                occurrenceRepository.findByGroup_GroupIdAndPrimaryAssignedMember_GroupMemberIdAndOccurDate(
-                        groupId, myMemberId, selectedDate
-                );
+                occurrenceRepository.findByGroup_GroupIdAndOccurDate(groupId, selectedDate);
 
-        List<MyTaskItemDto> items = occurrences.stream()
+        List<GroupTaskListResponse.GroupTaskItemDto> items = occurrences.stream()
                 .map(occ -> {
                     boolean isTakeover = takeoverRepository.existsByOccurrence_OccurrenceId(occ.getOccurrenceId());
-                    return MyTaskItemDto.builder()
+                    GroupMember assignee = occ.getPrimaryAssignedMember();
+
+                    return GroupTaskListResponse.GroupTaskItemDto.builder()
                             .occurrenceId(occ.getOccurrenceId())
                             .taskId(occ.getTask().getTaskId())
                             .taskTypeId(occ.getTask().getTaskType().getTaskTypeId())
                             .taskName(occ.getTask().getTaskType().getName())
+                            .category(occ.getTask().getTaskType().getCategory())
                             .point(occ.getTask().getTaskType().getPoint())
                             .time(occ.getTask().getTime())
-                            .status(TaskStatus.valueOf(occ.getStatus().name()))
+                            .status(occ.getStatus())
                             .isTakeover(isTakeover)
-                            .primaryAssignedMemberId(occ.getPrimaryAssignedMember().getGroupMemberId())
+                            .assignee(GroupTaskListResponse.AssigneeDto.builder()
+                                    .memberId(assignee.getGroupMemberId())
+                                    .nickname(assignee.getUser().getNickname())
+                                    .profileImageUrl(assignee.getUser().getProfileImg())
+                                    .build())
                             .build();
                 })
                 .collect(Collectors.toList());
 
-        return MyTaskListResponse.builder()
+        return GroupTaskListResponse.builder()
                 .weekStart(weekStart)
                 .weekEnd(weekEnd)
                 .weekDates(weekDates)
@@ -65,7 +71,10 @@ public class MyTaskQueryService {
                 .build();
     }
 
-    public MyTaskDetailResponse getMyTaskDetail(Long groupId, Long occurrenceId) {
+    /**
+     * 전체 할일 상세 조회
+     */
+    public GroupTaskDetailResponse getGroupTaskDetail(Long groupId, Long occurrenceId) {
         TaskOccurrence occ = occurrenceRepository.findByOccurrenceIdAndGroup_GroupId(occurrenceId, groupId)
                 .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
 
@@ -75,12 +84,13 @@ public class MyTaskQueryService {
         List<String> daysOfWeek = parseRRuleToDaysOfWeek(repeatRule);
 
         GroupMember assignee = occ.getPrimaryAssignedMember();
+        boolean isTakeover = takeoverRepository.existsByOccurrence_OccurrenceId(occ.getOccurrenceId());
 
-        return MyTaskDetailResponse.builder()
+        return GroupTaskDetailResponse.builder()
                 .occurrenceId(occ.getOccurrenceId())
                 .taskId(task.getTaskId())
                 .groupId(groupId)
-                .taskType(MyTaskDetailResponse.TaskTypeDto.builder()
+                .taskType(GroupTaskDetailResponse.TaskTypeDto.builder()
                         .taskTypeId(task.getTaskType().getTaskTypeId())
                         .category(task.getTaskType().getCategory())
                         .name(task.getTaskType().getName())
@@ -88,17 +98,17 @@ public class MyTaskQueryService {
                         .build())
                 .date(occ.getOccurDate().toString())
                 .time(task.getTime())
-                .repeat(MyTaskDetailResponse.RepeatDto.builder()
+                .repeat(GroupTaskDetailResponse.RepeatDto.builder()
                         .enabled(repeatEnabled)
                         .daysOfWeek(daysOfWeek)
                         .build())
-                .assignee(MyTaskDetailResponse.AssigneeDto.builder()
+                .assignee(GroupTaskDetailResponse.AssigneeDto.builder()
                         .memberId(assignee.getGroupMemberId())
                         .nickname(assignee.getUser().getNickname())
                         .profileImageUrl(assignee.getUser().getProfileImg())
                         .build())
                 .status(occ.getStatus())
-                .isTakeover(takeoverRepository.existsByOccurrence_OccurrenceId(occ.getOccurrenceId()))
+                .isTakeover(isTakeover)
                 .build();
     }
 
