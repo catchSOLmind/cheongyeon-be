@@ -25,7 +25,7 @@ public class SuggestionTaskOption {
     @Column(length = 50, nullable = false)
     private String name;
 
-    @Column(name = "estimated_minutes", length = 50, nullable = false)
+    @Column(name = "estimated_minutes", nullable = false)
     private Integer estimatedMinutes;
 
     @Column(nullable = false)

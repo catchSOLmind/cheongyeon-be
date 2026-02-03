@@ -23,7 +23,7 @@ public interface EraserApi {
 
     @Operation(
             summary = "옵션 선택",
-            description = "추천 업무에 맞는 옵션 선택"
+            description = "선택한 추천 업무들의 옵션 목록을 조회한다."
     )
     ApiResponse<List<EraserTaskOptionsResponse>> getTaskOptions(
             @RequestParam List<Long> taskIds
