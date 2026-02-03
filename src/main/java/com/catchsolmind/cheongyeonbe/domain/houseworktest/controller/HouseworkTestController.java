@@ -22,7 +22,7 @@ public class HouseworkTestController implements HouseworkTestApi {
 
     @Override
     @GetMapping("/questions")
-    public ApiResponse<HouseworkTestQuestionsResponse> questions() {
+    public ApiResponse<HouseworkTestQuestionsResponse> getQuestions() {
 
         return ApiResponse.success(
                 houseworkTestService.getQuestions()
@@ -31,7 +31,8 @@ public class HouseworkTestController implements HouseworkTestApi {
 
     @Override
     @PostMapping("/results")
-    public ApiResponse<HouseworkTestResultResponse> result(
+    public ApiResponse<HouseworkTestResultResponse> submitResult(
+
             @Valid @RequestBody HouseworkTestSubmitRequest request,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
