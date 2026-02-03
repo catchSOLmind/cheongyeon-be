@@ -2,6 +2,7 @@ package com.catchsolmind.cheongyeonbe.domain.eraser.controller;
 
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.EraserTaskOptionsResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.RecommendationResponse;
+import com.catchsolmind.cheongyeonbe.domain.eraser.service.EraserService;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +17,15 @@ import java.util.List;
 @RequestMapping("/api/eraser")
 @Slf4j
 public class EraserController implements EraserApi {
+    private final EraserService eraserService;
 
     @Override
     @GetMapping("/recommendations")
     public ApiResponse<List<RecommendationResponse>> getRecommendations(
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
-        return ApiResponse.success(
-                List.of()
-        );
+        List<RecommendationResponse> responses = eraserService.getRecommendations(principal.user().getUserId());
+        return ApiResponse.success(responses);
     }
 
     @Override
