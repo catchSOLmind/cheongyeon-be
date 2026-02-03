@@ -1,6 +1,9 @@
 package com.catchsolmind.cheongyeonbe.domain.houseworktest.service;
 
+import com.catchsolmind.cheongyeonbe.domain.houseworktest.dto.request.HouseworkTestAnswerRequest;
+import com.catchsolmind.cheongyeonbe.domain.houseworktest.dto.request.HouseworkTestSubmitRequest;
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.dto.response.HouseworkTestQuestionsResponse;
+import com.catchsolmind.cheongyeonbe.domain.houseworktest.dto.response.HouseworkTestResultResponse;
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.entity.HouseworkTestChoice;
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.entity.HouseworkTestQuestion;
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.repository.HouseworkTestChoiceRepository;
@@ -8,6 +11,7 @@ import com.catchsolmind.cheongyeonbe.domain.houseworktest.repository.HouseworkTe
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
 import com.catchsolmind.cheongyeonbe.global.enums.ChoiceType;
+import com.catchsolmind.cheongyeonbe.global.enums.TestResultType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,6 +106,79 @@ class HouseworkTestServiceTest {
 
         // when & then
         assertThatThrownBy(() -> houseworkTestService.getQuestions())
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.CHOICE_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("정상적으로 테스트 결과 계산")
+    void submitTestSuccess() {
+        // given
+        HouseworkTestQuestion q1 = HouseworkTestQuestion.builder()
+                .questionId(1L)
+                .build();
+
+        HouseworkTestChoice choiceA = HouseworkTestChoice.builder()
+                .question(q1)
+                .choiceType(ChoiceType.A)
+                .build();
+
+        given(questionRepository.findAllById(List.of(1L)))
+                .willReturn(List.of(q1));
+
+        given(choiceRepository.findAllByQuestionIn(List.of(q1)))
+                .willReturn(List.of(choiceA));
+
+        HouseworkTestSubmitRequest request =
+                new HouseworkTestSubmitRequest(
+                        List.of(new HouseworkTestAnswerRequest(1L, ChoiceType.A))
+                );
+
+        // when
+        HouseworkTestResultResponse response =
+                houseworkTestService.submitTest(request, null);
+
+        // then
+        assertThat(response.resultType()).isEqualTo(TestResultType.RELAXED);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 질문에 답변하면 예외")
+    void submitTestWhenInvalidQuestion() {
+        given(questionRepository.findAllById(List.of(1L)))
+                .willReturn(List.of());
+
+        HouseworkTestSubmitRequest request =
+                new HouseworkTestSubmitRequest(
+                        List.of(new HouseworkTestAnswerRequest(1L, ChoiceType.A))
+                );
+
+        assertThatThrownBy(() -> houseworkTestService.submitTest(request, null))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode")
+                .isEqualTo(ErrorCode.QUESTION_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("질문에 없는 선택지를 고르면 예외")
+    void submitTestWhenInvalidChoice() {
+        HouseworkTestQuestion q1 = HouseworkTestQuestion.builder()
+                .questionId(1L)
+                .build();
+
+        given(questionRepository.findAllById(List.of(1L)))
+                .willReturn(List.of(q1));
+
+        given(choiceRepository.findAllByQuestionIn(List.of(q1)))
+                .willReturn(List.of()); // 선택지 없음
+
+        HouseworkTestSubmitRequest request =
+                new HouseworkTestSubmitRequest(
+                        List.of(new HouseworkTestAnswerRequest(1L, ChoiceType.A))
+                );
+
+        assertThatThrownBy(() -> houseworkTestService.submitTest(request, null))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode")
                 .isEqualTo(ErrorCode.CHOICE_NOT_FOUND);
