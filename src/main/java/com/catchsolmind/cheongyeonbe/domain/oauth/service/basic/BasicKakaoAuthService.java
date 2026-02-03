@@ -14,6 +14,7 @@ import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.domain.user.mapper.UserMapper;
 import com.catchsolmind.cheongyeonbe.domain.user.service.UserService;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtProvider;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
