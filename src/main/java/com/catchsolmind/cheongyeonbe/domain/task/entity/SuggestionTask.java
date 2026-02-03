@@ -50,7 +50,7 @@ public class SuggestionTask {
     @Column(name = "desc_repeat", length = 500)
     private String descRepeat; // [반복 작업] 멘트
 
-    @OneToMany(mappedBy = "SuggestionTask", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "suggestionTask", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<SuggestionTaskOption> options = new ArrayList<>();
 }
