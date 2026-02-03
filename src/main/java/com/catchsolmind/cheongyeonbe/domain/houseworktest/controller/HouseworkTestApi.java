@@ -22,7 +22,6 @@ public interface HouseworkTestApi {
             description = "사용자의 답변을 제출하고 가사 성향 테스트 결과를 계산하여 반환"
     )
     ApiResponse<HouseworkTestResultResponse> submitResult(
-
             HouseworkTestSubmitRequest request,
             @Parameter(hidden = true) JwtUserDetails principal
     );

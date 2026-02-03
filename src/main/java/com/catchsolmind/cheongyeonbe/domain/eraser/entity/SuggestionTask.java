@@ -1,5 +1,6 @@
-package com.catchsolmind.cheongyeonbe.domain.task.entity;
+package com.catchsolmind.cheongyeonbe.domain.eraser.entity;
 
+import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,14 +30,11 @@ public class SuggestionTask {
     @Column(length = 100, nullable = false)
     private String title;
 
-    @Column(name = "img_url", nullable = false)
-    private String imgUrl;
-
     @Column(name = "default_estimated_minutes", nullable = false)
     private Integer defaultEstimatedMinutes;
 
     @Column(name = "reward_point", nullable = false)
-    private Integer rewardPoint; // TODO: 결제하면 포인트를 더 많이 줄수도, 제거 가능
+    private Integer rewardPoint; // TODO: 결제하면 포인트를 더 많이 줄수도, 제거 가능(제거 후 TaskType의 point와 연계)
 
     @Column(name = "desc_delayed", length = 500)
     private String descDelayed; // [미루어진 작업] 멘트
