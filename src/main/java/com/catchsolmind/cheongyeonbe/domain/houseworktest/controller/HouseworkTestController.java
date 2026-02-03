@@ -7,6 +7,7 @@ import com.catchsolmind.cheongyeonbe.domain.houseworktest.service.HouseworkTestS
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,7 +32,7 @@ public class HouseworkTestController implements HouseworkTestApi {
     @Override
     @PostMapping("/results")
     public ApiResponse<HouseworkTestResultResponse> result(
-            @RequestBody HouseworkTestSubmitRequest request,
+            @Valid @RequestBody HouseworkTestSubmitRequest request,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = (principal != null) ? principal.user() : null;
