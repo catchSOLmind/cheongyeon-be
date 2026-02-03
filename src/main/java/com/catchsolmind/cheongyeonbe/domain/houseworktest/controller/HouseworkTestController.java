@@ -4,9 +4,12 @@ import com.catchsolmind.cheongyeonbe.domain.houseworktest.dto.request.HouseworkT
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.dto.response.HouseworkTestQuestionsResponse;
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.dto.response.HouseworkTestResultResponse;
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.service.HouseworkTestService;
+import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
+import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,13 +22,22 @@ public class HouseworkTestController implements HouseworkTestApi {
     @Override
     @GetMapping("/questions")
     public ApiResponse<HouseworkTestQuestionsResponse> questions() {
-        return ApiResponse.success(houseworkTestService.getQuestions());
+
+        return ApiResponse.success(
+                houseworkTestService.getQuestions()
+        );
     }
 
     @Override
     @PostMapping("/results")
     public ApiResponse<HouseworkTestResultResponse> result(
-            @RequestBody HouseworkTestSubmitRequest request) {
-        return null;
+            @RequestBody HouseworkTestSubmitRequest request,
+            @AuthenticationPrincipal JwtUserDetails principal
+    ) {
+        User user = (principal != null) ? principal.user() : null;
+
+        return ApiResponse.success(
+                houseworkTestService.submitTest(request, user)
+        );
     }
 }
