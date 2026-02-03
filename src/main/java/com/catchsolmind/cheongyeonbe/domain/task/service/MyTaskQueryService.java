@@ -84,7 +84,6 @@ public class MyTaskQueryService {
                         .taskTypeId(task.getTaskType().getTaskTypeId())
                         .category(task.getTaskType().getCategory())
                         .name(task.getTaskType().getName())
-                        .point(task.getTaskType().getPoint())
                         .build())
                 .date(occ.getOccurDate().toString())
                 .time(task.getTime())
@@ -98,7 +97,6 @@ public class MyTaskQueryService {
                         .profileImageUrl(assignee.getUser().getProfileImg())
                         .build())
                 .status(occ.getStatus())
-                .isTakeover(takeoverRepository.existsByOccurrence_OccurrenceId(occ.getOccurrenceId()))
                 .build();
     }
 

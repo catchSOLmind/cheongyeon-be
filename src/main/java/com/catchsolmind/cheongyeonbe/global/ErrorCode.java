@@ -23,9 +23,6 @@ public enum ErrorCode {
     INVALID_TOKEN("AUTH005", "유효하지 않은 토큰입니다."),
     UNAUTHORIZED_USER("AUTH006", "인증되지 않은 사용자입니다."),
 
-    // Auth
-    //UNAUTHORIZED_USER("AUTH001", "인증되지 않은 사용자입니다."),
-
     // Housework Test
     QUESTION_NOT_FOUND("TEST001", "가사 성향 테스트 질문이 존재하지 않습니다."),
     CHOICE_NOT_FOUND("TEST002", "질문에 대한 선택지가 존재하지 않습니다."),

@@ -22,7 +22,6 @@ public class MyTaskDetailResponse {
     private RepeatDto repeat;
     private AssigneeDto assignee;
     private TaskStatus status;
-    private Boolean isTakeover;
 
     @Getter
     @Builder
@@ -30,7 +29,6 @@ public class MyTaskDetailResponse {
         private Long taskTypeId;
         private TaskCategory category;
         private String name;
-        private Integer point;
     }
 
     @Getter
