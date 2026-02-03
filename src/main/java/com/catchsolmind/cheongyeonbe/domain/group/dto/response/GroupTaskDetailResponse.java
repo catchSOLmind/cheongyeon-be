@@ -1,4 +1,4 @@
-package com.catchsolmind.cheongyeonbe.domain.task.dto.response;
+package com.catchsolmind.cheongyeonbe.domain.group.dto.response;
 
 import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
@@ -9,13 +9,12 @@ import java.util.List;
 
 @Getter
 @Builder
-public class MyTaskDetailResponse {
+public class GroupTaskDetailResponse {
 
     private Long occurrenceId;
     private Long taskId;
     private Long groupId;
 
-    // 중첩구조
     private TaskTypeDto taskType;
     private String date;
     private String time;
