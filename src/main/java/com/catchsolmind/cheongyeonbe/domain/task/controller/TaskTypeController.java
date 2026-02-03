@@ -27,14 +27,14 @@ public class TaskTypeController {
     private final TaskTypeService taskTypeService;
     private final GroupMemberRepository groupMemberRepository;
 
-    private void validatePrincipal(JwtUserDetails principal) {
+    private void validatePrincipal(@AuthenticationPrincipal JwtUserDetails principal) {
         if (principal == null) {
             log.error("[Auth] @AuthenticationPrincipal 주입 실패: principal is null");
             throw new BusinessException(ErrorCode.UNAUTHORIZED_USER);
         }
     }
 
-    private GroupMember getGroupMember(Long groupId, JwtUserDetails principal) {
+    private GroupMember getGroupMember(Long groupId, @AuthenticationPrincipal JwtUserDetails principal) {
         validatePrincipal(principal);
         return groupMemberRepository.findByGroup_GroupIdAndUser_UserId(groupId, principal.user().getUserId())
                 .orElseThrow(() -> new IllegalArgumentException(

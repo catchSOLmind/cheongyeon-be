@@ -28,7 +28,7 @@ public class MyTaskController {
     private final MyTaskCommandService commandService;
     private final GroupMemberRepository groupMemberRepository;
 
-    private void validatePrincipal(JwtUserDetails principal) {
+    private void validatePrincipal(@AuthenticationPrincipal JwtUserDetails principal) {
         if (principal == null) {
             log.error("[Auth] @AuthenticationPrincipal 주입 실패: principal is null");
             throw new BusinessException(ErrorCode.UNAUTHORIZED_USER);
