@@ -1,19 +1,14 @@
 package com.catchsolmind.cheongyeonbe.domain.user.controller;
 
-import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
-import com.catchsolmind.cheongyeonbe.domain.user.dto.*;
 import com.catchsolmind.cheongyeonbe.domain.user.dto.request.ProfileUpdateRequest;
 import com.catchsolmind.cheongyeonbe.domain.user.dto.response.ProfileGetResponse;
 import com.catchsolmind.cheongyeonbe.domain.user.dto.response.ProfileImageUploadResponse;
 import com.catchsolmind.cheongyeonbe.domain.user.dto.response.ProfileUpdateResponse;
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
-import com.catchsolmind.cheongyeonbe.domain.user.repository.UserRepository;
 import com.catchsolmind.cheongyeonbe.domain.user.service.ProfileImageService;
 import com.catchsolmind.cheongyeonbe.domain.user.service.ProfileService;
+import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,8 +39,8 @@ public class ProfileController {
 
     @GetMapping
     @Operation(summary = "프로필 조회")
-    public ProfileGetResponse getProfile(@AuthenticationPrincipal User user) {
-        return profileService.getProfile(user, null);
+    public ProfileGetResponse getProfile(@AuthenticationPrincipal JwtUserDetails principal) {
+        return profileService.getProfile(principal.user(), null);
     }
 
     @PatchMapping
