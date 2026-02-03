@@ -22,7 +22,9 @@ public class EraserController implements EraserApi {
     public ApiResponse<List<RecommendationResponse>> getRecommendations(
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
-        return null;
+        return ApiResponse.success(
+                List.of()
+        );
     }
 
     @Override
@@ -30,7 +32,9 @@ public class EraserController implements EraserApi {
     public ApiResponse<List<EraserTaskOptionsResponse>> getTaskOptions(
             @RequestParam List<Long> taskIds
     ) {
-        return null;
+        return ApiResponse.success(
+                List.of()
+        );
     }
 
 //    @Override
