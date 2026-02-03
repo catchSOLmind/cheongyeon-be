@@ -30,9 +30,6 @@ public class SuggestionTask {
     @Column(length = 100, nullable = false)
     private String title;
 
-    @Column(name = "img_url", nullable = false)
-    private String imgUrl;
-
     @Column(name = "default_estimated_minutes", nullable = false)
     private Integer defaultEstimatedMinutes;
 
