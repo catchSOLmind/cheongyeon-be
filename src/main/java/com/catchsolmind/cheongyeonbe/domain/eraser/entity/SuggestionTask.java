@@ -36,6 +36,12 @@ public class SuggestionTask {
     @Column(name = "reward_point", nullable = false)
     private Integer rewardPoint; // TODO: 결제하면 포인트를 더 많이 줄수도, 제거 가능(제거 후 TaskType의 point와 연계)
 
+    @Column(name = "recommendation_cycle_days")
+    private Integer recommendationCycleDays; // 추천 주기, 일 단위, null이면 시즌성으로 간주
+
+    @Column(name = "season_months", length = 50)
+    private String seasonMonths;
+
     @Column(name = "desc_delayed", length = 500)
     private String descDelayed; // [미루어진 작업] 멘트
 
