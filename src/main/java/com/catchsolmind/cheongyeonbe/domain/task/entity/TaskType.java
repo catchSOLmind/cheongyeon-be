@@ -2,6 +2,7 @@ package com.catchsolmind.cheongyeonbe.domain.task.entity;
 
 import com.catchsolmind.cheongyeonbe.domain.group.entity.MemberFavoriteTaskType;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
+import com.catchsolmind.cheongyeonbe.global.enums.TaskSubCategory;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -27,6 +28,10 @@ public class TaskType {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TaskCategory category;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sub_category")
+    private TaskSubCategory subCategory;  // ETC 카테고리일 때 PET/BABY 구분, null 가능
 
     @Column(nullable = false, length = 100)
     private String name;

@@ -32,6 +32,7 @@ public class HouseworkTestController implements HouseworkTestApi {
     @Override
     @PostMapping("/results")
     public ApiResponse<HouseworkTestResultResponse> submitResult(
+
             @Valid @RequestBody HouseworkTestSubmitRequest request,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {

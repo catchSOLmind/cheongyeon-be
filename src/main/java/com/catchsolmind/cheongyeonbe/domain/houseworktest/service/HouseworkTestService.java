@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,10 +77,27 @@ public class HouseworkTestService {
             throw new BusinessException(ErrorCode.INVALID_CHOICE);
         }
 
+        if (request.answers().stream()
+                .anyMatch(a -> a.questionId() == null || a.choiceType() == null)
+        ) {
+            throw new BusinessException(ErrorCode.INVALID_CHOICE);
+        }
+
         // 질문 조회
         List<Long> questionIds = request.answers().stream()
                 .map(HouseworkTestAnswerRequest::questionId)
                 .toList();
+
+        Set<Long> uniqueQuestionIds = questionIds.stream()
+                .collect(Collectors.toSet());
+        if (uniqueQuestionIds.size() != questionIds.size()) {
+            throw new BusinessException(ErrorCode.INVALID_CHOICE);
+        }
+
+        long totalQuestions = questionRepository.count();
+        if (uniqueQuestionIds.size() != totalQuestions) {
+            throw new BusinessException(ErrorCode.INVALID_CHOICE);
+        }
 
         List<HouseworkTestQuestion> questions =
                 questionRepository.findAllById(questionIds);
