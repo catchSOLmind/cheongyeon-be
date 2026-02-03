@@ -38,4 +38,8 @@ public class HouseworkTestResult {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    public void changeResultType(TestResultType resultType) {
+        this.resultType = resultType;
+    }
 }
