@@ -1,6 +1,5 @@
 package com.catchsolmind.cheongyeonbe.domain.eraser.service;
 
-import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.EraserTaskOptionsResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.RecommendationResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.entity.SuggestionTask;
 import com.catchsolmind.cheongyeonbe.domain.eraser.repository.SuggestionTaskRepository;
@@ -50,6 +49,7 @@ public class EraserService {
                     .findFirst()
                     .orElse(null);
 
+            boolean isSeason = isSeasonMatch(product);
             boolean shouldRecommend = false;
             List<SuggestionType> currentTags = new ArrayList<>();
             String description = "";
@@ -71,12 +71,14 @@ public class EraserService {
                             .replace("{delay_period}", period)
                             .replace("{time}", time);
                 }
+
+                if (isSeason) {
+                    currentTags.add(SuggestionType.GENERAL);
+                }
             }
 
             // [Case B] 일정에 없는 경우 (주기/시즌 체크)
             else {
-                boolean isSeason = isSeasonMatch(product);
-
                 // 1. 주기가 설정된 상품인지 확인
                 if (product.getRecommendationCycleDays() != null) {
                     LocalDateTime lastDoneAt = taskLogRepository.findLastDoneDate(
@@ -127,22 +129,6 @@ public class EraserService {
         } // end for
 
         return recommendations; // [수정] for문 밖으로 이동
-    }
-
-    // [New] 컨트롤러에서 호출할 옵션 조회 메서드
-    public List<EraserTaskOptionsResponse> getTaskOptions(List<Long> taskIds) {
-        List<SuggestionTask> tasks = suggestionTaskRepository.findAllById(taskIds);
-
-        return tasks.stream().map(task -> EraserTaskOptionsResponse.builder()
-                .suggestionTaskId(task.getSuggestionTaskId())
-                .title(task.getTitle())
-                .options(task.getOptions().stream().map(opt -> EraserTaskOptionsResponse.OptionDetail.builder()
-                        .optionId(opt.getOptionId())
-                        .count(opt.getCount())
-                        .estimatedMinutes(opt.getEstimatedMinutes())
-                        .price(opt.getPrice())
-                        .build()).toList())
-                .build()).toList();
     }
 
     // 헬퍼 메서드
