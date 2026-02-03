@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -25,6 +26,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     private final JwtUserDetailsService jwtUserDetailsService;
@@ -35,6 +37,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
+        if (request.getMethod().equals("OPTIONS")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String token = resolveToken(request);
 
@@ -42,6 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 jwtProvider.validateToken(token);
             } catch (BusinessException e) {
+                log.error("[Auth] 토큰 검증 실패: {}", e.getErrorCode());
                 SecurityContextHolder.clearContext();
                 filterChain.doFilter(request, response);
                 return;
@@ -80,10 +87,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
+        log.info("[Auth] Raw Authorization Header: {}", bearerToken);
 
-        if (StringUtils.hasText(bearerToken)
-                && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        if (StringUtils.hasText(bearerToken)) {
+            if (bearerToken.toLowerCase().startsWith("bearer ")) {
+                return bearerToken.substring(7).trim();
+            }
         }
         return null;
     }
