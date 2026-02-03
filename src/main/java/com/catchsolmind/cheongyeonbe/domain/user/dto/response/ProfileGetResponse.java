@@ -16,6 +16,7 @@ public class ProfileGetResponse {
     @Getter
     @Builder
     public static class Profile {
+        private Long userId;
         private String nickname;
         private String email;
         private String profileImageUrl;

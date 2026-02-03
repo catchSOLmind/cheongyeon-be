@@ -35,6 +35,7 @@ public class ProfileService {
         // TODO: 실제 데이터로 summary, monthlyActivity 구현 필요
         return ProfileGetResponse.builder()
                 .profile(ProfileGetResponse.Profile.builder()
+                        .userId(user.getUserId())
                         .nickname(user.getNickname())
                         .email(user.getEmail())
                         .profileImageUrl(user.getProfileImg())
