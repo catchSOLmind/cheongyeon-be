@@ -4,6 +4,8 @@ import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtAuthenticationFilter
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,6 +20,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -31,6 +34,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/housework-test/**").permitAll() // 가사성향테스트
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/oauth/**").permitAll() // 카카오 로그인
+
+                        .requestMatchers("/api/profile/**").authenticated() // 프로필은 인증된 사용자만
 
                         .requestMatchers( // 스웨거
                                 "/swagger-ui/**",

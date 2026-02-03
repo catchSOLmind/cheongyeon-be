@@ -2,6 +2,8 @@ package com.catchsolmind.cheongyeonbe.global.security.jwt;
 
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.domain.user.repository.UserRepository;
+import com.catchsolmind.cheongyeonbe.global.BusinessException;
+import com.catchsolmind.cheongyeonbe.global.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +15,7 @@ public class JwtUserDetailsService {
 
     public JwtUserDetails loadUserByUserId(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return new JwtUserDetails(user);
     }
