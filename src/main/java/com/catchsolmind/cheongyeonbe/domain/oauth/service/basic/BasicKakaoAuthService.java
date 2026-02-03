@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class BasicKakaoAuthService implements KakaoAuthService {
