@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(
         info = @Info(title = "Cheongyeon API", version = "v1"),
         security = @SecurityRequirement(name = "bearerAuth")
-        security = @io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")
 )
 @SecurityScheme(
         name = "bearerAuth",
