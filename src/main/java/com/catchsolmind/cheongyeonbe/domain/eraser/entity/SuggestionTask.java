@@ -42,16 +42,16 @@ public class SuggestionTask {
     @Column(name = "season_months", length = 50)
     private String seasonMonths;
 
-    @Column(name = "desc_delayed", length = 500)
+    @Column(name = "desc_delayed", length = 500, nullable = false)
     private String descDelayed; // [미루어진 작업] 멘트
 
-    @Column(name = "desc_no_assignee", length = 500)
+    @Column(name = "desc_no_assignee", length = 500, nullable = false)
     private String descNoAssignee; // [무담당 작업] 멘트
 
-    @Column(name = "desc_general", length = 500)
+    @Column(name = "desc_general", length = 500, nullable = false)
     private String descGeneral; // [시즌 추천] 멘트
 
-    @Column(name = "desc_repeat", length = 500)
+    @Column(name = "desc_repeat", length = 500, nullable = false)
     private String descRepeat; // [반복 작업] 멘트
 
     @OneToMany(mappedBy = "suggestionTask", cascade = CascadeType.ALL, orphanRemoval = true)
