@@ -33,17 +33,30 @@ public class TaskTypeController {
                 ));
     }
 
-    @GetMapping
-    @Operation(summary = "세부 업무 조회", description = "카테고리별 세부 업무를 조회합니다.ETC 카테고리일 때 subCategory로 추가 필터링")
-    public ApiResponse<TaskTypeListResponse> getTaskTypes(
-            @RequestParam(required = false) TaskCategory category,
-            @RequestParam(required = false) TaskSubCategory subCategory,
-            @AuthenticationPrincipal JwtUserDetails principal
-    ) {
-        User user = principal.user();
-        TaskTypeListResponse response = taskTypeService.getTaskTypesByCategory(category, subCategory);
-        return ApiResponse.success("세부 업무 조회 성공", response);
+//    @GetMapping
+//    @Operation(summary = "세부 업무 조회", description = "카테고리별 세부 업무를 조회합니다.ETC 카테고리일 때 subCategory로 추가 필터링")
+//    public ApiResponse<TaskTypeListResponse> getTaskTypes(
+//            @RequestParam(required = false) TaskCategory category,
+//            @RequestParam(required = false) TaskSubCategory subCategory,
+//            @AuthenticationPrincipal JwtUserDetails principal
+//    ) {
+//        User user = principal.user();
+//        TaskTypeListResponse response = taskTypeService.getTaskTypesByCategory(category, subCategory);
+//        return ApiResponse.success("세부 업무 조회 성공", response);
+//    }
+@GetMapping
+public ApiResponse<TaskTypeListResponse> getTaskTypes(
+        @RequestParam(required = false) TaskCategory category,
+        @RequestParam(required = false) String subCategory
+) {
+    TaskSubCategory parsed = null;
+    if (subCategory != null && !subCategory.isBlank()) {
+        parsed = TaskSubCategory.valueOf(subCategory);
     }
+
+    TaskTypeListResponse response = taskTypeService.getTaskTypesByCategory(category, parsed);
+    return ApiResponse.success("세부 업무 조회 성공", response);
+}
 
     @GetMapping("/favorites")
     public ApiResponse<TaskTypeListResponse> getFavorites(
