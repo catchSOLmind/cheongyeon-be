@@ -5,6 +5,7 @@ import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.global.enums.MemberStatus;
+import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,9 +25,10 @@ public class GroupMemberController {
     @Operation(summary = "그룹 멤버 목록 조회")
     public GroupMemberListResponse getGroupMembers(
             @PathVariable Long groupId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
-        // 권한 체크
+        User user = principal.user();
+
         groupMemberRepository.findByGroup_GroupIdAndUser_UserId(groupId, user.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "User " + user.getUserId() + " is not a member of group " + groupId

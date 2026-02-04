@@ -5,6 +5,7 @@ import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskListResp
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
 import com.catchsolmind.cheongyeonbe.domain.group.service.GroupTaskQueryService;
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
+import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -33,8 +34,9 @@ public class GroupTaskController {
     public GroupTaskListResponse getGroupTasks(
             @RequestParam Long groupId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         validateGroupMember(groupId, user);
         return groupTaskQueryService.getGroupTasks(groupId, date);
     }
@@ -44,8 +46,9 @@ public class GroupTaskController {
     public GroupTaskDetailResponse getGroupTaskDetail(
             @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         validateGroupMember(groupId, user);
         return groupTaskQueryService.getGroupTaskDetail(groupId, occurrenceId);
     }

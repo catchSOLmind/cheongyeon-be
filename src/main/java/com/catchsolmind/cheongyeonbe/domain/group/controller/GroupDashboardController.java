@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -21,9 +23,10 @@ public class GroupDashboardController {
     @Operation(summary = "우리집 관리 대시보드 조회")
     public GroupDashboardResponse getDashboard(
             @PathVariable Long groupId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
-        // 권한 체크
+        User user = principal.user();
+
         groupMemberRepository.findByGroup_GroupIdAndUser_UserId(groupId, user.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "User " + user.getUserId() + " is not a member of group " + groupId

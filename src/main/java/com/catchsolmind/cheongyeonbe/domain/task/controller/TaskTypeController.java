@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -37,8 +39,9 @@ public class TaskTypeController {
             @RequestParam(required = false) TaskCategory category,
             @RequestParam(required = false) Boolean favorite,
             @RequestParam(required = false) String q,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         GroupMember member = getGroupMember(groupId, user);
         TaskTypeListResponse response = taskTypeService.getTaskTypes(
                 member.getGroupMemberId(),
@@ -53,8 +56,9 @@ public class TaskTypeController {
     @Operation(summary = "세부 업무 등록", description = "DB에 없는 세부 업무를 직접 등록합니다")
     public ApiResponse<TaskTypeCreateResponse> createTaskType(
             @RequestBody TaskTypeCreateRequest request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         TaskTypeCreateResponse response = taskTypeService.createTaskType(request);
         return ApiResponse.success("세부 업무 직접 등록 성공", response);
     }
@@ -64,8 +68,9 @@ public class TaskTypeController {
     public ApiResponse<TaskTypeFavoriteResponse> addFavorite(
             @RequestParam Long groupId,
             @PathVariable Long taskTypeId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         GroupMember member = getGroupMember(groupId, user);
         TaskTypeFavoriteResponse response = taskTypeService.addFavorite(member.getGroupMemberId(), taskTypeId);
         return ApiResponse.success("즐겨찾기 추가 성공", response);
@@ -76,8 +81,9 @@ public class TaskTypeController {
     public ApiResponse<TaskTypeFavoriteResponse> removeFavorite(
             @RequestParam Long groupId,
             @PathVariable Long taskTypeId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         GroupMember member = getGroupMember(groupId, user);
         TaskTypeFavoriteResponse response = taskTypeService.removeFavorite(member.getGroupMemberId(), taskTypeId);
         return ApiResponse.success("즐겨찾기 해제 성공", response);
