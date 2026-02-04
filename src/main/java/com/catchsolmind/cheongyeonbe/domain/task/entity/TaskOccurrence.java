@@ -46,6 +46,14 @@ public class TaskOccurrence {
     @Builder.Default
     private TaskStatus status = TaskStatus.WAITING;
 
+    @Column(name = "postpone_count", nullable = false)
+    @Builder.Default
+    private Integer postponeCount = 0;
+
+    @Column(name = "takeover_count", nullable = false)
+    @Builder.Default
+    private Integer takeoverCount = 0;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -57,4 +65,13 @@ public class TaskOccurrence {
     @OneToMany(mappedBy = "occurrence", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<TaskTakeover> takeovers = new ArrayList<>();
+
+    // 헬퍼 메서드
+    public void increasePostponeCount() {
+        this.postponeCount++;
+    }
+
+    public void increaseTakeoverCount() {
+        this.takeoverCount++;
+    }
 }

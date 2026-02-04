@@ -20,7 +20,7 @@ public record RecommendationResponse(
         Integer rewardPoint,
 
         @Schema(description = "추천 유형 태그 리스트 " +
-                "(DELAYED: 미루어진 작업, NOASSIGNEE: 무담당 작업, GENERAL: 시즌 추천, REPEAT: 반복 작업)")
+                "(DELAYED: 미루어진 작업, NO_ASSIGNEE: 무담당 작업, GENERAL: 시즌 추천, REPEAT: 반복 작업)")
         List<SuggestionType> tags,
 
         @Schema(description = "추천 이유 설명")
