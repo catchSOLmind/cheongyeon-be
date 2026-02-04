@@ -30,11 +30,14 @@ public class SuggestionTask {
     @Column(length = 100, nullable = false)
     private String title;
 
+    @Column(name = "img_url", nullable = false)
+    private String imgUrl;
+
     @Column(name = "default_estimated_minutes", nullable = false)
     private Integer defaultEstimatedMinutes;
 
     @Column(name = "reward_point", nullable = false)
-    private Integer rewardPoint; // TODO: 결제하면 포인트를 더 많이 줄수도, 제거 가능(제거 후 TaskType의 point와 연계)
+    private Integer rewardPoint;
 
     @Column(name = "recommendation_cycle_days")
     private Integer recommendationCycleDays; // 추천 주기, 일 단위, null이면 시즌성으로 간주
