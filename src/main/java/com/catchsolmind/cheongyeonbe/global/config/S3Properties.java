@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "app.s3")
+@ConfigurationProperties(prefix = "cloud.aws.s3")
 public class S3Properties {
     private String bucket;
     private String region;
