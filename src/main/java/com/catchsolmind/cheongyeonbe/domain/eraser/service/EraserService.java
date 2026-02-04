@@ -145,7 +145,15 @@ public class EraserService {
             }
         }
 
-        return recommendations; // [수정] for문 밖으로 이동
+        return recommendations.stream()
+                .sorted((r1, r2) -> {
+                    // 우선순위 점수 계산 (낮을수록 높음)
+                    int score1 = getPriorityScore(r1.tags());
+                    int score2 = getPriorityScore(r2.tags());
+                    return Integer.compare(score1, score2);
+                })
+                .limit(3) // 최대 3개까지만 자름
+                .collect(Collectors.toList());
     }
 
     // 헬퍼 메서드
@@ -165,5 +173,11 @@ public class EraserService {
         if (month >= 6 && month <= 8) return "여름";
         if (month >= 9 && month <= 11) return "가을";
         return "겨울";
+    }
+
+    private int getPriorityScore(List<SuggestionType> tags) {
+        if (tags.contains(SuggestionType.DELAYED)) return 1;      // 1순위: 미룬 것
+        if (tags.contains(SuggestionType.NO_ASSIGNEE)) return 2;  // 2순위: 담당자 없는 것
+        return 3;                                                 // 3순위: 시즌 추천 등
     }
 }
