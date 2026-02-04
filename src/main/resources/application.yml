@@ -9,18 +9,17 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-#
-#  datasource:
-#    url: jdbc:mysql://localhost:3306/cheongyeon
-#    username: root
-#    password: ${DB_PASSWORD}
-#    driver-class-name: com.mysql.cj.jdbc.Driver
+  #
+  #  datasource:
+  #    url: jdbc:mysql://localhost:3306/cheongyeon
+  #    username: root
+  #    password: ${DB_PASSWORD}
+  #    driver-class-name: com.mysql.cj.jdbc.Driver
 
   sql:
     init:
       mode: always
-      schema-locations: classpath:schema.sql # 만약 있다면
-      data-locations: classpath:data.sql     # 명시적으로 파일 지정
+      data-locations: classpath:data.sql
 
   jpa:
     defer-datasource-initialization: true
@@ -49,6 +48,7 @@ cloud:
     s3:
       bucket: cheongyeon-fe-solmind
       region: ap-northeast-2
+      base-url: https://cheongyeon-fe-solmind.s3.ap-northeast-2.amazonaws.com
 
 security:
   jwt:

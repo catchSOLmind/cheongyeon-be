@@ -10,6 +10,7 @@ import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskLogRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskOccurrenceRepository;
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
+import com.catchsolmind.cheongyeonbe.global.config.S3Properties;
 import com.catchsolmind.cheongyeonbe.global.enums.SuggestionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +34,7 @@ public class EraserService {
     private final TaskOccurrenceRepository taskOccurrenceRepository;
     private final SuggestionTaskRepository suggestionTaskRepository;
     private final TaskLogRepository taskLogRepository;
+    private final S3Properties s3Properties;
 
     public List<RecommendationResponse> getRecommendations(Long userId) {
         // 1. 유저의 그룹 찾기
@@ -130,9 +133,14 @@ public class EraserService {
 
             // [결과] 추천 대상이면 리스트 추가
             if (shouldRecommend) {
+                String fullImgUrl = Optional.ofNullable(s3Properties.getBaseUrl())
+                        .map(base -> base + "/" + product.getImgUrl())
+                        .orElseThrow(() -> new BusinessException(ErrorCode.S3_CONFIG_ERROR));
+
                 recommendations.add(RecommendationResponse.builder()
                         .suggestionTaskId(product.getSuggestionTaskId())
                         .title(product.getTitle())
+                        .imgUrl(fullImgUrl)
                         .defaultEstimatedMinutes(product.getDefaultEstimatedMinutes())
                         .rewardPoint(product.getRewardPoint())
                         .tags(currentTags)
@@ -141,7 +149,15 @@ public class EraserService {
             }
         }
 
-        return recommendations; // [수정] for문 밖으로 이동
+        return recommendations.stream()
+                .sorted((r1, r2) -> {
+                    // 우선순위 점수 계산 (낮을수록 높음)
+                    int score1 = getPriorityScore(r1.tags());
+                    int score2 = getPriorityScore(r2.tags());
+                    return Integer.compare(score1, score2);
+                })
+                .limit(3) // 최대 3개까지만 자름
+                .collect(Collectors.toList());
     }
 
     // 헬퍼 메서드
@@ -161,5 +177,11 @@ public class EraserService {
         if (month >= 6 && month <= 8) return "여름";
         if (month >= 9 && month <= 11) return "가을";
         return "겨울";
+    }
+
+    private int getPriorityScore(List<SuggestionType> tags) {
+        if (tags.contains(SuggestionType.DELAYED)) return 1;      // 1순위: 미룬 것
+        if (tags.contains(SuggestionType.NO_ASSIGNEE)) return 2;  // 2순위: 담당자 없는 것
+        return 3;                                                 // 3순위: 시즌 추천 등
     }
 }
