@@ -122,7 +122,7 @@ class EraserServiceTest {
 
     @Test
     @DisplayName("상황 3: 일정에 없고, 주기도 아직 안 지났으면 추천 안 함")
-    void do_not_recommend_when_cycle_not_passed() {
+    void doNotRecommendWhenCycleNotPassed() {
         // given
         Long userId = 1L;
         Group group = Group.builder().groupId(100L).build();
