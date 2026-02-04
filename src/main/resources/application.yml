@@ -54,3 +54,7 @@ security:
     access-token-expiration: 900000 # 15분
     refresh-token-expiration: 1209600000 # 14일
 
+logging:
+  level:
+    org.springframework.jdbc.datasource.init: DEBUG # SQL 초기화 로그 확인
+    org.hibernate.SQL: DEBUG # 실행되는 SQL 확인
