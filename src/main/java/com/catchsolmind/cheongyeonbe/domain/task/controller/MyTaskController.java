@@ -9,6 +9,7 @@ import com.catchsolmind.cheongyeonbe.domain.task.service.MyTaskCommandService;
 import com.catchsolmind.cheongyeonbe.domain.task.service.MyTaskQueryService;
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.domain.user.repository.UserRepository;
+import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -39,8 +40,9 @@ public class MyTaskController {
     public MyTaskListResponse getMyTasks(
             @RequestParam Long groupId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         GroupMember member = getGroupMember(groupId, user);
         return queryService.getMyTasks(groupId, member.getGroupMemberId(), date);
     }
@@ -50,8 +52,9 @@ public class MyTaskController {
     public MyTaskDetailResponse getMyTaskDetail(
             @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         getGroupMember(groupId, user); // 권한 체크
         return queryService.getMyTaskDetail(groupId, occurrenceId);
     }
@@ -61,8 +64,9 @@ public class MyTaskController {
     @Operation(summary = "내 할 일 추가")
     public MyTaskCreateResponse createMyTasks(
             @RequestBody MyTaskCreateRequest request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         GroupMember member = getGroupMember(request.getGroupId(), user);
         return commandService.createMyTasks(member.getGroupMemberId(), request);
     }
@@ -75,8 +79,9 @@ public class MyTaskController {
             @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
             @RequestBody MyTaskStatusUpdateRequest request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         GroupMember member = getGroupMember(groupId, user);
         return commandService.updateStatus(
                 member.getGroupMemberId(),
@@ -92,8 +97,9 @@ public class MyTaskController {
             @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
             @RequestBody MyTaskScheduleUpdateRequest request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         GroupMember member = getGroupMember(groupId, user);
         return commandService.updateSchedule(member.getGroupMemberId(), groupId, occurrenceId, request);
     }
@@ -104,8 +110,9 @@ public class MyTaskController {
             @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
             @RequestBody MyTaskRequestToMemberRequest request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         GroupMember member = getGroupMember(groupId, user);
         return commandService.requestToMember(
                 member.getGroupMemberId(),
@@ -121,8 +128,9 @@ public class MyTaskController {
             @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
             @RequestBody MyTaskUpdateRequest request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         getGroupMember(groupId, user); // 권한 체크
         return commandService.updateMyTask(groupId, occurrenceId, request);
     }
@@ -132,8 +140,9 @@ public class MyTaskController {
     public MyTaskDeleteResponse deleteMyTask(
             @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
+        User user = principal.user();
         getGroupMember(groupId, user); // 권한 체크
         return commandService.deleteMyTask(groupId, occurrenceId);
     }
