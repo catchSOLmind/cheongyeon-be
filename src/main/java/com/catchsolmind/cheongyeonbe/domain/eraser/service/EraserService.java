@@ -20,6 +20,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -41,6 +43,23 @@ public class EraserService {
         List<SuggestionTask> products = suggestionTaskRepository.findAll();
 
         List<RecommendationResponse> recommendations = new ArrayList<>();
+
+        // 2-1. 상품들의 TaskTypeId 목록 추출
+        List<Long> productTaskTypeIds = products.stream()
+                .map(p -> p.getTaskType().getTaskTypeId())
+                .toList();
+
+        // 2-2. 해당 TaskType들에 대한 마지막 수행일 일괄 조회 (쿼리 1번 실행)
+        List<Object[]> lastDoneLogs = taskLogRepository.findLastDoneDatesByGroupAndTaskTypes(group.getGroupId(), productTaskTypeIds);
+
+        // 2-3. 조회 결과를 Map으로 변환 (Key: TaskTypeId, Value: LastDoneDate) -> O(1) 검색 속도
+        Map<Long, LocalDateTime> lastDoneMap = lastDoneLogs.stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (LocalDateTime) row[1]
+                        // 주의: H2나 MySQL 버전에 따라 Timestamp로 반환될 수 있으므로,
+                        // ClassCastException 발생 시 ((Timestamp) row[1]).toLocalDateTime() 으로 변경 필요
+                ));
 
         // 3. 상품별 추천 여부 검사
         for (SuggestionTask product : products) {
@@ -64,7 +83,6 @@ public class EraserService {
                     shouldRecommend = true;
                     currentTags.add(SuggestionType.DELAYED);
 
-                    // 멘트: 미루기 템플릿 적용
                     String period = overdueDays >= 14 ? "2주" : (overdueDays + "일");
                     String time = (product.getDefaultEstimatedMinutes() / 60) + "시간";
                     description = product.getDescDelayed()
@@ -81,10 +99,7 @@ public class EraserService {
             else {
                 // 1. 주기가 설정된 상품인지 확인
                 if (product.getRecommendationCycleDays() != null) {
-                    LocalDateTime lastDoneAt = taskLogRepository.findLastDoneDate(
-                            group.getGroupId(),
-                            product.getTaskType().getTaskTypeId()
-                    );
+                    LocalDateTime lastDoneAt = lastDoneMap.get(product.getTaskType().getTaskTypeId());
 
                     // 마지막 기록을 기준으로 경과일 계산
                     long daysSinceLast = lastDoneAt == null ?
@@ -95,12 +110,10 @@ public class EraserService {
                         shouldRecommend = true;
                         currentTags.add(SuggestionType.NO_ASSIGNEE);
 
-                        // 멘트: 무담당 템플릿 적용
                         description = product.getDescNoAssignee()
                                 .replace("{task_name}", product.getTitle())
                                 .replace("{season}", getCurrentSeasonName());
 
-                        // (선택) 시즌이면 시즌 태그도 같이 붙여줌
                         if (isSeason) {
                             currentTags.add(SuggestionType.GENERAL);
                         }
@@ -126,7 +139,7 @@ public class EraserService {
                         .description(description)
                         .build());
             }
-        } // end for
+        }
 
         return recommendations; // [수정] for문 밖으로 이동
     }
