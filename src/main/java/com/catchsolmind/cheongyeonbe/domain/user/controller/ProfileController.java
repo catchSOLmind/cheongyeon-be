@@ -23,20 +23,6 @@ public class ProfileController {
     private final ProfileService profileService;
     private final ProfileImageService profileImageService;
 
-    // 테스트용
-//    private User mockUser() {
-//        return userRepository.findById(1L)
-//                .orElseThrow(() -> new IllegalStateException("임시 유저 없음"));
-//    }
-
-//    private GroupMember mockMember() {
-//        return groupMemberRepository.findByUser_UserId(1L)
-//                .orElseThrow(() -> new IllegalStateException("임시 멤버 없음"));
-//    }
-//    private GroupMember mockMember() {
-//        return null;
-//    }
-
     @GetMapping
     @Operation(summary = "프로필 조회")
     public ProfileGetResponse getProfile(@AuthenticationPrincipal JwtUserDetails principal) {
@@ -46,19 +32,19 @@ public class ProfileController {
     @PatchMapping
     @Operation(summary = "프로필 수정")
     public ProfileUpdateResponse updateProfile(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal JwtUserDetails principal,
             @RequestBody ProfileUpdateRequest request
     ) {
-        return profileService.updateProfile(user, null, request);
+        return profileService.updateProfile(principal.user(), null, request);
     }
 
     @PostMapping(value = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "프로필 이미지 업로드/변경")
     public ProfileImageUploadResponse uploadProfileImage(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal JwtUserDetails principal,
             @RequestPart("image") MultipartFile image
     ) {
-        String url = profileImageService.upload(user, image);
+        String url = profileImageService.upload(principal.user(), image);
         return ProfileImageUploadResponse.builder()
                 .profileImageUrl(url)
                 .build();
