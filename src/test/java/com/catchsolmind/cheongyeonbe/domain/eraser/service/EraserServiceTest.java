@@ -6,7 +6,6 @@ import com.catchsolmind.cheongyeonbe.domain.eraser.repository.SuggestionTaskRepo
 import com.catchsolmind.cheongyeonbe.domain.group.entity.Group;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.Task;
-import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskLog;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskOccurrence;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskType;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskLogRepository;
@@ -21,10 +20,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
@@ -69,6 +70,8 @@ class EraserServiceTest {
         given(groupMemberRepository.findGroupByUserId(userId)).willReturn(Optional.of(group));
         given(suggestionTaskRepository.findAll()).willReturn(List.of(product));
         given(taskOccurrenceRepository.findUnfinishedByGroupId(anyLong())).willReturn(List.of(occurrence));
+        given(taskLogRepository.findLastDoneDatesByGroupAndTaskTypes(anyLong(), anyList()))
+                .willReturn(Collections.emptyList());
 
         // when
         List<RecommendationResponse> results = eraserService.getRecommendations(userId);
@@ -98,16 +101,14 @@ class EraserServiceTest {
                 .build();
 
         // 유저의 마지막 기록 (10일 전) -> 7일 지났으니 추천 대상!
-        TaskLog lastLog = TaskLog.builder()
-                .doneAt(LocalDateTime.now().minusDays(10))
-                .build();
+        LocalDateTime lastDoneDate = LocalDateTime.now().minusDays(10);
+        Object[] logRow = {2L, lastDoneDate};
 
         given(groupMemberRepository.findGroupByUserId(userId)).willReturn(Optional.of(group));
         given(suggestionTaskRepository.findAll()).willReturn(List.of(product));
         given(taskOccurrenceRepository.findUnfinishedByGroupId(anyLong())).willReturn(List.of()); // 현재 일정 없음
-
-        // 마지막 기록 조회 시 10일 전 기록 리턴
-        given(taskLogRepository.findLastDoneDate(anyLong(), anyLong())).willReturn(lastLog.getDoneAt());
+        given(taskLogRepository.findLastDoneDatesByGroupAndTaskTypes(anyLong(), anyList()))
+                .willReturn(Collections.singletonList(logRow));
 
         // when
         List<RecommendationResponse> results = eraserService.getRecommendations(userId);
@@ -137,11 +138,13 @@ class EraserServiceTest {
 
         // 유저의 마지막 기록 (3일 전) -> 아직 주기 안 됨
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
+        Object[] logRow = {2L, threeDaysAgo};
 
         given(groupMemberRepository.findGroupByUserId(userId)).willReturn(Optional.of(group));
         given(suggestionTaskRepository.findAll()).willReturn(List.of(product));
         given(taskOccurrenceRepository.findUnfinishedByGroupId(anyLong())).willReturn(List.of());
-        given(taskLogRepository.findLastDoneDate(anyLong(), anyLong())).willReturn(threeDaysAgo);
+        given(taskLogRepository.findLastDoneDatesByGroupAndTaskTypes(anyLong(), anyList()))
+                .willReturn(Collections.singletonList(logRow));
 
         // when
         List<RecommendationResponse> results = eraserService.getRecommendations(userId);
