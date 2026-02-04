@@ -10,6 +10,7 @@ import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskLogRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskOccurrenceRepository;
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
+import com.catchsolmind.cheongyeonbe.global.config.S3Properties;
 import com.catchsolmind.cheongyeonbe.global.enums.SuggestionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class EraserService {
     private final TaskOccurrenceRepository taskOccurrenceRepository;
     private final SuggestionTaskRepository suggestionTaskRepository;
     private final TaskLogRepository taskLogRepository;
+    private final S3Properties s3Properties;
 
     public List<RecommendationResponse> getRecommendations(Long userId) {
         // 1. 유저의 그룹 찾기
@@ -130,9 +132,11 @@ public class EraserService {
 
             // [결과] 추천 대상이면 리스트 추가
             if (shouldRecommend) {
+                String fullImgUrl = s3Properties.getBaseUrl() + "/" + product.getImgUrl();
                 recommendations.add(RecommendationResponse.builder()
                         .suggestionTaskId(product.getSuggestionTaskId())
                         .title(product.getTitle())
+                        .imgUrl(fullImgUrl)
                         .defaultEstimatedMinutes(product.getDefaultEstimatedMinutes())
                         .rewardPoint(product.getRewardPoint())
                         .tags(currentTags)

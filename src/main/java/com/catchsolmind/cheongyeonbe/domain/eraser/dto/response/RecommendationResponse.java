@@ -13,6 +13,9 @@ public record RecommendationResponse(
         @Schema(description = "업무 제목")
         String title,
 
+        @Schema(description = "이미지 url")
+        String imgUrl,
+
         @Schema(description = "소요 시간(분)")
         Integer defaultEstimatedMinutes,
 
