@@ -19,6 +19,8 @@ spring:
   sql:
     init:
       mode: always
+      schema-locations: classpath:schema.sql # 만약 있다면
+      data-locations: classpath:data.sql     # 명시적으로 파일 지정
 
   jpa:
     defer-datasource-initialization: true
@@ -53,4 +55,3 @@ security:
     secret: ${JWT_SECRET_KEY}
     access-token-expiration: 900000 # 15분
     refresh-token-expiration: 1209600000 # 14일
-
