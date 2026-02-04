@@ -17,6 +17,7 @@ public enum ErrorCode {
     INVALID_FILE_TYPE("FILE001", "허용되지 않는 파일 형식입니다."),
     FILE_SIZE_EXCEEDED("FILE002", "파일 크기가 제한을 초과했습니다."),
     FILE_UPLOAD_FAILED("FILE003", "파일 업로드에 실패했습니다."),
+    S3_CONFIG_ERROR("FILE004", "s3 관련 정보를 확인하세요."),
 
     // OAuth
     KAKAO_SERVER_ERROR("OAUTH001", "카카오 서버 오류가 발생했습니다."),

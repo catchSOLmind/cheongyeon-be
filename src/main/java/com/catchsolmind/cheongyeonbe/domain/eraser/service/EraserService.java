@@ -22,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -132,7 +133,10 @@ public class EraserService {
 
             // [결과] 추천 대상이면 리스트 추가
             if (shouldRecommend) {
-                String fullImgUrl = s3Properties.getBaseUrl() + "/" + product.getImgUrl();
+                String fullImgUrl = Optional.ofNullable(s3Properties.getBaseUrl())
+                        .map(base -> base + "/" + product.getImgUrl())
+                        .orElseThrow(() -> new BusinessException(ErrorCode.S3_CONFIG_ERROR));
+
                 recommendations.add(RecommendationResponse.builder()
                         .suggestionTaskId(product.getSuggestionTaskId())
                         .title(product.getTitle())
