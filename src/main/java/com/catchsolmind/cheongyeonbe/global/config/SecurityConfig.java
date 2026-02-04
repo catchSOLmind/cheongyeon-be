@@ -39,7 +39,10 @@ public class SecurityConfig {
 
                         .requestMatchers( // 스웨거
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**"
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
                         ).permitAll()
 
                         .anyRequest().authenticated()
@@ -63,7 +66,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
-                "https://d288u0ybsqpwmr.cloudfront.net"
+                "https://d288u0ybsqpwmr.cloudfront.net",
+                "http://localhost:8080"
         ));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
