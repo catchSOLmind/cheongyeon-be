@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface TaskLogRepository extends JpaRepository<TaskLog, Long> {
@@ -22,6 +23,17 @@ public interface TaskLogRepository extends JpaRepository<TaskLog, Long> {
             "JOIN tlo.task t " +
             "WHERE tlo.group.groupId = :groupId " +
             "AND t.taskType.taskTypeId = :taskTypeId")
-    LocalDateTime findLastDoneDate(@Param("groupId") Long groupId,
-                                   @Param("taskTypeId") Long taskTypeId);
+    Optional<LocalDateTime> findLastDoneDate(@Param("groupId") Long groupId,
+                                             @Param("taskTypeId") Long taskTypeId);
+
+    // 한 번에 여러 TaskType의 마지막 수행일 조회
+    @Query("SELECT t.taskType.taskTypeId, MAX(tl.doneAt) " +
+            "FROM TaskLog tl " +
+            "JOIN tl.occurrence tlo " +
+            "JOIN tlo.task t " +
+            "WHERE tlo.group.groupId = :groupId " +
+            "AND t.taskType.taskTypeId IN :taskTypeIds " +
+            "GROUP BY t.taskType.taskTypeId")
+    List<Object[]> findLastDoneDatesByGroupAndTaskTypes(@Param("groupId") Long groupId,
+                                                        @Param("taskTypeIds") List<Long> taskTypeIds);
 }
