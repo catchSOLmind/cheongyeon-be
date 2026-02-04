@@ -19,8 +19,7 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:schema.sql # 만약 있다면
-      data-locations: classpath:data.sql     # 명시적으로 파일 지정
+      data-locations: classpath:data.sql
 
   jpa:
     defer-datasource-initialization: true
