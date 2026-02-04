@@ -23,6 +23,11 @@ public class KakaoAuthController {
     private final KakaoAuthService kakaoAuthService;
     private final AuthTokenService authTokenService;
 
+    @GetMapping("/kakao/callback")
+    public String getKakaoCode(@RequestParam("code") String code) {
+        return code;
+    }
+
     @PostMapping("/kakao/login")
     public ApiResponse<KakaoLoginResponse> login(
             @NotBlank @RequestParam("code") String code,
