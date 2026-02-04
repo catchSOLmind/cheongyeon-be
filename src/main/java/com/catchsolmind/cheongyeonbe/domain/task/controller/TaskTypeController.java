@@ -10,6 +10,7 @@ import com.catchsolmind.cheongyeonbe.domain.task.service.TaskTypeService;
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
+import com.catchsolmind.cheongyeonbe.global.enums.TaskSubCategory;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,24 +34,29 @@ public class TaskTypeController {
     }
 
     @GetMapping
-    @Operation(summary = "세부 업무 조회", description = "카테고리별 세부 업무를 조회합니다. favorite=true면 즐겨찾기만 조회")
+    @Operation(summary = "세부 업무 조회", description = "카테고리별 세부 업무를 조회합니다.ETC 카테고리일 때 subCategory로 추가 필터링")
     public ApiResponse<TaskTypeListResponse> getTaskTypes(
-            @RequestParam Long groupId,
             @RequestParam(required = false) TaskCategory category,
-            @RequestParam(required = false) Boolean favorite,
-            @RequestParam(required = false) String q,
+            @RequestParam(required = false) TaskSubCategory subCategory,
+            @AuthenticationPrincipal JwtUserDetails principal
+    ) {
+        User user = principal.user();
+        TaskTypeListResponse response = taskTypeService.getTaskTypesByCategory(category, subCategory);
+        return ApiResponse.success("세부 업무 조회 성공", response);
+    }
+
+    @GetMapping("/favorites")
+    public ApiResponse<TaskTypeListResponse> getFavorites(
+            @RequestParam Long groupId,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = principal.user();
         GroupMember member = getGroupMember(groupId, user);
-        TaskTypeListResponse response = taskTypeService.getTaskTypes(
-                member.getGroupMemberId(),
-                category,
-                favorite,
-                q
-        );
-        return ApiResponse.success("세부 업무 조회 성공", response);
+
+        TaskTypeListResponse response = taskTypeService.getFavoriteTaskTypes(member.getGroupMemberId());
+        return ApiResponse.success("즐겨찾기 세부 업무 조회 성공", response);
     }
+
 
     @PostMapping
     @Operation(summary = "세부 업무 등록", description = "DB에 없는 세부 업무를 직접 등록합니다")
