@@ -1,15 +1,15 @@
 -- 가사 성향 테스트
 -- 질문지
-INSERT IGNORE INTO housework_test_question (question_order, content)
-VALUES (1, '주말 아침, 집이 어질러져 있다면?'),
-       (2, '내가 설거지를 하는 타이밍은?'),
-       (3, '바닥에 머리카락이 보인다면?'),
-       (4, '냉장고 정리를 하는 나만의 방식은?'),
-       (5, '나는 어떨 때 청소를 시작할까?'),
-       (6, '집안일을 할 때 나의 스타일은?'),
-       (7, '옷장 정리는 어떻게 하는 편인가?'),
-       (8, '집안일 우선순위를 정할 때는?'),
-       (9, '평소 청소할 때 나는?');
+INSERT IGNORE INTO housework_test_question (question_id, question_order, content)
+VALUES (1, 1, '주말 아침, 집이 어질러져 있다면?'),
+       (2, 2, '내가 설거지를 하는 타이밍은?'),
+       (3, 3, '바닥에 머리카락이 보인다면?'),
+       (4, 4, '냉장고 정리를 하는 나만의 방식은?'),
+       (5, 5, '나는 어떨 때 청소를 시작할까?'),
+       (6, 6, '집안일을 할 때 나의 스타일은?'),
+       (7, 7, '옷장 정리는 어떻게 하는 편인가?'),
+       (8, 8, '집안일 우선순위를 정할 때는?'),
+       (9, 9, '평소 청소할 때 나는?');
 
 -- 1번 질문
 INSERT IGNORE INTO housework_test_choice (question_id, choice_type, content, active_score, clean_score, routine_score,
