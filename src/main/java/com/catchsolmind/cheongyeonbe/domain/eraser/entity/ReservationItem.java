@@ -28,7 +28,7 @@ public class ReservationItem {
     @Column(name = "task_title", nullable = false)
     private String taskTitle; // 화장실 청소
 
-    @Column(name = "option_name", nullable = false)
+    @Column(name = "option_count", nullable = false)
     private String optionCount; // 1개
 
     @Column(name = "price_at_reservation", nullable = false)
