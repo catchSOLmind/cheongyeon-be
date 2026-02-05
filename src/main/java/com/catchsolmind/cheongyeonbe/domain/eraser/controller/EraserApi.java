@@ -1,6 +1,8 @@
 package com.catchsolmind.cheongyeonbe.domain.eraser.controller;
 
+import com.catchsolmind.cheongyeonbe.domain.eraser.dto.request.ReservationRequest;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.EraserTaskOptionsResponse;
+import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.PaymentInfoResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.RecommendationResponse;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
@@ -27,19 +29,24 @@ public interface EraserApi {
                     " options - DELAYED: 미루어진 작업, NO_ASSIGNEE: 무담당 작업, GENERAL: 시즌 추천, REPEAT: 반복 작업"
     )
     ApiResponse<List<EraserTaskOptionsResponse>> getTaskOptions(
-            @RequestParam List<Long> taskIds,
+            @RequestParam List<Long> suggestionTaskId,
             @Parameter(hidden = true) JwtUserDetails principal
     );
-//
-//    @Operation(
-//            summary = "예약 일정 잡기",
-//            description = "추천 업무 별 날짜/시간 선택"
-//    )
-//    ApiResponse<?> makeReservation();
-//
-//    @Operation(
-//            summary = "예약 완료",
-//            description = "추가 예정"
-//    )
-//    ApiResponse<?> completeReservation();
+
+    @Operation(
+            summary = "결제 정보",
+            description = "사용자의 포인트를 조회한다. "
+    )
+    ApiResponse<PaymentInfoResponse> getPaymentInfo(
+            @Parameter(hidden = true) JwtUserDetails principal
+    );
+
+    @Operation(
+            summary = "예약 완료 (결제)",
+            description = "예약 정보를 저장하고 결제를 확정한다. "
+    )
+    ApiResponse<Long> completeReservation(
+            ReservationRequest request,
+            @Parameter(hidden = true) JwtUserDetails principal
+    );
 }
