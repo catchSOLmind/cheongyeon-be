@@ -303,6 +303,45 @@ public class MyTaskCommandService {
                 .build();
     }
 
+    // 내 할 일 완료하기 (간편 API)
+    public MyTaskCompleteResponse completeTask(GroupMember member, Long occurrenceId) {
+        TaskOccurrence occ = occurrenceRepository
+                .findByOccurrenceIdAndPrimaryAssignedMember_GroupMemberId(occurrenceId, member.getGroupMemberId())
+                .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
+
+        // 이미 완료된 경우 체크
+        if (occ.getStatus() == TaskStatus.COMPLETED) {
+            throw new IllegalArgumentException("이미 완료된 할일입니다.");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // 상태 완료로 변경
+        occ.setStatus(TaskStatus.COMPLETED);
+        occurrenceRepository.save(occ);
+
+        // TaskLog 저장 (완료 기록)
+        if (!taskLogRepository.existsByOccurrence_OccurrenceId(occurrenceId)) {
+            taskLogRepository.save(
+                    TaskLog.builder()
+                            .occurrence(occ)
+                            .doneByMember(member)
+                            .memo(null)
+                            .build()
+            );
+        }
+
+        // 포인트 조회
+        Integer earnedPoint = occ.getTask().getTaskType().getPoint();
+
+        return MyTaskCompleteResponse.builder()
+                .occurrenceId(occurrenceId)
+                .status(TaskStatus.COMPLETED)
+                .earnedPoint(earnedPoint)
+                .completedAt(now.toString())
+                .build();
+    }
+
     // 내 할 일 삭제하기
     public MyTaskDeleteResponse deleteMyTask(
             GroupMember member,
