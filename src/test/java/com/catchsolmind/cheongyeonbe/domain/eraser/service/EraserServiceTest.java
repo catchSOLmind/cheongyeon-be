@@ -64,8 +64,8 @@ class EraserServiceTest {
     private S3Properties s3Properties;
 
     @Test
-    @DisplayName("상황 1: 일정에 있는데 3번 이상 미뤘으면 추천 목록에 떠야 한다.")
-    void recommendWhenPostponed3Times() {
+    @DisplayName("예약 확정 시 TaskOccurrence 상태가 RESOLVED_BY_ERASER로 변경된다")
+    void completeReservationWithTaskStatusChange() {
         Long userId = 1L;
         Long optionId = 100L;
         Long groupId = 10L;
@@ -267,7 +267,7 @@ class EraserServiceTest {
 
     @Test
     @DisplayName("포인트 부족 예외 검증 (usedPoint > currentPoint)")
-    void completeReservation_NotEnoughPoint() {
+    void completeReservationNotEnoughPoint() {
         // given
         Long userId = 1L;
         int userBalance = 1000;
@@ -292,7 +292,7 @@ class EraserServiceTest {
 
     @Test
     @DisplayName("최대 사용 포인트 초과 예외 검증 (usedPoint > MAX_USABLE_POINT)")
-    void completeReservation_ExceedMaxPoint() {
+    void completeReservationExceedMaxPoint() {
         // given
         Long userId = 1L;
         int userBalance = 50000;
@@ -317,7 +317,7 @@ class EraserServiceTest {
 
     @Test
     @DisplayName("옵션 미존재 예외 검증 (OPTION_NOT_FOUND)")
-    void completeReservation_OptionNotFound() {
+    void completeReservationOptionNotFound() {
         // given
         Long userId = 1L;
         Long optionId = 999L;
@@ -349,7 +349,7 @@ class EraserServiceTest {
 
     @Test
     @DisplayName("음수 결제 금액 예외 검증 (INVALID_PAYMENT_AMOUNT)")
-    void completeReservation_NegativePayment() {
+    void completeReservationNegativePayment() {
         // given
         Long userId = 1L;
         Long optionId = 100L;
