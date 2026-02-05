@@ -17,7 +17,6 @@ import java.util.Optional;
 public class KakaoOAuthUserInfo {
     private final KakaoUserResponse response;
     private final S3Properties s3Properties;
-
     private static final String DEFAULT_PROFILE_PATH = "assets/default-profile.png";
 
     public OAuthUserInfo toOAuthUserInfo() {
