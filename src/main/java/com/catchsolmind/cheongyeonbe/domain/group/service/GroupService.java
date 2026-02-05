@@ -91,16 +91,20 @@ public class GroupService {
      * 초대 수락 (그룹 가입)
      * - 기존 임시 그룹에서 탈퇴(LEFT) 처리
      * - 새 그룹에 MEMBER로 등록
+     * - 초대 링크는 재사용 가능
      */
     public GroupInvitationAcceptResponse acceptInvitation(User user, Long invitationId) {
-        // 1. 초대 유효성 확인
-        GroupInvitation invitation = groupInvitationRepository.findByInvitationIdAndUsedAtIsNull(invitationId)
+        // 1. 초대 유효성 확인 (재사용 가능 - usedAt 체크 없음)
+        GroupInvitation invitation = groupInvitationRepository.findByInvitationId(invitationId)
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 초대입니다."));
 
         Group group = invitation.getGroup();
 
-        // 2. 이미 그룹 멤버인지 확인
-        if (groupMemberRepository.existsByGroup_GroupIdAndUser_UserId(group.getGroupId(), user.getUserId())) {
+        // 2. 이미 그룹 멤버인지 확인 (JOINED 또는 AGREED 상태)
+        boolean alreadyMember = groupMemberRepository
+                .findByGroup_GroupIdAndUser_UserIdAndStatusNot(group.getGroupId(), user.getUserId(), MemberStatus.LEFT)
+                .isPresent();
+        if (alreadyMember) {
             throw new IllegalArgumentException("이미 해당 그룹의 멤버입니다.");
         }
 
@@ -116,7 +120,7 @@ public class GroupService {
                 .build();
         groupMemberRepository.save(newMember);
 
-        // 5. 초대 사용 처리
+        // 5. 초대 사용 기록 (재사용 가능하므로 마지막 사용자 정보만 업데이트)
         invitation.setUsedAt(LocalDateTime.now());
         invitation.setUsedBy(user);
         groupInvitationRepository.save(invitation);

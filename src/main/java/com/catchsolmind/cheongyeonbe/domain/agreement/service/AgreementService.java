@@ -39,7 +39,7 @@ public class AgreementService {
     /**
      * 협약서 초안 생성
      * - OWNER만 생성 가능
-     * - 그룹 멤버 수 2~5명 필수
+     * - 그룹 멤버 수 2~100명 필수 (시연용 확장)
      */
     public AgreementCreateResponse createAgreement(GroupMember member, AgreementCreateRequest request) {
         // 1. OWNER 권한 확인
@@ -49,11 +49,11 @@ public class AgreementService {
 
         Group group = member.getGroup();
 
-        // 2. 멤버 수 확인 (2~5명)
+        // 2. 멤버 수 확인 (2~100명, 시연용으로 확장)
         List<GroupMember> activeMembers = groupMemberRepository.findByGroup_GroupIdAndStatusNot(
                 group.getGroupId(), MemberStatus.LEFT);
-        if (activeMembers.size() < 2 || activeMembers.size() > 5) {
-            throw new IllegalArgumentException("그룹 멤버 수는 2~5명이어야 합니다. 현재: " + activeMembers.size() + "명");
+        if (activeMembers.size() < 2 || activeMembers.size() > 100) {
+            throw new IllegalArgumentException("그룹 멤버 수는 2~100명이어야 합니다. 현재: " + activeMembers.size() + "명");
         }
 
         // 3. 기존 협약서 확인
