@@ -1,6 +1,8 @@
 package com.catchsolmind.cheongyeonbe.domain.eraser.controller;
 
+import com.catchsolmind.cheongyeonbe.domain.eraser.dto.request.ReservationRequest;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.EraserTaskOptionsResponse;
+import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.PaymentInfoResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.RecommendationResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.service.EraserService;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
@@ -38,15 +40,22 @@ public class EraserController implements EraserApi {
         return ApiResponse.success(responses);
     }
 
-//    @Override
-//    @PostMapping("/reservation")
-//    public ApiResponse<?> makeReservation() {
-//        return null;
-//    }
-//
-//    @Override
-//    @PostMapping("/complete-reservation")
-//    public ApiResponse<?> completeReservation() {
-//        return null;
-//    }
+    @Override
+    @GetMapping("/payment-info")
+    public ApiResponse<PaymentInfoResponse> getPaymentInfo(
+            @AuthenticationPrincipal JwtUserDetails principal
+    ) {
+        PaymentInfoResponse response = eraserService.getPaymentInfo(principal.user().getUserId());
+
+        return ApiResponse.success(response);
+    }
+
+    @Override
+    @PostMapping("/reservation")
+    public ApiResponse<Long> completeReservation(
+            @RequestBody ReservationRequest request,
+            @AuthenticationPrincipal JwtUserDetails principal) {
+        Long reservationId = eraserService.completeReservation(request, principal.user().getUserId());
+        return ApiResponse.success(null);
+    }
 }
