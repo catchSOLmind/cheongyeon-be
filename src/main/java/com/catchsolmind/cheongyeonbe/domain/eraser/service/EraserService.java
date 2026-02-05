@@ -1,5 +1,6 @@
 package com.catchsolmind.cheongyeonbe.domain.eraser.service;
 
+import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.EraserTaskOptionsResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.RecommendationResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.entity.SuggestionTask;
 import com.catchsolmind.cheongyeonbe.domain.eraser.repository.SuggestionTaskRepository;
@@ -157,6 +158,44 @@ public class EraserService {
                     return Integer.compare(score1, score2);
                 })
                 .limit(3) // 최대 3개까지만 자름
+                .collect(Collectors.toList());
+    }
+
+    public List<EraserTaskOptionsResponse> getTaskOptions(
+            List<Long> suggestionTaskId,
+            Long userId
+    ) {
+        // 요청 suggestionTaskId로 DB(SuggestionTask)를 조회해서 해당 상품들 한 번에 조회 (findAllById)
+        if (suggestionTaskId == null || suggestionTaskId.isEmpty()) {
+            return List.of();
+        }
+
+        List<SuggestionTask> tasks = suggestionTaskRepository.findAllById(suggestionTaskId);
+
+        return tasks.stream()
+                .map(task -> {
+                    // 이미지 URL
+                    String fullImgUrl = Optional.ofNullable(s3Properties.getBaseUrl())
+                            .map(base -> base + "/" + task.getImgUrl())
+                            .orElseThrow(() -> new BusinessException(ErrorCode.S3_CONFIG_ERROR));
+
+                    // 옵션 매핑 
+                    List<EraserTaskOptionsResponse.OptionDetail> optionDetails = task.getOptions().stream()
+                            .map(opt -> new EraserTaskOptionsResponse.OptionDetail(
+                                    opt.getOptionId(),
+                                    opt.getCount(),
+                                    opt.getEstimatedMinutes(),
+                                    opt.getPrice()
+                            ))
+                            .collect(Collectors.toList());
+
+                    return EraserTaskOptionsResponse.builder()
+                            .suggestionTaskId(task.getSuggestionTaskId())
+                            .title(task.getTitle())
+                            .imgUrl(fullImgUrl)
+                            .options(optionDetails)
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

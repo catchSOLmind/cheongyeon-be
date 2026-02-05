@@ -12,6 +12,9 @@ public record EraserTaskOptionsResponse(
         @Schema(description = "추천 업무 이름", example = "냉장실 청소")
         String title,
 
+        @Schema(description = "이미지 링크")
+        String imgUrl,
+
         List<OptionDetail> options
 ) {
     @Builder

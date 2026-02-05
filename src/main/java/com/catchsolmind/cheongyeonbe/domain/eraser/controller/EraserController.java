@@ -31,11 +31,11 @@ public class EraserController implements EraserApi {
     @Override
     @GetMapping("/options")
     public ApiResponse<List<EraserTaskOptionsResponse>> getTaskOptions(
-            @RequestParam List<Long> taskIds
+            @RequestParam List<Long> suggestionTaskId,
+            @AuthenticationPrincipal JwtUserDetails principal
     ) {
-        return ApiResponse.success(
-                List.of()
-        );
+        List<EraserTaskOptionsResponse> responses = eraserService.getTaskOptions(suggestionTaskId, principal.user().getUserId());
+        return ApiResponse.success(responses);
     }
 
 //    @Override

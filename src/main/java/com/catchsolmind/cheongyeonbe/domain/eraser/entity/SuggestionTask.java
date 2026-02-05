@@ -58,6 +58,7 @@ public class SuggestionTask {
     private String descRepeat; // [반복 작업] 멘트
 
     @OneToMany(mappedBy = "suggestionTask", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("optionId ASC")
     @Builder.Default
     private List<SuggestionTaskOption> options = new ArrayList<>();
 }
