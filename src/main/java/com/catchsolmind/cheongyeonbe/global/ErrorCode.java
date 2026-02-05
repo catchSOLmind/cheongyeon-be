@@ -10,6 +10,12 @@ public enum ErrorCode {
     USER_NOT_FOUND("USER001", "사용자를 찾을 수 없습니다."),
     INVALID_HOUSEWORK_TYPE("USER002", "유효하지 않은 가사 성향 타입입니다."),
 
+    // 예약
+    POINT_NOT_ENOUGH("RESER001", "포인트가 부족합니다."),
+    INVALID_POINT_AMOUNT("RESER002", "최대 사용 포인트보다 많습니다."),
+    OPTION_NOT_FOUND("RESER003", "옵션이 없습니다."),
+    INVALID_PAYMENT_AMOUNT("RESER004", "유효하지 않은 결제 금액입니다."),
+
     // Group
     GROUP_NOT_FOUND("GROUP001", "그룹을 찾을 수 없습니다."),
 
@@ -30,7 +36,7 @@ public enum ErrorCode {
     // Housework Test
     QUESTION_NOT_FOUND("TEST001", "가사 성향 테스트 질문이 존재하지 않습니다."),
     CHOICE_NOT_FOUND("TEST002", "질문에 대한 선택지가 존재하지 않습니다."),
-    INVALID_CHOICE("TEST003", "유효하지 않은 선택입니다.")
+    INVALID_CHOICE("TEST003", "유효하지 않은 선택입니다."),
     ;
 
 
