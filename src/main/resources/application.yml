@@ -48,7 +48,7 @@ cloud:
     s3:
       bucket: cheongyeon-fe-solmind
       region: ap-northeast-2
-      base-url: https://cheongyeon-fe-solmind.s3.ap-northeast-2.amazonaws.com
+      base-url: ${AWS_BASE_URL}
 
 security:
   jwt:
