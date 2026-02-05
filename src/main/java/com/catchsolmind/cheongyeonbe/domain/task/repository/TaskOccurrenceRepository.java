@@ -16,11 +16,19 @@ public interface TaskOccurrenceRepository extends JpaRepository<TaskOccurrence, 
             Long groupId, Long memberId, LocalDate date
     );
 
+    // 내 할일: memberId와 날짜로 조회 (groupId 없이)
+    List<TaskOccurrence> findByPrimaryAssignedMember_GroupMemberIdAndOccurDate(
+            Long memberId, LocalDate date
+    );
+
     List<TaskOccurrence> findByGroup_GroupIdAndPrimaryAssignedMember_GroupMemberIdAndOccurDateBetween(
             Long groupId, Long memberId, LocalDate start, LocalDate end
     );
 
     Optional<TaskOccurrence> findByOccurrenceIdAndGroup_GroupId(Long occurrenceId, Long groupId);
+
+    // 내 할일: occurrenceId와 memberId로 조회 (groupId 없이, 본인 검증 포함)
+    Optional<TaskOccurrence> findByOccurrenceIdAndPrimaryAssignedMember_GroupMemberId(Long occurrenceId, Long memberId);
 
     boolean existsByOccurrenceIdAndGroup_GroupId(Long occurrenceId, Long groupId);
 

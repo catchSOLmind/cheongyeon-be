@@ -27,7 +27,7 @@ public class MyTaskQueryService {
     private final TaskOccurrenceRepository occurrenceRepository;
     private final TaskTakeoverRepository takeoverRepository;
 
-    public MyTaskListResponse getMyTasks(Long groupId, Long myMemberId, LocalDate selectedDate) {
+    public MyTaskListResponse getMyTasks(GroupMember member, LocalDate selectedDate) {
         LocalDate weekStart = selectedDate.with(DayOfWeek.MONDAY);
         LocalDate weekEnd = weekStart.plusDays(6);
 
@@ -35,8 +35,8 @@ public class MyTaskQueryService {
                 .collect(Collectors.toList());
 
         List<TaskOccurrence> occurrences =
-                occurrenceRepository.findByGroup_GroupIdAndPrimaryAssignedMember_GroupMemberIdAndOccurDate(
-                        groupId, myMemberId, selectedDate
+                occurrenceRepository.findByPrimaryAssignedMember_GroupMemberIdAndOccurDate(
+                        member.getGroupMemberId(), selectedDate
                 );
 
         List<MyTaskItemDto> items = occurrences.stream()
@@ -65,8 +65,9 @@ public class MyTaskQueryService {
                 .build();
     }
 
-    public MyTaskDetailResponse getMyTaskDetail(Long groupId, Long occurrenceId) {
-        TaskOccurrence occ = occurrenceRepository.findByOccurrenceIdAndGroup_GroupId(occurrenceId, groupId)
+    public MyTaskDetailResponse getMyTaskDetail(GroupMember member, Long occurrenceId) {
+        TaskOccurrence occ = occurrenceRepository.findByOccurrenceIdAndPrimaryAssignedMember_GroupMemberId(
+                        occurrenceId, member.getGroupMemberId())
                 .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
 
         Task task = occ.getTask();
@@ -79,7 +80,7 @@ public class MyTaskQueryService {
         return MyTaskDetailResponse.builder()
                 .occurrenceId(occ.getOccurrenceId())
                 .taskId(task.getTaskId())
-                .groupId(groupId)
+                .groupId(member.getGroup().getGroupId())
                 .taskType(MyTaskDetailResponse.TaskTypeDto.builder()
                         .taskTypeId(task.getTaskType().getTaskTypeId())
                         .category(task.getTaskType().getCategory())
