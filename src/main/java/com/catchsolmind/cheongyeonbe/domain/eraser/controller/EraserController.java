@@ -56,6 +56,6 @@ public class EraserController implements EraserApi {
             @RequestBody ReservationRequest request,
             @AuthenticationPrincipal JwtUserDetails principal) {
         Long reservationId = eraserService.completeReservation(request, principal.user().getUserId());
-        return ApiResponse.success(null);
+        return ApiResponse.success(reservationId);
     }
 }
