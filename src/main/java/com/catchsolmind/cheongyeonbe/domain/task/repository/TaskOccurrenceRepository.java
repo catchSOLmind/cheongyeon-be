@@ -51,4 +51,16 @@ public interface TaskOccurrenceRepository extends JpaRepository<TaskOccurrence, 
             "WHERE t.group.groupId = :groupId " +
             "AND t.status = 'WAITING'")
     List<TaskOccurrence> findUnfinishedByGroupId(@Param("groupId") Long groupId);
+
+    // 특정 그룹의 특정 집안일 중, 아직 안 끝난 것 찾기
+    @Query("SELECT to FROM TaskOccurrence to " +
+            "JOIN to.task t " +
+            "WHERE t.group.groupId = :groupId " +
+            "AND t.taskType.taskTypeId = :taskTypeId " +
+            "AND to.status IN :statuses")
+    List<TaskOccurrence> findByGroupAndTaskTypeAndStatusIn(
+            @Param("groupId") Long groupId,
+            @Param("taskTypeId") Long taskTypeId,
+            @Param("statuses") List<TaskStatus> statuses
+    );
 }
