@@ -21,6 +21,9 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
     // LEFT 상태 제외 멤버 목록
     List<GroupMember> findByGroup_GroupIdAndStatusNot(Long groupId, MemberStatus status);
 
+    // 특정 상태가 아닌 멤버 조회 (그룹 + 유저 + 상태)
+    Optional<GroupMember> findByGroup_GroupIdAndUser_UserIdAndStatusNot(Long groupId, Long userId, MemberStatus status);
+
     // 그룹 전체 멤버 목록
     List<GroupMember> findByGroup_GroupId(Long groupId);
 
