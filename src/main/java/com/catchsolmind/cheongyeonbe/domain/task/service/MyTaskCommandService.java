@@ -31,12 +31,8 @@ public class MyTaskCommandService {
     private final TaskIncompleteLogRepository taskIncompleteLogRepository;
     private final GroupMemberRepository groupMemberRepository;
 
-    public MyTaskCreateResponse createMyTasks(Long myMemberId, MyTaskCreateRequest req) {
-
-        GroupMember me = groupMemberRepository.findById(myMemberId)
-                .orElseThrow(() -> new IllegalArgumentException("GroupMember not found"));
-
-        Group group = me.getGroup();
+    public MyTaskCreateResponse createMyTasks(GroupMember member, MyTaskCreateRequest req) {
+        Group group = member.getGroup();
 
         List<TaskType> types = taskTypeRepository.findAllById(req.getTaskTypeIds());
         if (types.size() != req.getTaskTypeIds().size()) {
@@ -50,7 +46,7 @@ public class MyTaskCommandService {
                     .group(group)
                     .taskType(type)
                     .title(type.getName())
-                    .creatorMember(me)
+                    .creatorMember(member)
                     .repeatRule(null)
                     .time(null)
                     .status(TaskStatus.WAITING)
@@ -61,7 +57,7 @@ public class MyTaskCommandService {
                     .task(task)
                     .group(group)
                     .occurDate(req.getDate())
-                    .primaryAssignedMember(me)
+                    .primaryAssignedMember(member)
                     .status(TaskStatus.WAITING)
                     .build();
             occurrenceRepository.save(occ);
@@ -83,17 +79,13 @@ public class MyTaskCommandService {
 
     // 내 할 일 상태 변경하기
     public MyTaskStatusUpdateResponse updateStatus(
-            Long myMemberId,
-            Long groupId,
+            GroupMember member,
             Long occurrenceId,
             MyTaskStatusUpdateRequest req
     ) {
         TaskOccurrence occ = occurrenceRepository
-                .findByOccurrenceIdAndGroup_GroupId(occurrenceId, groupId)
+                .findByOccurrenceIdAndPrimaryAssignedMember_GroupMemberId(occurrenceId, member.getGroupMemberId())
                 .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
-
-        GroupMember me = groupMemberRepository.findById(myMemberId)
-                .orElseThrow(() -> new IllegalArgumentException("GroupMember not found"));
 
         LocalDateTime now = LocalDateTime.now();
         TaskStatus target = req.getStatus();
@@ -105,7 +97,7 @@ public class MyTaskCommandService {
                 taskLogRepository.save(
                         TaskLog.builder()
                                 .occurrence(occ)
-                                .doneByMember(me)
+                                .doneByMember(member)
                                 .memo(null)
                                 .build()
                 );
@@ -128,7 +120,7 @@ public class MyTaskCommandService {
             taskIncompleteLogRepository.save(
                     TaskIncompleteLog.builder()
                             .occurrence(occ)
-                            .member(me)
+                            .member(member)
                             .reasonCode(req.getReasonCode())
                             .build()
             );
@@ -144,17 +136,13 @@ public class MyTaskCommandService {
 
     // 내 할 일 일정 변경하기
     public MyTaskScheduleUpdateResponse updateSchedule(
-            Long myMemberId,
-            Long groupId,
+            GroupMember member,
             Long occurrenceId,
             MyTaskScheduleUpdateRequest req
     ) {
         TaskOccurrence occ = occurrenceRepository
-                .findByOccurrenceIdAndGroup_GroupId(occurrenceId, groupId)
+                .findByOccurrenceIdAndPrimaryAssignedMember_GroupMemberId(occurrenceId, member.getGroupMemberId())
                 .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
-
-        GroupMember me = groupMemberRepository.findById(myMemberId)
-                .orElseThrow(() -> new IllegalArgumentException("GroupMember not found"));
 
         Task task = occ.getTask();
         LocalDate originalDate = occ.getOccurDate();
@@ -184,7 +172,7 @@ public class MyTaskCommandService {
             taskPostponeLogRepository.save(
                     TaskPostponeLog.builder()
                             .occurrence(occ)
-                            .member(me)
+                            .member(member)
                             .originalDate(originalDate)
                             .newDate(occ.getOccurDate())
                             .reasonCode(req.getPostponeReasonCode())
@@ -203,17 +191,13 @@ public class MyTaskCommandService {
 
     // 내 할 일 멤버에게 부탁하기
     public MyTaskRequestToMemberResponse requestToMember(
-            Long myMemberId,
-            Long groupId,
+            GroupMember member,
             Long occurrenceId,
             MyTaskRequestToMemberRequest req
     ) {
         TaskOccurrence occ = occurrenceRepository
-                .findByOccurrenceIdAndGroup_GroupId(occurrenceId, groupId)
+                .findByOccurrenceIdAndPrimaryAssignedMember_GroupMemberId(occurrenceId, member.getGroupMemberId())
                 .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
-
-        GroupMember fromMember = groupMemberRepository.findById(myMemberId)
-                .orElseThrow(() -> new IllegalArgumentException("From member not found"));
 
         GroupMember toMember = groupMemberRepository.findById(req.getToMemberId())
                 .orElseThrow(() -> new IllegalArgumentException("To member not found"));
@@ -226,14 +210,14 @@ public class MyTaskCommandService {
         taskTakeoverRepository.save(
                 TaskTakeover.builder()
                         .occurrence(occ)
-                        .fromMember(fromMember)
+                        .fromMember(member)
                         .toMember(toMember)
                         .build()
         );
 
         return MyTaskRequestToMemberResponse.builder()
                 .occurrenceId(occurrenceId)
-                .fromMemberId(myMemberId)
+                .fromMemberId(member.getGroupMemberId())
                 .toMemberId(req.getToMemberId())
                 .updatedAssigneeMemberId(toMember.getGroupMemberId())
                 .updatedAt(LocalDateTime.now())
@@ -242,12 +226,12 @@ public class MyTaskCommandService {
 
     // 내 할 일 수정
     public MyTaskUpdateResponse updateMyTask(
-            Long groupId,
+            GroupMember member,
             Long occurrenceId,
             MyTaskUpdateRequest request
     ) {
         TaskOccurrence occ = occurrenceRepository
-                .findByOccurrenceIdAndGroup_GroupId(occurrenceId, groupId)
+                .findByOccurrenceIdAndPrimaryAssignedMember_GroupMemberId(occurrenceId, member.getGroupMemberId())
                 .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
 
         Task task = occ.getTask();
@@ -321,11 +305,11 @@ public class MyTaskCommandService {
 
     // 내 할 일 삭제하기
     public MyTaskDeleteResponse deleteMyTask(
-            Long groupId,
+            GroupMember member,
             Long occurrenceId
     ) {
         TaskOccurrence occ = occurrenceRepository
-                .findByOccurrenceIdAndGroup_GroupId(occurrenceId, groupId)
+                .findByOccurrenceIdAndPrimaryAssignedMember_GroupMemberId(occurrenceId, member.getGroupMemberId())
                 .orElseThrow(() -> new IllegalArgumentException("Occurrence not found"));
 
         // 관련 로그 삭제

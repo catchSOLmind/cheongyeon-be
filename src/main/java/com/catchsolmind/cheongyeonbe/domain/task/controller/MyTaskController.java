@@ -28,35 +28,33 @@ public class MyTaskController {
     private final GroupMemberRepository groupMemberRepository;
 
 
-    private GroupMember getGroupMember(Long groupId, User user) {
-        return groupMemberRepository.findByGroup_GroupIdAndUser_UserId(groupId, user.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "User " + user.getUserId() + " is not a member of group " + groupId
-                ));
+    private GroupMember currentMember(User user) {
+        return groupMemberRepository.findFirstByUser_UserIdOrderByGroupMemberIdDesc(user.getUserId())
+                .orElseThrow(() -> new IllegalStateException("그룹 미가입 사용자"));
     }
+
 
     @GetMapping
     @Operation(summary = "내 할 일 목록 조회")
     public MyTaskListResponse getMyTasks(
-            @RequestParam Long groupId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = principal.user();
-        GroupMember member = getGroupMember(groupId, user);
-        return queryService.getMyTasks(groupId, member.getGroupMemberId(), date);
+        GroupMember member = currentMember(user);
+        return queryService.getMyTasks(member, date);
     }
 
     @GetMapping("/{occurrenceId}")
     @Operation(summary = "내 할 일 상세 조회")
     public MyTaskDetailResponse getMyTaskDetail(
-            @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = principal.user();
-        getGroupMember(groupId, user); // 권한 체크
-        return queryService.getMyTaskDetail(groupId, occurrenceId);
+        GroupMember member = currentMember(user);
+
+        return queryService.getMyTaskDetail(member, occurrenceId);
     }
 
 
@@ -67,8 +65,9 @@ public class MyTaskController {
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = principal.user();
-        GroupMember member = getGroupMember(request.getGroupId(), user);
-        return commandService.createMyTasks(member.getGroupMemberId(), request);
+        GroupMember member = currentMember(user);
+
+        return commandService.createMyTasks(member, request);
     }
 
 
@@ -76,74 +75,64 @@ public class MyTaskController {
     @PatchMapping("/{occurrenceId}/status")
     @Operation(summary = "내 할 일 상태 변경")
     public MyTaskStatusUpdateResponse updateStatus(
-            @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
             @RequestBody MyTaskStatusUpdateRequest request,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = principal.user();
-        GroupMember member = getGroupMember(groupId, user);
-        return commandService.updateStatus(
-                member.getGroupMemberId(),
-                groupId,
-                occurrenceId,
-                request
-        );
+        GroupMember member = currentMember(user);
+
+        return commandService.updateStatus(member, occurrenceId, request);
     }
 
     @PatchMapping("/{occurrenceId}/schedule")
     @Operation(summary = "내 할 일 일정 변경")
     public MyTaskScheduleUpdateResponse updateSchedule(
-            @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
             @RequestBody MyTaskScheduleUpdateRequest request,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = principal.user();
-        GroupMember member = getGroupMember(groupId, user);
-        return commandService.updateSchedule(member.getGroupMemberId(), groupId, occurrenceId, request);
+        GroupMember member = currentMember(user);
+
+        return commandService.updateSchedule(member, occurrenceId, request);
     }
 
     @PostMapping("/{occurrenceId}/request")
     @Operation(summary = "내 할 일 멤버에게 부탁하기")
     public MyTaskRequestToMemberResponse requestToMember(
-            @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
             @RequestBody MyTaskRequestToMemberRequest request,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = principal.user();
-        GroupMember member = getGroupMember(groupId, user);
-        return commandService.requestToMember(
-                member.getGroupMemberId(),
-                groupId,
-                occurrenceId,
-                request
-        );
+        GroupMember member = currentMember(user);
+
+        return commandService.requestToMember(member, occurrenceId, request);
     }
 
     @PatchMapping("/{occurrenceId}")
     @Operation(summary = "내 할 일 수정")
     public MyTaskUpdateResponse updateMyTask(
-            @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
             @RequestBody MyTaskUpdateRequest request,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = principal.user();
-        getGroupMember(groupId, user); // 권한 체크
-        return commandService.updateMyTask(groupId, occurrenceId, request);
+        GroupMember member = currentMember(user);
+
+        return commandService.updateMyTask(member, occurrenceId, request);
     }
 
     @DeleteMapping("/{occurrenceId}")
     @Operation(summary = "내 할 일 삭제")
     public MyTaskDeleteResponse deleteMyTask(
-            @RequestParam Long groupId,
             @PathVariable Long occurrenceId,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = principal.user();
-        getGroupMember(groupId, user); // 권한 체크
-        return commandService.deleteMyTask(groupId, occurrenceId);
+        GroupMember member = currentMember(user);
+
+        return commandService.deleteMyTask(member, occurrenceId);
     }
 }

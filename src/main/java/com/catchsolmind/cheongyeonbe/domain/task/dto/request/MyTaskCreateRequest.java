@@ -9,7 +9,6 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class MyTaskCreateRequest {
-    private Long groupId;
     private LocalDate date;
     private List<Long> taskTypeIds;
 }
