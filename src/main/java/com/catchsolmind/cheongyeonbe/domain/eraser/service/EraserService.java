@@ -204,6 +204,7 @@ public class EraserService {
         return null;
     }
 
+    @Transactional
     public Long completeReservation(ReservationRequest request, Long userId) {
         // TODO: 구현 예정
         return null;
