@@ -232,7 +232,7 @@ public class EraserService {
     @Transactional
     public Long completeReservation(ReservationRequest request, Long userId) {
         // 유저 조회
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithPessimisticLock(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         // 유저의 그룹 ID 조회
@@ -248,7 +248,7 @@ public class EraserService {
             throw new BusinessException(ErrorCode.POINT_NOT_ENOUGH);
         }
         if (usedPoint > MAX_USABLE_POINT) {
-            throw new BusinessException(ErrorCode.POINT_NOT_ENOUGH);
+            throw new BusinessException(ErrorCode.INVALID_POINT_AMOUNT);
         }
 
         // 예약 아이템 생성 및 총액 계산
