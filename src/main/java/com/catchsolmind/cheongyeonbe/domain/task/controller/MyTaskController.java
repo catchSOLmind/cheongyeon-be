@@ -85,6 +85,18 @@ public class MyTaskController {
         return commandService.updateStatus(member, occurrenceId, request);
     }
 
+    @PostMapping("/{occurrenceId}/complete")
+    @Operation(summary = "내 할 일 완료하기", description = "할일을 완료 상태로 변경합니다. Request body 없이 호출만 하면 됩니다.")
+    public MyTaskCompleteResponse completeTask(
+            @PathVariable Long occurrenceId,
+            @AuthenticationPrincipal JwtUserDetails principal
+    ) {
+        User user = principal.user();
+        GroupMember member = currentMember(user);
+
+        return commandService.completeTask(member, occurrenceId);
+    }
+
     @PatchMapping("/{occurrenceId}/schedule")
     @Operation(summary = "내 할 일 일정 변경")
     public MyTaskScheduleUpdateResponse updateSchedule(
