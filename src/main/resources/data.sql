@@ -215,7 +215,7 @@ VALUES (5, 37,
         '후드 청소',
         'options/hood.png',
         60, 70, 60, NULL,
-        '{{delay_period} 넘게 방치된 기름때, 화재 위험이 있어요. {time}만 투자해서 안전을 지키세요. ',
+        '{delay_period} 넘게 방치된 기름때, 화재 위험이 있어요. {time}만 투자해서 안전을 지키세요. ',
         '{task_name} 담당자가 없네요. 끈적이는 기름때 제거, 혼자서 힘들다면 청연이 도와드릴게요.',
         '요리할 때마다 떨어지는 기름방울, {season} 위생을 위해 후드 청소는 필수예요. ',
         '항상 쾌적한 주방 공기를 위해 정기적인 후드 관리가 필요해요. ');
@@ -253,14 +253,14 @@ INSERT
 IGNORE INTO suggestion_task (suggestion_task_id, task_type_id, title, img_url,
                              default_estimated_minutes, reward_point, recommendation_cycle_days, season_months,
                              desc_delayed, desc_no_assignee, desc_general, desc_repeat)
-VALUES (3, 92,
+VALUES (8, 92,
         '에어컨 청소',
         'options/aircon.png',
         90, 80, NULL, '5,6,7,8',
         '{delay_period} 지났어요. 묵은 먼지와 곰팡이를 {time}만에 싹 씻어내세요. ',
         '{task_name} 담당자가 없네요. {season} 필수 코스, 잊지 마세요.',
         '다가오는 {season}, 에어컨 필터 청소로 호흡기 건강을 챙기세요.',
-        '' -- 빈 문자열 (Not Null 대응)
+        ''
        );
 
 -- -- [3] 침구 세탁 (ID: 53) - 주기성(14일)
@@ -328,6 +328,12 @@ VALUES (7, '초기', 175200, 30000),
        (7, '중기', 306600, 35000),
        (7, '후기', 438000, 40000),
        (7, '유아식', 569401, 45000);
+
+-- [8] 이유식 구독 옵션 (ID: 8)
+INSERT
+IGNORE INTO suggestion_task_option (suggestion_task_id, count, estimated_minutes, price)
+VALUES (8, '벽걸이', 60, 70000),
+       (8, '스탠드', 90, 110000);
 
 -- ============================================================
 -- 가사 성향 테스트 (Housework_Test_Question)
