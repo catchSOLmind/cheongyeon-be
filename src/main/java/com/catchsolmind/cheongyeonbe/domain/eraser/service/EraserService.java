@@ -11,6 +11,8 @@ import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberReposito
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskOccurrence;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskLogRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskOccurrenceRepository;
+import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
+import com.catchsolmind.cheongyeonbe.domain.user.repository.UserRepository;
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
 import com.catchsolmind.cheongyeonbe.global.config.S3Properties;
@@ -37,6 +39,7 @@ public class EraserService {
     private final TaskOccurrenceRepository taskOccurrenceRepository;
     private final SuggestionTaskRepository suggestionTaskRepository;
     private final TaskLogRepository taskLogRepository;
+    private final UserRepository userRepository;
     private final S3Properties s3Properties;
 
     public List<RecommendationResponse> getRecommendations(Long userId) {
@@ -200,8 +203,20 @@ public class EraserService {
     }
 
     public PaymentInfoResponse getPaymentInfo(Long userId) {
-        // TODO: 구현 예정
-        return null;
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        // 유저의 포인트 조회
+        int currentPoint = (user.getPointBalance() != null) ? user.getPointBalance() : 0;
+
+        // 사용 가능 포인트 계산(최대 2만 포인트)
+        int maxUsablePoint = Math.min(currentPoint, 20000);
+
+        return PaymentInfoResponse.builder()
+                .currentPoint(currentPoint)
+                .maxUsablePoint(maxUsablePoint)
+                .build();
     }
 
     @Transactional
