@@ -27,7 +27,8 @@ public interface EraserApi {
                     " options - DELAYED: 미루어진 작업, NO_ASSIGNEE: 무담당 작업, GENERAL: 시즌 추천, REPEAT: 반복 작업"
     )
     ApiResponse<List<EraserTaskOptionsResponse>> getTaskOptions(
-            @RequestParam List<Long> taskIds
+            @RequestParam List<Long> taskIds,
+            @Parameter(hidden = true) JwtUserDetails principal
     );
 //
 //    @Operation(
