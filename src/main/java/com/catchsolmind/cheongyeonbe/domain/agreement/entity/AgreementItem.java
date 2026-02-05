@@ -24,7 +24,11 @@ public class AgreementItem {
     @JoinColumn(name = "agreement_id", nullable = false)
     private Agreement agreement;
 
-    @Column(name = "item_text", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "item_order", nullable = false)
+    @Builder.Default
+    private Integer itemOrder = 1;
+
+    @Column(name = "item_text", nullable = false, length = 60)
     private String itemText;
 
     @CreationTimestamp

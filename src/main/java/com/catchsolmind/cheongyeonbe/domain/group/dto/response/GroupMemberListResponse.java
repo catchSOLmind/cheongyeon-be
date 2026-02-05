@@ -5,6 +5,7 @@ import com.catchsolmind.cheongyeonbe.global.enums.MemberStatus;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -12,6 +13,7 @@ import java.util.List;
 public class GroupMemberListResponse {
 
     private Long groupId;
+    private Integer memberCount;
     private List<GroupMemberItemDto> members;
 
     @Getter
@@ -22,5 +24,6 @@ public class GroupMemberListResponse {
         private String profileImageUrl;
         private MemberRole role;
         private MemberStatus status;
+        private LocalDateTime joinedAt;
     }
 }

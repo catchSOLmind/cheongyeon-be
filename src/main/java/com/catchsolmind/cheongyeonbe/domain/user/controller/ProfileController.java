@@ -26,7 +26,7 @@ public class ProfileController {
     @GetMapping
     @Operation(summary = "프로필 조회")
     public ProfileGetResponse getProfile(@AuthenticationPrincipal JwtUserDetails principal) {
-        return profileService.getProfile(principal.user(), null);
+        return profileService.getProfile(principal.user());
     }
 
     @PatchMapping
