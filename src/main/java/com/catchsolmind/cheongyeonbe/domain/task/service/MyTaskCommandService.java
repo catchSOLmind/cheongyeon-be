@@ -338,7 +338,7 @@ public class MyTaskCommandService {
                 .occurrenceId(occurrenceId)
                 .status(TaskStatus.COMPLETED)
                 .earnedPoint(earnedPoint)
-                .completedAt(now)
+                .completedAt(now.toString())
                 .build();
     }
 
