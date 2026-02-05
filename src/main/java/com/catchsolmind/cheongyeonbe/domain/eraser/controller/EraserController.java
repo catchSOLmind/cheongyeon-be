@@ -7,6 +7,7 @@ import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.RecommendationRe
 import com.catchsolmind.cheongyeonbe.domain.eraser.service.EraserService;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -53,7 +54,7 @@ public class EraserController implements EraserApi {
     @Override
     @PostMapping("/reservation")
     public ApiResponse<Long> completeReservation(
-            @RequestBody ReservationRequest request,
+            @RequestBody @Valid ReservationRequest request,
             @AuthenticationPrincipal JwtUserDetails principal) {
         Long reservationId = eraserService.completeReservation(request, principal.user().getUserId());
         return ApiResponse.success(reservationId);
