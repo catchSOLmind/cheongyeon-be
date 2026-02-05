@@ -276,6 +276,17 @@ public class EraserService {
             for (TaskOccurrence task : tasksToResolve) {
                 task.setStatus(TaskStatus.RESOLVED_BY_ERASER);
             }
+
+            ReservationItem item = ReservationItem.builder()
+                    .suggestionTaskId(option.getSuggestionTask().getSuggestionTaskId())
+                    .taskTitle(option.getSuggestionTask().getTitle())
+                    .optionCount(option.getCount())
+                    .price(option.getPrice())
+                    .visitDate(itemReq.visitDate())
+                    .visitTime(itemReq.visitTime())
+                    .build();
+
+            reservationItems.add(item);
         }
 
         // 최종 결제 금액 검증
