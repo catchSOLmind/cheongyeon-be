@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/oauth")
 @Validated
 @Slf4j
-public class KakaoAuthController {
+public class KakaoAuthController implements KakaoAuthApi {
     private final KakaoAuthService kakaoAuthService;
     private final AuthTokenService authTokenService;
 
