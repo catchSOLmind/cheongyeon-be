@@ -308,14 +308,14 @@ public class EraserService {
             reservation.addReservationItem(item); // 편의 메서드 사용
         }
 
-        reservationRepository.save(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
 
         // 유저 포인트 차감
         if (usedPoint > 0) {
             user.setPointBalance(currentPoint - usedPoint);
         }
 
-        return reservation.getReservationId();
+        return savedReservation.getReservationId();
     }
 
     // 헬퍼 메서드
