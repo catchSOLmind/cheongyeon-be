@@ -1,6 +1,8 @@
 package com.catchsolmind.cheongyeonbe.domain.eraser.service;
 
+import com.catchsolmind.cheongyeonbe.domain.eraser.dto.request.ReservationRequest;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.EraserTaskOptionsResponse;
+import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.PaymentInfoResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.RecommendationResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.entity.SuggestionTask;
 import com.catchsolmind.cheongyeonbe.domain.eraser.repository.SuggestionTaskRepository;
@@ -161,9 +163,7 @@ public class EraserService {
                 .collect(Collectors.toList());
     }
 
-    public List<EraserTaskOptionsResponse> getTaskOptions(
-            List<Long> suggestionTaskId,
-            Long userId
+    public List<EraserTaskOptionsResponse> getTaskOptions(List<Long> suggestionTaskId, Long userId
     ) {
         // 요청 suggestionTaskId로 DB(SuggestionTask)를 조회해서 해당 상품들 한 번에 조회 (findAllById)
         if (suggestionTaskId == null || suggestionTaskId.isEmpty()) {
@@ -197,6 +197,16 @@ public class EraserService {
                             .build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    public PaymentInfoResponse getPaymentInfo(Long userId) {
+        // TODO: 구현 예정
+        return null;
+    }
+
+    public Long completeReservation(ReservationRequest request, Long userId) {
+        // TODO: 구현 예정
+        return null;
     }
 
     // 헬퍼 메서드
