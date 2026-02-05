@@ -10,6 +10,7 @@ import java.util.List;
 public class ProfileGetResponse {
 
     private Profile profile;
+    private PersonalityInfo personalityInfo;
     private Summary summary;
     private MonthlyActivity monthlyActivity;
 
@@ -17,11 +18,17 @@ public class ProfileGetResponse {
     @Builder
     public static class Profile {
         private Long userId;
+        private Long groupId;
         private String nickname;
-        private String email;
         private String profileImageUrl;
-        private String houseworkType;
-        private String houseworkTypeLabel;
+    }
+
+    @Getter
+    @Builder
+    public static class PersonalityInfo {
+        private Boolean hasCompleted;       // 성향 테스트 완료 여부
+        private String houseworkType;       // 성향 코드 (예: "EFFICIENCY")
+        private String houseworkTypeLabel;  // 성향 라벨 (예: "효율이")
     }
 
     @Getter
