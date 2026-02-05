@@ -6,8 +6,6 @@ import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.RefreshTokenRespo
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.AuthTokenService;
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoAuthService;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -30,7 +28,7 @@ public class KakaoAuthController implements KakaoAuthApi {
 
     @PostMapping("/kakao/login")
     public ApiResponse<KakaoLoginResponse> login(
-            @NotBlank @RequestParam("code") String code,
+            @RequestParam("code") String code,
             @RequestParam(value = "redirectUri", required = false) String redirectUri
     ) {
         KakaoLoginResponse response = kakaoAuthService.login(code, redirectUri);
@@ -40,7 +38,7 @@ public class KakaoAuthController implements KakaoAuthApi {
 
     @PostMapping("/kakao/refresh")
     public ApiResponse<RefreshTokenResponse> refresh(
-            @Valid @RequestBody RefreshTokenRequest request
+            @RequestBody RefreshTokenRequest request
     ) {
         return ApiResponse.success(
                 authTokenService.refresh(request)

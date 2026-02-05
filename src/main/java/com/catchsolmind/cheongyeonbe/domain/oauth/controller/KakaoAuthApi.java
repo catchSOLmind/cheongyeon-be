@@ -7,6 +7,7 @@ import com.catchsolmind.cheongyeonbe.global.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -37,6 +38,6 @@ public interface KakaoAuthApi {
             description = "Refresh Token을 사용하여 새로운 Access Token과 Refresh Token을 발급받습니다."
     )
     ApiResponse<RefreshTokenResponse> refresh(
-            @RequestBody RefreshTokenRequest request
+            @Valid @RequestBody RefreshTokenRequest request
     );
 }
