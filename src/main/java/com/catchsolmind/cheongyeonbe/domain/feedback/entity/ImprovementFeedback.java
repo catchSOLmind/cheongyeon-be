@@ -8,18 +8,13 @@ import lombok.*;
 @Entity
 @Table(name = "improvement_feedback")
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-class ImprovementFeedback {
+public class ImprovementFeedback {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "feedback_id")
-    private Feedback feedback;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

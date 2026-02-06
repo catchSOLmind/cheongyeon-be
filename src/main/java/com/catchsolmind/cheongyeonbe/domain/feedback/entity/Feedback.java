@@ -43,7 +43,9 @@ public class Feedback {
     @Column(name = "praise_type")
     private List<PraiseType> praiseType;
 
-    @OneToMany(mappedBy = "feedback", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "feedback_id")
+    @Builder.Default
     private List<ImprovementFeedback> improvements = new ArrayList<>();
 
     @CreationTimestamp
@@ -52,6 +54,5 @@ public class Feedback {
 
     public void addImprovement(ImprovementFeedback improvement) {
         this.improvements.add(improvement);
-        improvement.setFeedback(this);
     }
 }
