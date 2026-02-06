@@ -1,6 +1,7 @@
 package com.catchsolmind.cheongyeonbe.domain.task.entity;
 
 import com.catchsolmind.cheongyeonbe.domain.group.entity.MemberFavoriteTaskType;
+import com.catchsolmind.cheongyeonbe.global.enums.RecommendationType;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskSubCategory;
 import jakarta.persistence.*;
@@ -32,6 +33,11 @@ public class TaskType {
     @Enumerated(EnumType.STRING)
     @Column(name = "sub_category")
     private TaskSubCategory subCategory;  // ETC 카테고리일 때 PET/BABY 구분, null 가능
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "recommendation_type", nullable = false)
+    @Builder.Default
+    private RecommendationType recommendationType = RecommendationType.NONE;
 
     @Column(nullable = false, length = 100)
     private String name;
