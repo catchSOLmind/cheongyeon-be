@@ -26,11 +26,9 @@ public class TaskTypeController {
     private final TaskTypeService taskTypeService;
     private final GroupMemberRepository groupMemberRepository;
 
-    private GroupMember getGroupMember(Long groupId, User user) {
-        return groupMemberRepository.findByGroup_GroupIdAndUser_UserId(groupId, user.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "User " + user.getUserId() + " is not a member of group " + groupId
-                ));
+    private GroupMember currentMember(User user) {
+        return groupMemberRepository.findFirstByUser_UserIdOrderByGroupMemberIdDesc(user.getUserId())
+                .orElseThrow(() -> new IllegalStateException("그룹 미가입 사용자"));
     }
 
 //    @GetMapping
@@ -59,12 +57,12 @@ public ApiResponse<TaskTypeListResponse> getTaskTypes(
 }
 
     @GetMapping("/favorites")
+    @Operation(summary = "즐겨찾기 세부 업무 조회")
     public ApiResponse<TaskTypeListResponse> getFavorites(
-            @RequestParam Long groupId,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = principal.user();
-        GroupMember member = getGroupMember(groupId, user);
+        GroupMember member = currentMember(user);
 
         TaskTypeListResponse response = taskTypeService.getFavoriteTaskTypes(member.getGroupMemberId());
         return ApiResponse.success("즐겨찾기 세부 업무 조회 성공", response);
@@ -85,12 +83,11 @@ public ApiResponse<TaskTypeListResponse> getTaskTypes(
     @PostMapping("/{taskTypeId}/favorite")
     @Operation(summary = "즐겨찾기 추가")
     public ApiResponse<TaskTypeFavoriteResponse> addFavorite(
-            @RequestParam Long groupId,
             @PathVariable Long taskTypeId,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = principal.user();
-        GroupMember member = getGroupMember(groupId, user);
+        GroupMember member = currentMember(user);
         TaskTypeFavoriteResponse response = taskTypeService.addFavorite(member.getGroupMemberId(), taskTypeId);
         return ApiResponse.success("즐겨찾기 추가 성공", response);
     }
@@ -98,12 +95,11 @@ public ApiResponse<TaskTypeListResponse> getTaskTypes(
     @DeleteMapping("/{taskTypeId}/favorite")
     @Operation(summary = "즐겨찾기 해제")
     public ApiResponse<TaskTypeFavoriteResponse> removeFavorite(
-            @RequestParam Long groupId,
             @PathVariable Long taskTypeId,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
         User user = principal.user();
-        GroupMember member = getGroupMember(groupId, user);
+        GroupMember member = currentMember(user);
         TaskTypeFavoriteResponse response = taskTypeService.removeFavorite(member.getGroupMemberId(), taskTypeId);
         return ApiResponse.success("즐겨찾기 해제 성공", response);
     }
