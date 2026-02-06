@@ -2,19 +2,20 @@ package com.catchsolmind.cheongyeonbe.domain.feedback.entity;
 
 import com.catchsolmind.cheongyeonbe.domain.group.entity.Group;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
-import com.catchsolmind.cheongyeonbe.global.enums.AiStatus;
-import com.catchsolmind.cheongyeonbe.global.enums.FeedbackType;
+import com.catchsolmind.cheongyeonbe.global.enums.PraiseType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "feedback")
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 public class Feedback {
@@ -30,28 +31,28 @@ public class Feedback {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_member_id", nullable = false)
-    private GroupMember authorMember;
+    private GroupMember author;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "target_member_id")
-    private GroupMember targetMember;
+    private GroupMember target;
 
+    @ElementCollection(targetClass = PraiseType.class)
+    @CollectionTable(name = "feedback_praise_tags", joinColumns = @JoinColumn(name = "feedback_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "feedback_type", nullable = false)
-    private FeedbackType feedbackType;
+    @Column(name = "praise_type")
+    private List<PraiseType> praiseTypes;
 
-    @Column(name = "raw_text", nullable = false, columnDefinition = "TEXT")
-    private String rawText;
-
-    @Column(name = "ai_text", columnDefinition = "TEXT")
-    private String aiText;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "ai_status", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "feedback_id")
     @Builder.Default
-    private AiStatus aiStatus = AiStatus.UNCOMPLETED;
+    private List<ImprovementFeedback> improvements = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    public void addImprovement(ImprovementFeedback improvement) {
+        this.improvements.add(improvement);
+    }
 }
