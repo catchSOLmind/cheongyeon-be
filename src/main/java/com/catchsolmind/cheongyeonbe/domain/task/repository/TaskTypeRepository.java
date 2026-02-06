@@ -1,6 +1,7 @@
 package com.catchsolmind.cheongyeonbe.domain.task.repository;
 
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskType;
+import com.catchsolmind.cheongyeonbe.global.enums.RecommendationType;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskSubCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +18,10 @@ public interface TaskTypeRepository extends JpaRepository<TaskType, Long> {
 
     List<TaskType> findByCategoryAndSubCategory(TaskCategory category, TaskSubCategory subCategory);
 
+    // 카테고리 + 추천타입으로 조회
+    List<TaskType> findByCategoryAndRecommendationType(TaskCategory category, RecommendationType recommendationType);
+
+    // 카테고리 + 서브카테고리 + 추천타입으로 조회 (ETC용)
+    List<TaskType> findByCategoryAndSubCategoryAndRecommendationType(
+            TaskCategory category, TaskSubCategory subCategory, RecommendationType recommendationType);
 }
