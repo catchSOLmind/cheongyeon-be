@@ -4,7 +4,12 @@ import com.catchsolmind.cheongyeonbe.domain.eraser.dto.request.ReservationReques
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.EraserTaskOptionsResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.PaymentInfoResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.RecommendationResponse;
+import com.catchsolmind.cheongyeonbe.domain.eraser.entity.Reservation;
+import com.catchsolmind.cheongyeonbe.domain.eraser.entity.ReservationItem;
 import com.catchsolmind.cheongyeonbe.domain.eraser.entity.SuggestionTask;
+import com.catchsolmind.cheongyeonbe.domain.eraser.entity.SuggestionTaskOption;
+import com.catchsolmind.cheongyeonbe.domain.eraser.repository.ReservationRepository;
+import com.catchsolmind.cheongyeonbe.domain.eraser.repository.SuggestionTaskOptionRepository;
 import com.catchsolmind.cheongyeonbe.domain.eraser.repository.SuggestionTaskRepository;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.Group;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
@@ -17,6 +22,7 @@ import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
 import com.catchsolmind.cheongyeonbe.global.config.S3Properties;
 import com.catchsolmind.cheongyeonbe.global.enums.SuggestionType;
+import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,12 +40,16 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class EraserService {
+    public static final int MAX_USABLE_POINT = 20000;
 
     private final GroupMemberRepository groupMemberRepository;
     private final TaskOccurrenceRepository taskOccurrenceRepository;
     private final SuggestionTaskRepository suggestionTaskRepository;
     private final TaskLogRepository taskLogRepository;
     private final UserRepository userRepository;
+    private final SuggestionTaskOptionRepository suggestionTaskOptionRepository;
+    private final ReservationRepository reservationRepository;
+
     private final S3Properties s3Properties;
 
     public List<RecommendationResponse> getRecommendations(Long userId) {
@@ -221,8 +231,91 @@ public class EraserService {
 
     @Transactional
     public Long completeReservation(ReservationRequest request, Long userId) {
-        // TODO: 구현 예정
-        return null;
+        // 유저 조회
+        User user = userRepository.findByIdWithPessimisticLock(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        // 유저의 그룹 ID 조회
+        Group group = groupMemberRepository.findGroupByUserId(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.GROUP_NOT_FOUND));
+        Long groupId = group.getGroupId();
+
+        // 포인트 검증
+        int usedPoint = (request.usedPoint() != null) ? request.usedPoint() : 0;
+        int currentPoint = (user.getPointBalance() != null) ? user.getPointBalance() : 0;
+
+        if (usedPoint > currentPoint) {
+            throw new BusinessException(ErrorCode.POINT_NOT_ENOUGH);
+        }
+        if (usedPoint > MAX_USABLE_POINT) {
+            throw new BusinessException(ErrorCode.INVALID_POINT_AMOUNT);
+        }
+
+        // 예약 아이템 생성 및 총액 계산
+        List<ReservationItem> reservationItems = new ArrayList<>();
+        int totalPrice = 0;
+
+        for (ReservationRequest.ReservationItemRequest itemReq : request.reservations()) {
+            SuggestionTaskOption option = suggestionTaskOptionRepository.findById(itemReq.optionId())
+                    .orElseThrow(() -> new BusinessException(ErrorCode.OPTION_NOT_FOUND));
+
+            totalPrice += option.getPrice();
+
+            // 청연 지우개 로직 (예약한 상품과 관련된 미완료 집안일 상태 변경)
+            Long targetTaskTypeId = option.getSuggestionTask().getTaskType().getTaskTypeId();
+
+            List<TaskStatus> targetStatuses = List.of(
+                    TaskStatus.WAITING,
+                    TaskStatus.IN_PROGRESS,
+                    TaskStatus.INCOMPLETED
+            );
+
+            List<TaskOccurrence> tasksToResolve = taskOccurrenceRepository
+                    .findByGroupAndTaskTypeAndStatusIn(groupId, targetTaskTypeId, targetStatuses);
+
+            for (TaskOccurrence task : tasksToResolve) {
+                task.setStatus(TaskStatus.RESOLVED_BY_ERASER);
+            }
+
+            ReservationItem item = ReservationItem.builder()
+                    .suggestionTaskId(option.getSuggestionTask().getSuggestionTaskId())
+                    .taskTitle(option.getSuggestionTask().getTitle())
+                    .optionCount(option.getCount())
+                    .price(option.getPrice())
+                    .visitDate(itemReq.visitDate())
+                    .visitTime(itemReq.visitTime())
+                    .build();
+
+            reservationItems.add(item);
+        }
+
+        // 최종 결제 금액 검증
+        int finalPrice = totalPrice - usedPoint;
+        if (finalPrice < 0) {
+            throw new BusinessException(ErrorCode.INVALID_PAYMENT_AMOUNT);
+        }
+
+        // 예약 저장
+        Reservation reservation = Reservation.builder()
+                .user(user)
+                .totalPrice(totalPrice)
+                .usedPoint(usedPoint)
+                .finalPrice(finalPrice)
+                .status(TaskStatus.RESOLVED_BY_ERASER) // 예약 확정 상태
+                .build();
+
+        for (ReservationItem item : reservationItems) {
+            reservation.addReservationItem(item); // 편의 메서드 사용
+        }
+
+        Reservation savedReservation = reservationRepository.save(reservation);
+
+        // 유저 포인트 차감
+        if (usedPoint > 0) {
+            user.setPointBalance(currentPoint - usedPoint);
+        }
+
+        return savedReservation.getReservationId();
     }
 
     // 헬퍼 메서드
