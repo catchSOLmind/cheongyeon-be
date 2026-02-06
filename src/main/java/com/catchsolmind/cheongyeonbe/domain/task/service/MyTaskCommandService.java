@@ -66,6 +66,7 @@ public class MyTaskCommandService {
                     .taskId(task.getTaskId())
                     .occurrenceId(occ.getOccurrenceId())
                     .taskTypeId(type.getTaskTypeId())
+                    .category(type.getCategory())
                     .taskName(type.getName())
                     .point(type.getPoint())
                     .build());
