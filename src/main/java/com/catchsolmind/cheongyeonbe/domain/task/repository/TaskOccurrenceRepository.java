@@ -55,7 +55,8 @@ public interface TaskOccurrenceRepository extends JpaRepository<TaskOccurrence, 
 
     // 특정 그룹의 특정 집안일 중, 아직 안 끝난 것 찾기
     @Query("SELECT to FROM TaskOccurrence to " +
-            "JOIN to.task t " +
+            "JOIN FETCH to.task t " +
+            "JOIN FETCH t.taskType " +
             "WHERE t.group.groupId = :groupId " +
             "AND t.taskType.taskTypeId = :taskTypeId " +
             "AND to.status IN :statuses")
@@ -66,7 +67,7 @@ public interface TaskOccurrenceRepository extends JpaRepository<TaskOccurrence, 
     );
 
     // 일괄 업데이트 쿼리 (성능 최적화)
-    @Modifying(clearAutomatically = true) // 영속성 컨텍스트 초기화 (데이터 불일치 방지)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE TaskOccurrence to SET to.status = :newStatus " +
             "WHERE to.task.taskType.taskTypeId = :taskTypeId " +
             "AND to.task.group.groupId = :groupId " +
