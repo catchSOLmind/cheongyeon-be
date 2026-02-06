@@ -41,7 +41,7 @@ public class Feedback {
     @CollectionTable(name = "feedback_praise_tags", joinColumns = @JoinColumn(name = "feedback_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "praise_type")
-    private List<PraiseType> praiseType;
+    private List<PraiseType> praiseTypes;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "feedback_id")
