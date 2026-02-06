@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
+    // 공통
+    INVALID_INPUT_VALUE("COMM001", "요청 값 검증"),
+
     // User
     USER_NOT_FOUND("USER001", "사용자를 찾을 수 없습니다."),
     INVALID_HOUSEWORK_TYPE("USER002", "유효하지 않은 가사 성향 타입입니다."),
