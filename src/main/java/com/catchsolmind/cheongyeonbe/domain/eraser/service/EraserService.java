@@ -233,7 +233,7 @@ public class EraserService {
     public Long completeReservation(ReservationRequest request, Long userId) {
         // 입력값 유효성 검증
         if (request.usedPoint() != null && request.usedPoint() < 0) {
-            throw new BusinessException(ErrorCode.INVALID_POINT_AMOUNT);
+            throw new BusinessException(ErrorCode.INVALID_POINT);
         }
         if (request.reservations() == null || request.reservations().isEmpty()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
