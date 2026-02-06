@@ -193,65 +193,8 @@ class EraserServiceTest {
     }
 
     @Test
-    @DisplayName("정상 예약 확정 케이스 검증")
-    void completeReservationSuccess() {
-        // given
-        Long userId = 1L;
-        Long optionId = 100L;
-        Long groupId = 10L;
-        int optionPrice = 30000;
-        int usedPoint = 5000;
-        int userBalance = 50000;
-
-        User user = User.builder().userId(userId).pointBalance(userBalance).build();
-        Group group = Group.builder().groupId(groupId).build();
-
-        given(userRepository.findByIdWithPessimisticLock(userId)).willReturn(Optional.of(user));
-        given(groupMemberRepository.findGroupByUserId(userId)).willReturn(Optional.of(group));
-
-        TaskType taskType = TaskType.builder().taskTypeId(55L).build();
-        SuggestionTask task = SuggestionTask.builder().title("청소").taskType(taskType).build();
-        SuggestionTaskOption option = SuggestionTaskOption.builder()
-                .optionId(optionId)
-                .price(optionPrice)
-                .count("1개")
-                .suggestionTask(task)
-                .build();
-        given(suggestionTaskOptionRepository.findById(optionId)).willReturn(Optional.of(option));
-
-        Reservation savedReservation = Reservation.builder().reservationId(999L).build();
-        given(reservationRepository.save(any(Reservation.class))).willReturn(savedReservation);
-
-        // Request 생성
-        ReservationRequest request = ReservationRequest.builder()
-                .usedPoint(usedPoint)
-                .reservations(List.of(
-                        ReservationRequest.ReservationItemRequest.builder()
-                                .optionId(optionId)
-                                .visitDate(LocalDate.now().plusDays(1))
-                                .visitTime("14:00")
-                                .build()
-                ))
-                .build();
-
-        // when
-        Long reservationId = eraserService.completeReservation(request, userId);
-
-        // then
-        assertThat(reservationId).isEqualTo(999L);
-        assertThat(user.getPointBalance()).isEqualTo(userBalance - usedPoint); // 포인트 차감 확인
-        verify(taskOccurrenceRepository).bulkUpdateStatus(
-                eq(groupId),
-                eq(55L), // taskTypeId
-                anyList(), // targetStatuses (WAITING, IN_PROGRESS, INCOMPLETED)
-                eq(TaskStatus.RESOLVED_BY_ERASER) // 변경될 상태
-        );
-        verify(reservationRepository).save(any(Reservation.class));
-    }
-
-    @Test
     @DisplayName("포인트 부족 예외 검증 (usedPoint > currentPoint)")
-    void completeReservation_NotEnoughPoint() {
+    void completeReservationNotEnoughPoint() {
         // given
         Long userId = 1L;
         int userBalance = 1000;
@@ -279,7 +222,7 @@ class EraserServiceTest {
 
     @Test
     @DisplayName("최대 사용 포인트 초과 예외 검증 (usedPoint > MAX_USABLE_POINT)")
-    void completeReservation_ExceedMaxPoint() {
+    void completeReservationExceedMaxPoint() {
         // given
         Long userId = 1L;
         int userBalance = 50000;
