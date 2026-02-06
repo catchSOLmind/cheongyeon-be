@@ -6,15 +6,21 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
+    // 공통
+    INVALID_INPUT_VALUE("COMMON001", "요청 값 검증"),
+
     // User
     USER_NOT_FOUND("USER001", "사용자를 찾을 수 없습니다."),
     INVALID_HOUSEWORK_TYPE("USER002", "유효하지 않은 가사 성향 타입입니다."),
 
+    // 포인트
+    POINT_NOT_ENOUGH("POINT001", "포인트가 부족합니다."),
+    INVALID_POINT_AMOUNT("POINT002", "최대 사용 포인트보다 많습니다."),
+    INVALID_POINT("POINT003", "잘못된 포인트 (음수 포인트 불가)"),
+
     // 예약
-    POINT_NOT_ENOUGH("RESER001", "포인트가 부족합니다."),
-    INVALID_POINT_AMOUNT("RESER002", "최대 사용 포인트보다 많습니다."),
-    OPTION_NOT_FOUND("RESER003", "옵션이 없습니다."),
-    INVALID_PAYMENT_AMOUNT("RESER004", "유효하지 않은 결제 금액입니다."),
+    OPTION_NOT_FOUND("RESERVATION003", "옵션이 없습니다."),
+    INVALID_PAYMENT_AMOUNT("RESERVATION004", "유효하지 않은 결제 금액입니다."),
 
     // Group
     GROUP_NOT_FOUND("GROUP001", "그룹을 찾을 수 없습니다."),

@@ -25,7 +25,10 @@ public record KakaoUserResponse(
                 String nickname, // User.nickname
 
                 @JsonProperty("profile_image_url")
-                String profileImageUrl // User.profileImg
+                String profileImageUrl, // User.profileImg
+
+                @JsonProperty("is_default_image") // 카카오톡 기본 이미지 여부
+                Boolean isDefaultImage
         ) {
         }
     }

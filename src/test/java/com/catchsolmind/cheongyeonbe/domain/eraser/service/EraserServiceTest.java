@@ -10,7 +10,6 @@ import com.catchsolmind.cheongyeonbe.domain.eraser.repository.SuggestionTaskOpti
 import com.catchsolmind.cheongyeonbe.domain.eraser.repository.SuggestionTaskRepository;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.Group;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
-import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskOccurrence;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskType;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskLogRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskOccurrenceRepository;
@@ -64,8 +63,8 @@ class EraserServiceTest {
     private S3Properties s3Properties;
 
     @Test
-    @DisplayName("예약 확정 시 TaskOccurrence 상태가 RESOLVED_BY_ERASER로 변경된다")
-    void completeReservationWithTaskStatusChange() {
+    @DisplayName("예약 확정 성공: 기존 일정 존재")
+    void completeReservationWhenExistingTask() {
         Long userId = 1L;
         Long optionId = 100L;
         Long groupId = 10L;
@@ -79,31 +78,18 @@ class EraserServiceTest {
         given(userRepository.findByIdWithPessimisticLock(userId)).willReturn(Optional.of(user));
         given(groupMemberRepository.findGroupByUserId(userId)).willReturn(Optional.of(group));
 
-        // [Fix 2] TaskType -> SuggestionTask -> Option 순으로 객체 연결 (NPE 해결)
         TaskType taskType = TaskType.builder().taskTypeId(55L).build();
-
-        SuggestionTask task = SuggestionTask.builder()
-                .suggestionTaskId(1L)
-                .title("청소")
-                .taskType(taskType) // TaskType 연결 필수!
-                .build();
+        SuggestionTask task = SuggestionTask.builder().title("청소").taskType(taskType).build();
 
         SuggestionTaskOption option = SuggestionTaskOption.builder()
                 .optionId(optionId)
                 .price(optionPrice)
                 .count("1개")
-                .suggestionTask(task) // Task 연결 필수!
+                .suggestionTask(task)
                 .build();
 
         given(suggestionTaskOptionRepository.findById(optionId)).willReturn(Optional.of(option));
 
-        TaskOccurrence existingTask = TaskOccurrence.builder()
-                .status(TaskStatus.WAITING)
-                .build();
-        given(taskOccurrenceRepository.findByGroupAndTaskTypeAndStatusIn(eq(groupId), eq(55L), anyList()))
-                .willReturn(List.of(existingTask));
-
-        // [Fix 3] save() 호출 시 ID가 있는 객체를 리턴하도록 설정
         Reservation savedReservation = Reservation.builder().reservationId(999L).build();
         given(reservationRepository.save(any(Reservation.class))).willReturn(savedReservation);
 
@@ -124,8 +110,12 @@ class EraserServiceTest {
         // then
         assertThat(reservationId).isEqualTo(999L);
         assertThat(user.getPointBalance()).isEqualTo(userBalance - usedPoint);
-        assertThat(existingTask.getStatus()).isEqualTo(TaskStatus.RESOLVED_BY_ERASER);
-        verify(reservationRepository).save(any(Reservation.class));
+        verify(taskOccurrenceRepository).bulkUpdateStatus(
+                eq(groupId),
+                eq(55L),
+                anyList(),
+                eq(TaskStatus.RESOLVED_BY_ERASER)
+        );
     }
 
     @Test
@@ -203,69 +193,6 @@ class EraserServiceTest {
     }
 
     @Test
-    @DisplayName("정상 예약 확정 케이스 검증")
-    void completeReservationSuccess() {
-        // given
-        Long userId = 1L;
-        Long optionId = 100L;
-        Long groupId = 10L;
-        int optionPrice = 30000;
-        int usedPoint = 5000;
-        int userBalance = 50000;
-
-        // 1. User & Group Mocking
-        User user = User.builder().userId(userId).pointBalance(userBalance).build();
-        Group group = Group.builder().groupId(groupId).build();
-
-        given(userRepository.findByIdWithPessimisticLock(userId)).willReturn(Optional.of(user));
-        given(groupMemberRepository.findGroupByUserId(userId)).willReturn(Optional.of(group));
-
-        // 2. Option & TaskType Mocking
-        TaskType taskType = TaskType.builder().taskTypeId(55L).build();
-        SuggestionTask task = SuggestionTask.builder().title("청소").taskType(taskType).build();
-        SuggestionTaskOption option = SuggestionTaskOption.builder()
-                .optionId(optionId)
-                .price(optionPrice)
-                .count("1개")
-                .suggestionTask(task)
-                .build();
-
-        given(suggestionTaskOptionRepository.findById(optionId)).willReturn(Optional.of(option));
-
-        // 3. Eraser Logic (TaskOccurrence) Mocking
-        TaskOccurrence existingTask = TaskOccurrence.builder()
-                .status(TaskStatus.WAITING)
-                .build();
-        given(taskOccurrenceRepository.findByGroupAndTaskTypeAndStatusIn(eq(groupId), eq(55L), anyList()))
-                .willReturn(List.of(existingTask));
-
-        // 4. Reservation Save Mocking
-        Reservation savedReservation = Reservation.builder().reservationId(999L).build();
-        given(reservationRepository.save(any(Reservation.class))).willReturn(savedReservation);
-
-        // Request 생성
-        ReservationRequest request = ReservationRequest.builder()
-                .usedPoint(usedPoint)
-                .reservations(List.of(
-                        ReservationRequest.ReservationItemRequest.builder()
-                                .optionId(optionId)
-                                .visitDate(LocalDate.now().plusDays(1))
-                                .visitTime("14:00")
-                                .build()
-                ))
-                .build();
-
-        // when
-        Long reservationId = eraserService.completeReservation(request, userId);
-
-        // then
-        assertThat(reservationId).isEqualTo(999L);
-        assertThat(user.getPointBalance()).isEqualTo(userBalance - usedPoint); // 포인트 차감 확인
-        assertThat(existingTask.getStatus()).isEqualTo(TaskStatus.RESOLVED_BY_ERASER); // 지우개 로직 확인
-        verify(reservationRepository).save(any(Reservation.class));
-    }
-
-    @Test
     @DisplayName("포인트 부족 예외 검증 (usedPoint > currentPoint)")
     void completeReservationNotEnoughPoint() {
         // given
@@ -281,6 +208,9 @@ class EraserServiceTest {
 
         ReservationRequest request = ReservationRequest.builder()
                 .usedPoint(usedPoint)
+                .reservations(List.of(
+                        ReservationRequest.ReservationItemRequest.builder().optionId(1L).build()
+                ))
                 .build();
 
         // when & then
@@ -306,6 +236,9 @@ class EraserServiceTest {
 
         ReservationRequest request = ReservationRequest.builder()
                 .usedPoint(usedPoint)
+                .reservations(List.of(
+                        ReservationRequest.ReservationItemRequest.builder().optionId(1L).build()
+                ))
                 .build();
 
         // when & then

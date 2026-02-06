@@ -231,6 +231,14 @@ public class EraserService {
 
     @Transactional
     public Long completeReservation(ReservationRequest request, Long userId) {
+        // 입력값 유효성 검증
+        if (request.usedPoint() != null && request.usedPoint() < 0) {
+            throw new BusinessException(ErrorCode.INVALID_POINT);
+        }
+        if (request.reservations() == null || request.reservations().isEmpty()) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+
         // 유저 조회
         User user = userRepository.findByIdWithPessimisticLock(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -240,7 +248,7 @@ public class EraserService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.GROUP_NOT_FOUND));
         Long groupId = group.getGroupId();
 
-        // 포인트 검증
+        // 포인트 잔액 조회
         int usedPoint = (request.usedPoint() != null) ? request.usedPoint() : 0;
         int currentPoint = (user.getPointBalance() != null) ? user.getPointBalance() : 0;
 
@@ -255,6 +263,12 @@ public class EraserService {
         List<ReservationItem> reservationItems = new ArrayList<>();
         int totalPrice = 0;
 
+        List<TaskStatus> targetStatuses = List.of(
+                TaskStatus.WAITING,
+                TaskStatus.IN_PROGRESS,
+                TaskStatus.INCOMPLETED
+        );
+
         for (ReservationRequest.ReservationItemRequest itemReq : request.reservations()) {
             SuggestionTaskOption option = suggestionTaskOptionRepository.findById(itemReq.optionId())
                     .orElseThrow(() -> new BusinessException(ErrorCode.OPTION_NOT_FOUND));
@@ -264,19 +278,14 @@ public class EraserService {
             // 청연 지우개 로직 (예약한 상품과 관련된 미완료 집안일 상태 변경)
             Long targetTaskTypeId = option.getSuggestionTask().getTaskType().getTaskTypeId();
 
-            List<TaskStatus> targetStatuses = List.of(
-                    TaskStatus.WAITING,
-                    TaskStatus.IN_PROGRESS,
-                    TaskStatus.INCOMPLETED
+            taskOccurrenceRepository.bulkUpdateStatus(
+                    groupId,
+                    targetTaskTypeId,
+                    targetStatuses,
+                    TaskStatus.RESOLVED_BY_ERASER
             );
 
-            List<TaskOccurrence> tasksToResolve = taskOccurrenceRepository
-                    .findByGroupAndTaskTypeAndStatusIn(groupId, targetTaskTypeId, targetStatuses);
-
-            for (TaskOccurrence task : tasksToResolve) {
-                task.setStatus(TaskStatus.RESOLVED_BY_ERASER);
-            }
-
+            // 예약 아이템 객체
             ReservationItem item = ReservationItem.builder()
                     .suggestionTaskId(option.getSuggestionTask().getSuggestionTaskId())
                     .taskTitle(option.getSuggestionTask().getTitle())
@@ -294,6 +303,9 @@ public class EraserService {
         if (finalPrice < 0) {
             throw new BusinessException(ErrorCode.INVALID_PAYMENT_AMOUNT);
         }
+        if (usedPoint > 0) {
+            user.setPointBalance(currentPoint - usedPoint);
+        }
 
         // 예약 저장
         Reservation reservation = Reservation.builder()
@@ -309,11 +321,6 @@ public class EraserService {
         }
 
         Reservation savedReservation = reservationRepository.save(reservation);
-
-        // 유저 포인트 차감
-        if (usedPoint > 0) {
-            user.setPointBalance(currentPoint - usedPoint);
-        }
 
         return savedReservation.getReservationId();
     }

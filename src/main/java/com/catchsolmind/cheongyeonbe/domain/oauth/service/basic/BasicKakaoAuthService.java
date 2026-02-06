@@ -13,8 +13,8 @@ import com.catchsolmind.cheongyeonbe.domain.user.dto.UserDto;
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.domain.user.mapper.UserMapper;
 import com.catchsolmind.cheongyeonbe.domain.user.service.UserService;
+import com.catchsolmind.cheongyeonbe.global.config.S3Properties;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtProvider;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +29,7 @@ public class BasicKakaoAuthService implements KakaoAuthService {
     private final UserService userService;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final S3Properties s3Properties;
     private final UserMapper userMapper;
 
     @Override
@@ -44,7 +45,7 @@ public class BasicKakaoAuthService implements KakaoAuthService {
         KakaoUserResponse kakaoUserResponse = kakaoClientService.getKakaoUserInfo(kakaoTokenResponse.access_token());
 
         // 사용자 조회 or 생성
-        OAuthUserInfo oAuthUserInfo = new KakaoOAuthUserInfo(kakaoUserResponse).toOAuthUserInfo();
+        OAuthUserInfo oAuthUserInfo = new KakaoOAuthUserInfo(kakaoUserResponse, s3Properties).toOAuthUserInfo();
         UserDto userDto = userService.findOrCreate(oAuthUserInfo);
         User user = userService.findEntityById(userDto.userId());
 

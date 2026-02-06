@@ -3,6 +3,7 @@ package com.catchsolmind.cheongyeonbe.domain.task.repository;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskOccurrence;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -54,7 +55,8 @@ public interface TaskOccurrenceRepository extends JpaRepository<TaskOccurrence, 
 
     // 특정 그룹의 특정 집안일 중, 아직 안 끝난 것 찾기
     @Query("SELECT to FROM TaskOccurrence to " +
-            "JOIN to.task t " +
+            "JOIN FETCH to.task t " +
+            "JOIN FETCH t.taskType " +
             "WHERE t.group.groupId = :groupId " +
             "AND t.taskType.taskTypeId = :taskTypeId " +
             "AND to.status IN :statuses")
@@ -62,5 +64,18 @@ public interface TaskOccurrenceRepository extends JpaRepository<TaskOccurrence, 
             @Param("groupId") Long groupId,
             @Param("taskTypeId") Long taskTypeId,
             @Param("statuses") List<TaskStatus> statuses
+    );
+
+    // 일괄 업데이트 쿼리 (성능 최적화)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE TaskOccurrence to SET to.status = :newStatus " +
+            "WHERE to.task.taskType.taskTypeId = :taskTypeId " +
+            "AND to.task.group.groupId = :groupId " +
+            "AND to.status IN :oldStatuses")
+    void bulkUpdateStatus(
+            @Param("groupId") Long groupId,
+            @Param("taskTypeId") Long taskTypeId,
+            @Param("oldStatuses") List<TaskStatus> oldStatuses,
+            @Param("newStatus") TaskStatus newStatus
     );
 }
