@@ -46,6 +46,7 @@ public class MyTaskQueryService {
                             .occurrenceId(occ.getOccurrenceId())
                             .taskId(occ.getTask().getTaskId())
                             .taskTypeId(occ.getTask().getTaskType().getTaskTypeId())
+                            .category(occ.getTask().getTaskType().getCategory())
                             .taskName(occ.getTask().getTaskType().getName())
                             .point(occ.getTask().getTaskType().getPoint())
                             .time(occ.getTask().getTime())
