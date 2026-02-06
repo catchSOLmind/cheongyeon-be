@@ -6,7 +6,7 @@ import lombok.*;
 
 @Entity
 @Table(name = "personality_recommend_task",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"personality_type", "task_type_id"}))
+        uniqueConstraints = @UniqueConstraint(name = "uk_personality_task", columnNames = {"personality_type", "task_type_id"}))
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
