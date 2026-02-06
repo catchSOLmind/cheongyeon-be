@@ -31,30 +31,22 @@ public class TaskTypeController {
                 .orElseThrow(() -> new IllegalStateException("그룹 미가입 사용자"));
     }
 
-//    @GetMapping
-//    @Operation(summary = "세부 업무 조회", description = "카테고리별 세부 업무를 조회합니다.ETC 카테고리일 때 subCategory로 추가 필터링")
-//    public ApiResponse<TaskTypeListResponse> getTaskTypes(
-//            @RequestParam(required = false) TaskCategory category,
-//            @RequestParam(required = false) TaskSubCategory subCategory,
-//            @AuthenticationPrincipal JwtUserDetails principal
-//    ) {
-//        User user = principal.user();
-//        TaskTypeListResponse response = taskTypeService.getTaskTypesByCategory(category, subCategory);
-//        return ApiResponse.success("세부 업무 조회 성공", response);
-//    }
-@GetMapping
-public ApiResponse<TaskTypeListResponse> getTaskTypes(
-        @RequestParam(required = false) TaskCategory category,
-        @RequestParam(required = false) String subCategory
-) {
-    TaskSubCategory parsed = null;
-    if (subCategory != null && !subCategory.isBlank()) {
-        parsed = TaskSubCategory.valueOf(subCategory);
-    }
+    @GetMapping
+    @Operation(summary = "세부 업무 조회", description = "카테고리별 세부 업무를 조회합니다. 새해맞이/성향별 추천 업무 섹션 포함")
+    public ApiResponse<TaskTypeListResponse> getTaskTypes(
+            @RequestParam(required = false) TaskCategory category,
+            @RequestParam(required = false) String subCategory,
+            @AuthenticationPrincipal JwtUserDetails principal
+    ) {
+        TaskSubCategory parsed = null;
+        if (subCategory != null && !subCategory.isBlank()) {
+            parsed = TaskSubCategory.valueOf(subCategory);
+        }
 
-    TaskTypeListResponse response = taskTypeService.getTaskTypesByCategory(category, parsed);
-    return ApiResponse.success("세부 업무 조회 성공", response);
-}
+        User user = (principal != null) ? principal.user() : null;
+        TaskTypeListResponse response = taskTypeService.getTaskTypesByCategory(category, parsed, user);
+        return ApiResponse.success("세부 업무 조회 성공", response);
+    }
 
     @GetMapping("/favorites")
     @Operation(summary = "즐겨찾기 세부 업무 조회")

@@ -1,6 +1,5 @@
 package com.catchsolmind.cheongyeonbe.domain.task.dto.response;
 
-import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -18,7 +17,6 @@ public class MyTaskCreateResponse {
         private Long taskId;
         private Long occurrenceId;
         private Long taskTypeId;
-        private TaskCategory category;
 
         private String taskName;
         private Integer point;
