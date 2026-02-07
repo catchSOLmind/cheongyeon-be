@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-public record GroupMemberWithTestResponse(
+public record GroupMemberWithTestResult(
         @Schema(description = "그룹 멤버 ID (피드백 대상 ID)")
         Long groupMemberId,
 
