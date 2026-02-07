@@ -3,6 +3,7 @@ package com.catchsolmind.cheongyeonbe.domain.group.repository;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.Group;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.global.enums.MemberStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,8 +32,10 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
     Optional<Group> findGroupByUserId(@Param("userId") Long userId);
 
     // 특정 상태인 내 정보 찾기 (피드백 작성 가능한지 보기 위해)
+    @EntityGraph(attributePaths = {"group"})
     Optional<GroupMember> findByUser_UserIdAndStatus(Long userId, MemberStatus status);
 
     // 특정 상태인 그룹 멤버 목록 찾기
+    @EntityGraph(attributePaths = {"user"})
     List<GroupMember> findByGroup_GroupIdAndStatus(Long groupId, MemberStatus status);
 }
