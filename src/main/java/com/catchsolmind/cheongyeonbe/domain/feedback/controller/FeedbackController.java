@@ -5,12 +5,10 @@ import com.catchsolmind.cheongyeonbe.domain.feedback.dto.response.FeedbackRespon
 import com.catchsolmind.cheongyeonbe.domain.feedback.service.FeedbackService;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,7 +28,10 @@ public class FeedbackController implements FeedbackApi {
     @Override
     @PostMapping
     public ApiResponse<Void> postFeedback(@AuthenticationPrincipal JwtUserDetails principal,
-                                          FeedbackCreateRequest request) {
-        return null;
+                                          @Valid @RequestBody FeedbackCreateRequest request) {
+
+        feedbackService.postFeedback(principal.user().getUserId(), request);
+
+        return ApiResponse.success("피드백 제출 성공", null);
     }
 }
