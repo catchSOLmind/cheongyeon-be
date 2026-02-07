@@ -1,7 +1,10 @@
 package com.catchsolmind.cheongyeonbe.domain.feedback.service;
 
+import com.catchsolmind.cheongyeonbe.domain.feedback.dto.request.FeedbackCreateRequest;
 import com.catchsolmind.cheongyeonbe.domain.feedback.dto.response.FeedbackResponse;
 import com.catchsolmind.cheongyeonbe.domain.feedback.dto.response.GroupMemberWithTestResult;
+import com.catchsolmind.cheongyeonbe.domain.feedback.entity.Feedback;
+import com.catchsolmind.cheongyeonbe.domain.feedback.repository.FeedbackRepository;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.Group;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
@@ -12,10 +15,13 @@ import com.catchsolmind.cheongyeonbe.domain.user.repository.UserRepository;
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
 import com.catchsolmind.cheongyeonbe.global.enums.MemberStatus;
+import com.catchsolmind.cheongyeonbe.global.enums.PraiseType;
+import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
 import com.catchsolmind.cheongyeonbe.global.enums.TestResultType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,12 +42,12 @@ class FeedbackServiceTest {
 
     @Mock
     private UserRepository userRepository;
-
     @Mock
     private GroupMemberRepository groupMemberRepository;
-
     @Mock
     private HouseworkTestResultRepository houseworkTestResultRepository;
+    @Mock
+    private FeedbackRepository feedbackRepository;
 
     @Test
     @DisplayName("피드백 폼 조회 성공 - 본인을 제외한 그룹 멤버와 성향, 칭찬 스티커, 카테고리를 반환한다")
@@ -179,8 +185,155 @@ class FeedbackServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NEED_AGREEMENT_APPROVAL);
     }
 
-    // --- Helper Methods ---
+    @Test
+    @DisplayName("피드백 제출 성공 - 칭찬 스티커와 개선 피드백을 모두 포함하여 저장한다")
+    void postFeedbackSuccess() {
+        // given
+        Long authorUserId = 1L;
+        Long targetMemberId = 200L;
+        Long groupId = 10L;
 
+        User me = createUser(authorUserId, "나");
+        User other = createUser(2L, "너");
+        Group group = Group.builder().groupId(groupId).build();
+
+        GroupMember author = createGroupMember(100L, me, group);
+        GroupMember target = createGroupMember(targetMemberId, other, group);
+
+        // 요청 DTO 생성 (개선사항 포함)
+        FeedbackCreateRequest.ImprovementRequest improvementReq =
+                new FeedbackCreateRequest.ImprovementRequest(TaskCategory.BATHROOM, "청소 좀 해");
+        FeedbackCreateRequest request = createFeedbackRequest(targetMemberId, List.of(improvementReq));
+
+        given(groupMemberRepository.findByUser_UserIdAndStatus(authorUserId, MemberStatus.AGREED))
+                .willReturn(Optional.of(author));
+        given(groupMemberRepository.findById(targetMemberId))
+                .willReturn(Optional.of(target));
+
+        // when
+        feedbackService.postFeedback(authorUserId, request);
+
+        // then
+        // 1. save가 호출되었는지 검증
+        ArgumentCaptor<Feedback> feedbackCaptor = ArgumentCaptor.forClass(Feedback.class);
+        verify(feedbackRepository).save(feedbackCaptor.capture());
+
+        // 2. 저장된 데이터 검증
+        Feedback savedFeedback = feedbackCaptor.getValue();
+        assertThat(savedFeedback.getAuthor().getGroupMemberId()).isEqualTo(100L);
+        assertThat(savedFeedback.getTarget().getGroupMemberId()).isEqualTo(200L);
+        assertThat(savedFeedback.getPraiseTypes()).contains(PraiseType.DETAIL_KING);
+        assertThat(savedFeedback.getImprovements()).hasSize(1);
+        assertThat(savedFeedback.getImprovements().get(0).getRawText()).isEqualTo("청소 좀 해");
+    }
+
+    @Test
+    @DisplayName("피드백 제출 성공 - 개선 피드백 없이 칭찬 스티커만 보내도 저장된다")
+    void postFeedbackSuccessWithoutImprovements() {
+        // given
+        Long authorUserId = 1L;
+        Long targetMemberId = 200L;
+        Group group = Group.builder().groupId(10L).build();
+
+        GroupMember author = createGroupMember(100L, createUser(authorUserId, "나"), group);
+        GroupMember target = createGroupMember(targetMemberId, createUser(2L, "너"), group);
+
+        // 요청 DTO 생성 (개선사항 null)
+        FeedbackCreateRequest request = createFeedbackRequest(targetMemberId, null);
+
+        given(groupMemberRepository.findByUser_UserIdAndStatus(authorUserId, MemberStatus.AGREED))
+                .willReturn(Optional.of(author));
+        given(groupMemberRepository.findById(targetMemberId))
+                .willReturn(Optional.of(target));
+
+        // when
+        feedbackService.postFeedback(authorUserId, request);
+
+        // then
+        ArgumentCaptor<Feedback> feedbackCaptor = ArgumentCaptor.forClass(Feedback.class);
+        verify(feedbackRepository).save(feedbackCaptor.capture());
+
+        Feedback savedFeedback = feedbackCaptor.getValue();
+        assertThat(savedFeedback.getImprovements()).isEmpty(); // 개선사항 리스트가 비어있는지 확인
+    }
+
+    @Test
+    @DisplayName("피드백 제출 실패 - 본인에게 피드백을 보낼 수 없다")
+    void postFeedbackFailSelfFeedback() {
+        // given
+        Long authorUserId = 1L;
+        Long myMemberId = 100L;
+        Group group = Group.builder().groupId(10L).build();
+
+        // 작성자와 대상자가 동일한 Member ID를 가짐
+        GroupMember author = createGroupMember(myMemberId, createUser(authorUserId, "나"), group);
+        GroupMember target = createGroupMember(myMemberId, createUser(authorUserId, "나"), group);
+
+        FeedbackCreateRequest request = createFeedbackRequest(myMemberId, null);
+
+        given(groupMemberRepository.findByUser_UserIdAndStatus(authorUserId, MemberStatus.AGREED))
+                .willReturn(Optional.of(author));
+        given(groupMemberRepository.findById(myMemberId))
+                .willReturn(Optional.of(target));
+
+        // when & then
+        assertThatThrownBy(() -> feedbackService.postFeedback(authorUserId, request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.CANNOT_FEEDBACK_SELF);
+    }
+
+    @Test
+    @DisplayName("피드백 제출 실패 - 다른 그룹의 멤버에게 피드백을 보낼 수 없다")
+    void postFeedbackFailDifferentGroup() {
+        // given
+        Long authorUserId = 1L;
+        Long targetMemberId = 200L;
+
+        // 서로 다른 그룹 ID
+        Group groupA = Group.builder().groupId(10L).build();
+        Group groupB = Group.builder().groupId(20L).build();
+
+        GroupMember author = createGroupMember(100L, createUser(authorUserId, "나"), groupA);
+        GroupMember target = createGroupMember(targetMemberId, createUser(2L, "남"), groupB);
+
+        FeedbackCreateRequest request = createFeedbackRequest(targetMemberId, null);
+
+        given(groupMemberRepository.findByUser_UserIdAndStatus(authorUserId, MemberStatus.AGREED))
+                .willReturn(Optional.of(author));
+        given(groupMemberRepository.findById(targetMemberId))
+                .willReturn(Optional.of(target));
+
+        // when & then
+        assertThatThrownBy(() -> feedbackService.postFeedback(authorUserId, request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_SAME_GROUP);
+    }
+
+    @Test
+    @DisplayName("피드백 제출 실패 - 받는 대상(Target)이 존재하지 않으면 예외가 발생한다")
+    void postFeedbackFailTargetNotFound() {
+        // given
+        Long authorUserId = 1L;
+        Long unknownTargetId = 999L;
+        Group group = Group.builder().groupId(10L).build();
+
+        GroupMember author = createGroupMember(100L, createUser(authorUserId, "나"), group);
+        FeedbackCreateRequest request = createFeedbackRequest(unknownTargetId, null);
+
+        given(groupMemberRepository.findByUser_UserIdAndStatus(authorUserId, MemberStatus.AGREED))
+                .willReturn(Optional.of(author));
+
+        // 대상 조회 시 Empty 반환
+        given(groupMemberRepository.findById(unknownTargetId))
+                .willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> feedbackService.postFeedback(authorUserId, request))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.MEMBER_NOT_FOUND);
+    }
+
+    // --- 헬퍼 메서드 ---
     private User createUser(Long id, String nickname) {
         return User.builder()
                 .userId(id)
@@ -195,6 +348,14 @@ class FeedbackServiceTest {
                 .user(user)
                 .group(group)
                 .status(MemberStatus.AGREED)
+                .build();
+    }
+
+    private FeedbackCreateRequest createFeedbackRequest(Long targetId, List<FeedbackCreateRequest.ImprovementRequest> improvements) {
+        return FeedbackCreateRequest.builder()
+                .targetMemberId(targetId)
+                .praiseTypes(List.of(PraiseType.DETAIL_KING))
+                .improvements(improvements)
                 .build();
     }
 }
