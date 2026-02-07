@@ -15,7 +15,7 @@ public interface FeedbackApi {
     @Operation(
             summary = "피드백 작성",
             description = "피드백 작성 페이지를 로드한다.\n\n" +
-                    "성향테스트 결과를 없을 경우 NULL을 반환한다.\n\n" +
+                    "성향테스트 결과가 없을 경우 NULL을 반환한다.\n\n" +
                     "칭찬 스탬프: \n\n" +
                     "- DETAIL_KING: 꼼꼼왕\n\n" +
                     "- TIME_KEEPER: 시간 엄수\n\n" +
