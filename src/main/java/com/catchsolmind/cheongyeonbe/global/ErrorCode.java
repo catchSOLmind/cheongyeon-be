@@ -24,6 +24,10 @@ public enum ErrorCode {
 
     // Group
     GROUP_NOT_FOUND("GROUP001", "그룹을 찾을 수 없습니다."),
+    NOT_SAME_GROUP("GROUP002", "같은 그룹이 아닙니다."),
+
+    // Member
+    MEMBER_NOT_FOUND("MEMBER001", "멤버를 찾을 수 없습니다."),
 
     // File
     INVALID_FILE_TYPE("FILE001", "허용되지 않는 파일 형식입니다."),
@@ -45,7 +49,10 @@ public enum ErrorCode {
     INVALID_CHOICE("TEST003", "유효하지 않은 선택입니다."),
 
     // 협약서
-    NEED_AGREEMENT_APPROVAL("AGREEMENT001", "협약서 동의가 필요합니다.");
+    NEED_AGREEMENT_APPROVAL("AGREEMENT001", "협약서 동의가 필요합니다."),
+
+    // 피드백
+    CANNOT_FEEDBACK_SELF("FEEDBACK001", "자기자신에게 피드백을 줄 수 없습니다.");
 
     private final String code;
     private final String message;
