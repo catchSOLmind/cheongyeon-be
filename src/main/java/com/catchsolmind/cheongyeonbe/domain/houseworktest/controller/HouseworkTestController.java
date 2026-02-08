@@ -4,7 +4,6 @@ import com.catchsolmind.cheongyeonbe.domain.houseworktest.dto.request.HouseworkT
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.dto.response.HouseworkTestQuestionsResponse;
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.dto.response.HouseworkTestResultResponse;
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.service.HouseworkTestService;
-import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
 import jakarta.validation.Valid;
@@ -35,10 +34,11 @@ public class HouseworkTestController implements HouseworkTestApi {
             @Valid @RequestBody HouseworkTestSubmitRequest request,
             @AuthenticationPrincipal JwtUserDetails principal
     ) {
-        User user = (principal != null) ? principal.user() : null;
+
+        Long userId = (principal != null) ? principal.user().getUserId() : null;
 
         return ApiResponse.success(
-                houseworkTestService.submitTest(request, user)
+                houseworkTestService.submitTest(request, userId)
         );
     }
 }

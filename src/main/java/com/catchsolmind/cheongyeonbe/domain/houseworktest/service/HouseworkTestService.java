@@ -12,6 +12,7 @@ import com.catchsolmind.cheongyeonbe.domain.houseworktest.repository.HouseworkTe
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.repository.HouseworkTestQuestionRepository;
 import com.catchsolmind.cheongyeonbe.domain.houseworktest.repository.HouseworkTestResultRepository;
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
+import com.catchsolmind.cheongyeonbe.domain.user.repository.UserRepository;
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
 import com.catchsolmind.cheongyeonbe.global.enums.ChoiceType;
@@ -34,6 +35,7 @@ public class HouseworkTestService {
     private final HouseworkTestQuestionRepository questionRepository;
     private final HouseworkTestChoiceRepository choiceRepository;
     private final HouseworkTestResultRepository resultRepository;
+    private final UserRepository userRepository;
 
     public HouseworkTestQuestionsResponse getQuestions() {
         List<HouseworkTestQuestion> questions = questionRepository.findAllByOrderByQuestionOrderAsc();
@@ -70,7 +72,7 @@ public class HouseworkTestService {
     @Transactional
     public HouseworkTestResultResponse submitTest(
             HouseworkTestSubmitRequest request,
-            User user
+            Long userId
     ) {
         // 요청 검증
         if (request.answers() == null || request.answers().isEmpty()) {
@@ -154,12 +156,22 @@ public class HouseworkTestService {
         // 결과 계산
         TestResultType resultType = calculateType(active, clean, routine, sloppy);
 
+        List<Integer> finalScores = List.of(
+                convertToDisplayScore(clean),
+                convertToDisplayScore(active),
+                convertToDisplayScore(routine),
+                convertToDisplayScore(sloppy)
+        );
+
         // 로그인 사용자는 결과 저장
-        if (user != null) {
+        if (userId != null) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
             saveOrUpdateResult(user, resultType);
         }
 
-        return HouseworkTestResultResponse.from(resultType);
+        return HouseworkTestResultResponse.of(resultType, finalScores);
     }
 
     private TestResultType calculateType(int active, int clean, int routine, int sloppy) {
@@ -187,5 +199,11 @@ public class HouseworkTestService {
 
         result.changeResultType(resultType);
         resultRepository.save(result);
+    }
+
+    private int convertToDisplayScore(int rawScore) {
+        int calculated = 50 + (rawScore * 2);
+
+        return Math.max(5, Math.min(100, calculated));
     }
 }
