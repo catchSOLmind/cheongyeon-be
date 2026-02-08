@@ -184,6 +184,8 @@ public class FeedbackService {
         // 멤버 피드백
         List<ReportResponse.MemberFeedbackPreviewResponse> memberPreviews = getMemberPreviews(groupId, userId, weeklyFeedbacks);
 
+        log.info("[리포트] 조회: userId={}, groupId={}, 피드백수={}", userId, groupId, weeklyFeedbacks.size());
+
         return ReportResponse.builder()
                 .period(String.format("%d년 %d월 %d주차", now.getYear(), now.getMonthValue(), getWeekOfMonth(now)))
                 .groupTitle(title)
