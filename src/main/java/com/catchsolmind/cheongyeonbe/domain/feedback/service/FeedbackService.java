@@ -135,6 +135,10 @@ public class FeedbackService {
     }
 
     public ReportResponse getReport(Long userId) {
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
         // 유저 및 그룹 조회
         GroupMember currentMember = groupMemberRepository.findByUser_UserIdAndStatus(userId, MemberStatus.AGREED)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NEED_AGREEMENT_APPROVAL));
