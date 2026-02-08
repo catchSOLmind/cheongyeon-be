@@ -2,6 +2,7 @@ package com.catchsolmind.cheongyeonbe.domain.task.service;
 
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.task.dto.data.MyTaskItemDto;
+import com.catchsolmind.cheongyeonbe.domain.task.dto.response.MyTaskCalendarResponse;
 import com.catchsolmind.cheongyeonbe.domain.task.dto.response.MyTaskDetailResponse;
 import com.catchsolmind.cheongyeonbe.domain.task.dto.response.MyTaskListResponse;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.Task;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,6 +65,22 @@ public class MyTaskQueryService {
                 .weekDates(weekDates)
                 .selectedDate(selectedDate)
                 .items(items)
+                .build();
+    }
+
+    public MyTaskCalendarResponse getMyTaskCalendar(GroupMember member, YearMonth yearMonth) {
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth();
+
+        List<LocalDate> taskDates = occurrenceRepository
+                .findDistinctOccurDatesByMemberIdAndDateBetween(
+                        member.getGroupMemberId(), start, end
+                );
+
+        return MyTaskCalendarResponse.builder()
+                .year(yearMonth.getYear())
+                .month(yearMonth.getMonthValue())
+                .taskDates(taskDates)
                 .build();
     }
 

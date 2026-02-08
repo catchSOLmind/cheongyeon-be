@@ -66,6 +66,26 @@ public interface TaskOccurrenceRepository extends JpaRepository<TaskOccurrence, 
             @Param("statuses") List<TaskStatus> statuses
     );
 
+    // 캘린더: 내 할일이 있는 날짜 목록 조회
+    @Query("SELECT DISTINCT t.occurDate FROM TaskOccurrence t " +
+            "WHERE t.primaryAssignedMember.groupMemberId = :memberId " +
+            "AND t.occurDate BETWEEN :start AND :end")
+    List<LocalDate> findDistinctOccurDatesByMemberIdAndDateBetween(
+            @Param("memberId") Long memberId,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end
+    );
+
+    // 캘린더: 그룹 전체 할일이 있는 날짜 목록 조회
+    @Query("SELECT DISTINCT t.occurDate FROM TaskOccurrence t " +
+            "WHERE t.group.groupId = :groupId " +
+            "AND t.occurDate BETWEEN :start AND :end")
+    List<LocalDate> findDistinctOccurDatesByGroupIdAndDateBetween(
+            @Param("groupId") Long groupId,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end
+    );
+
     // 일괄 업데이트 쿼리 (성능 최적화)
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE TaskOccurrence to SET to.status = :newStatus " +

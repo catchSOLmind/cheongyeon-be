@@ -1,5 +1,6 @@
 package com.catchsolmind.cheongyeonbe.domain.group.controller;
 
+import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskCalendarResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskDetailResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskListResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
@@ -13,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +29,19 @@ public class GroupTaskController {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "User " + user.getUserId() + " is not a member of group " + groupId
                 ));
+    }
+
+    @GetMapping("/calendar")
+    @Operation(summary = "전체 할일 캘린더 (할일 있는 날짜 목록)")
+    public GroupTaskCalendarResponse getGroupTaskCalendar(
+            @RequestParam Long groupId,
+            @RequestParam int year,
+            @RequestParam int month,
+            @AuthenticationPrincipal JwtUserDetails principal
+    ) {
+        User user = principal.user();
+        validateGroupMember(groupId, user);
+        return groupTaskQueryService.getGroupTaskCalendar(groupId, YearMonth.of(year, month));
     }
 
     @GetMapping
