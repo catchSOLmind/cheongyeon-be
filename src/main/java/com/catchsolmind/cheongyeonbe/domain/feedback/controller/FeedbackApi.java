@@ -2,6 +2,7 @@ package com.catchsolmind.cheongyeonbe.domain.feedback.controller;
 
 import com.catchsolmind.cheongyeonbe.domain.feedback.dto.request.FeedbackCreateRequest;
 import com.catchsolmind.cheongyeonbe.domain.feedback.dto.response.FeedbackResponse;
+import com.catchsolmind.cheongyeonbe.domain.feedback.dto.response.ReportResponse;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,5 +36,16 @@ public interface FeedbackApi {
     ApiResponse<Void> postFeedback(
             @Parameter(hidden = true) JwtUserDetails principal,
             @RequestBody @Valid FeedbackCreateRequest request
+    );
+
+    @Operation(
+            summary = "주간 리포트 조회",
+            description = "이번 주의 그룹 리포트(타이틀, 요약)와 내 피드백, 멤버별 최신 피드백을 조회한다.\n\n" +
+                    "- **period**: '2026년 2월 1주차' 형식\n\n" +
+                    "- **myImprovements**: 내가 받은 개선 피드백 리스트\n\n" +
+                    "- **memberFeedbacks**: 나를 제외한 그룹 멤버들의 최신 피드백 1건씩"
+    )
+    ApiResponse<ReportResponse> getReport(
+            @Parameter(hidden = true) JwtUserDetails principal
     );
 }
