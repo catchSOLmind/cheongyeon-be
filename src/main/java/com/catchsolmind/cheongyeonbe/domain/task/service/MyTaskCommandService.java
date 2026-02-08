@@ -39,6 +39,19 @@ public class MyTaskCommandService {
             throw new IllegalArgumentException("Some taskTypeIds are invalid");
         }
 
+        // 담당자 결정: assigneeMemberId가 있으면 해당 멤버, 없으면 본인
+        GroupMember assignee = member;
+        if (req.getAssigneeMemberId() != null) {
+            assignee = groupMemberRepository.findById(req.getAssigneeMemberId())
+                    .orElseThrow(() -> new IllegalArgumentException("Assignee not found"));
+        }
+
+        // 반복 규칙 변환
+        String repeatRule = null;
+        if (req.getRepeat() != null && Boolean.TRUE.equals(req.getRepeat().getEnabled())) {
+            repeatRule = convertDaysToRRule(req.getRepeat().getDaysOfWeek());
+        }
+
         List<MyTaskCreateResponse.CreatedMyTaskDto> created = new ArrayList<>();
 
         for (TaskType type : types) {
@@ -47,8 +60,8 @@ public class MyTaskCommandService {
                     .taskType(type)
                     .title(type.getName())
                     .creatorMember(member)
-                    .repeatRule(null)
-                    .time(null)
+                    .repeatRule(repeatRule)
+                    .time(req.getTime())
                     .status(TaskStatus.WAITING)
                     .build();
             taskRepository.save(task);
@@ -57,7 +70,7 @@ public class MyTaskCommandService {
                     .task(task)
                     .group(group)
                     .occurDate(req.getDate())
-                    .primaryAssignedMember(member)
+                    .primaryAssignedMember(assignee)
                     .status(TaskStatus.WAITING)
                     .build();
             occurrenceRepository.save(occ);
@@ -68,6 +81,16 @@ public class MyTaskCommandService {
                     .taskTypeId(type.getTaskTypeId())
                     .taskName(type.getName())
                     .point(type.getPoint())
+                    .time(task.getTime())
+                    .assignee(MyTaskCreateResponse.AssigneeDto.builder()
+                            .memberId(assignee.getGroupMemberId())
+                            .nickname(assignee.getUser().getNickname())
+                            .profileImageUrl(assignee.getUser().getProfileImg())
+                            .build())
+                    .repeat(MyTaskCreateResponse.RepeatDto.builder()
+                            .enabled(repeatRule != null && !repeatRule.isBlank())
+                            .daysOfWeek(parseRRuleToDaysOfWeek(repeatRule))
+                            .build())
                     .build());
         }
 
