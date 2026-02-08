@@ -40,8 +40,9 @@ public class FeedbackController implements FeedbackApi {
     @GetMapping("/report")
     public ApiResponse<ReportResponse> getReport(@AuthenticationPrincipal JwtUserDetails principal) {
 
-        ReportResponse response = feedbackService.getReport(principal.user().getUserId());
+//        ReportResponse response = feedbackService.getReport(principal.user().getUserId());
 
-        return ApiResponse.success("리포트 조회 성공", response);
+//        return ApiResponse.success("리포트 조회 성공", response);
+        return ApiResponse.success("리포트 조회 성공", null);
     }
 }
