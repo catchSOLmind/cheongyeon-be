@@ -5,6 +5,7 @@ import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberReposito
 import com.catchsolmind.cheongyeonbe.domain.group.service.GroupMemberService;
 import com.catchsolmind.cheongyeonbe.domain.task.dto.request.*;
 import com.catchsolmind.cheongyeonbe.domain.task.dto.response.*;
+import java.time.YearMonth;
 import com.catchsolmind.cheongyeonbe.domain.task.service.MyTaskCommandService;
 import com.catchsolmind.cheongyeonbe.domain.task.service.MyTaskQueryService;
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
@@ -33,6 +34,18 @@ public class MyTaskController {
                 .orElseThrow(() -> new IllegalStateException("그룹 미가입 사용자"));
     }
 
+
+    @GetMapping("/calendar")
+    @Operation(summary = "내 할 일 캘린더 (할일 있는 날짜 목록)")
+    public MyTaskCalendarResponse getMyTaskCalendar(
+            @RequestParam int year,
+            @RequestParam int month,
+            @AuthenticationPrincipal JwtUserDetails principal
+    ) {
+        User user = principal.user();
+        GroupMember member = currentMember(user);
+        return queryService.getMyTaskCalendar(member, YearMonth.of(year, month));
+    }
 
     @GetMapping
     @Operation(summary = "내 할 일 목록 조회")

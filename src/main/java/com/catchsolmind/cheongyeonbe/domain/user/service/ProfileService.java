@@ -3,6 +3,8 @@ package com.catchsolmind.cheongyeonbe.domain.user.service;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.MemberPreference;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
+import com.catchsolmind.cheongyeonbe.domain.houseworktest.entity.HouseworkTestResult;
+import com.catchsolmind.cheongyeonbe.domain.houseworktest.repository.HouseworkTestResultRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskOccurrence;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskOccurrenceRepository;
 import com.catchsolmind.cheongyeonbe.domain.user.dto.*;
@@ -30,6 +32,7 @@ public class ProfileService {
     private final MemberPreferenceRepository memberPreferenceRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final TaskOccurrenceRepository taskOccurrenceRepository;
+    private final HouseworkTestResultRepository houseworkTestResultRepository;
 
     public ProfileGetResponse getProfile(User user) {
         // 현재 그룹 멤버 조회
@@ -51,16 +54,16 @@ public class ProfileService {
         int monthlyTotalCount = 0;
         List<ProfileGetResponse.CategoryActivity> categories = Collections.emptyList();
 
+        // 성향 정보: housework_test 테이블에서 User 기준으로 조회
+        HouseworkTestResult testResult = houseworkTestResultRepository.findByUser(user).orElse(null);
+        if (testResult != null && testResult.getResultType() != null) {
+            type = testResult.getResultType().name();
+            typeLabel = testResult.getResultType().getTitle();
+            hasCompletedTest = true;
+        }
+
         if (member != null) {
             groupId = member.getGroup().getGroupId();
-
-            // 성향 정보
-            MemberPreference pref = memberPreferenceRepository.findByMember(member).orElse(null);
-            if (pref != null && pref.getPersonalityType() != null) {
-                type = pref.getPersonalityType();
-                typeLabel = HouseworkTypeMapper.labelOf(type);
-                hasCompletedTest = true;
-            }
 
             // 이번 달 성과 계산
             LocalDate monthStart = currentMonth.atDay(1);

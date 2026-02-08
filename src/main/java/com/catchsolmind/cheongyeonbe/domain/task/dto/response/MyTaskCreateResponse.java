@@ -20,5 +20,23 @@ public class MyTaskCreateResponse {
 
         private String taskName;
         private Integer point;
+        private String time;
+        private AssigneeDto assignee;
+        private RepeatDto repeat;
+    }
+
+    @Getter
+    @Builder
+    public static class AssigneeDto {
+        private Long memberId;
+        private String nickname;
+        private String profileImageUrl;
+    }
+
+    @Getter
+    @Builder
+    public static class RepeatDto {
+        private Boolean enabled;
+        private java.util.List<String> daysOfWeek;
     }
 }
