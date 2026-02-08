@@ -11,10 +11,10 @@ public record HouseworkTestResultResponse(
         String mainQuote,
         List<String> tags,
         String description,
-        List<String> representativeLines,
+        List<Integer> scores,
         String cautionPoint
 ) {
-    public static HouseworkTestResultResponse from(TestResultType type) {
+    public static HouseworkTestResultResponse of(TestResultType type, List<Integer> calculatedScores) {
         return new HouseworkTestResultResponse(
                 type,
                 type.getTitle(),
@@ -22,7 +22,7 @@ public record HouseworkTestResultResponse(
                 type.getMainQuote(),
                 type.getTags(),
                 type.getDescription(),
-                type.getRepresentativeLines(),
+                calculatedScores,
                 type.getCautionPoint()
         );
     }

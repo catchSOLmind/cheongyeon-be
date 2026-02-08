@@ -156,6 +156,13 @@ public class HouseworkTestService {
         // 결과 계산
         TestResultType resultType = calculateType(active, clean, routine, sloppy);
 
+        List<Integer> finalScores = List.of(
+                convertToDisplayScore(clean),
+                convertToDisplayScore(active),
+                convertToDisplayScore(routine),
+                convertToDisplayScore(sloppy)
+        );
+
         // 로그인 사용자는 결과 저장
         if (userId != null) {
             User user = userRepository.findById(userId)
@@ -164,7 +171,7 @@ public class HouseworkTestService {
             saveOrUpdateResult(user, resultType);
         }
 
-        return HouseworkTestResultResponse.from(resultType);
+        return HouseworkTestResultResponse.of(resultType, finalScores);
     }
 
     private TestResultType calculateType(int active, int clean, int routine, int sloppy) {
@@ -192,5 +199,11 @@ public class HouseworkTestService {
 
         result.changeResultType(resultType);
         resultRepository.save(result);
+    }
+
+    private int convertToDisplayScore(int rawScore) {
+        int calculated = 50 + (rawScore * 2);
+
+        return Math.max(5, Math.min(100, calculated));
     }
 }
