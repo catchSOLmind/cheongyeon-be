@@ -34,34 +34,33 @@ public class MyTaskCommandService {
     public MyTaskCreateResponse createMyTasks(GroupMember member, MyTaskCreateRequest req) {
         Group group = member.getGroup();
 
-        List<TaskType> types = taskTypeRepository.findAllById(req.getTaskTypeIds());
-        if (types.size() != req.getTaskTypeIds().size()) {
-            throw new IllegalArgumentException("Some taskTypeIds are invalid");
-        }
-
-        // 담당자 결정: assigneeMemberId가 있으면 해당 멤버, 없으면 본인
-        GroupMember assignee = member;
-        if (req.getAssigneeMemberId() != null) {
-            assignee = groupMemberRepository.findById(req.getAssigneeMemberId())
-                    .orElseThrow(() -> new IllegalArgumentException("Assignee not found"));
-        }
-
-        // 반복 규칙 변환
-        String repeatRule = null;
-        if (req.getRepeat() != null && Boolean.TRUE.equals(req.getRepeat().getEnabled())) {
-            repeatRule = convertDaysToRRule(req.getRepeat().getDaysOfWeek());
-        }
-
         List<MyTaskCreateResponse.CreatedMyTaskDto> created = new ArrayList<>();
 
-        for (TaskType type : types) {
+        for (MyTaskCreateRequest.TaskItemDto item : req.getTasks()) {
+            // taskType 조회
+            TaskType type = taskTypeRepository.findById(item.getTaskTypeId())
+                    .orElseThrow(() -> new IllegalArgumentException("TaskType not found: " + item.getTaskTypeId()));
+
+            // 담당자 결정: assigneeMemberId가 있으면 해당 멤버, 없으면 본인
+            GroupMember assignee = member;
+            if (item.getAssigneeMemberId() != null) {
+                assignee = groupMemberRepository.findById(item.getAssigneeMemberId())
+                        .orElseThrow(() -> new IllegalArgumentException("Assignee not found"));
+            }
+
+            // 반복 규칙 변환
+            String repeatRule = null;
+            if (item.getRepeat() != null && Boolean.TRUE.equals(item.getRepeat().getEnabled())) {
+                repeatRule = convertDaysToRRule(item.getRepeat().getDaysOfWeek());
+            }
+
             Task task = Task.builder()
                     .group(group)
                     .taskType(type)
                     .title(type.getName())
                     .creatorMember(member)
                     .repeatRule(repeatRule)
-                    .time(req.getTime())
+                    .time(item.getTime())
                     .status(TaskStatus.WAITING)
                     .build();
             taskRepository.save(task);
@@ -69,7 +68,7 @@ public class MyTaskCommandService {
             TaskOccurrence occ = TaskOccurrence.builder()
                     .task(task)
                     .group(group)
-                    .occurDate(req.getDate())
+                    .occurDate(item.getDate())
                     .primaryAssignedMember(assignee)
                     .status(TaskStatus.WAITING)
                     .build();
