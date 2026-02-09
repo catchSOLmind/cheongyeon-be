@@ -110,11 +110,16 @@ public class FeedbackService {
         List<ImprovementFeedback> improvementEntities = new ArrayList<>();
         if (request.improvements() != null && !request.improvements().isEmpty()) {
             improvementEntities = request.improvements().stream()
-                    .map(dto -> ImprovementFeedback.builder()
-                            .category(dto.category())
-                            .rawText(dto.content())
-                            .aiStatus(AiStatus.UNCOMPLETED) // 초기값 설정
-                            .build())
+                    .map(dto -> {
+                        boolean hasAiText = dto.aiText() != null && !dto.aiText().isBlank();
+
+                        return ImprovementFeedback.builder()
+                                .category(dto.category())
+                                .rawText(dto.rawText())
+                                .aiText(dto.aiText())
+                                .aiStatus(hasAiText ? AiStatus.COMPLETED : AiStatus.UNCOMPLETED)
+                                .build();
+                    })
                     .toList();
         }
 
@@ -124,7 +129,7 @@ public class FeedbackService {
                 .author(author)
                 .target(target)
                 .praiseTypes(request.praiseTypes())
-                .improvements(new ArrayList<>(improvementEntities))
+                .improvements(improvementEntities)
                 .build();
 
         // 저장

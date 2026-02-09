@@ -5,7 +5,7 @@ import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse
 import com.catchsolmind.cheongyeonbe.domain.oauth.service.KakaoClientService;
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
-import com.catchsolmind.cheongyeonbe.global.config.KakaoOAuthProperties;
+import com.catchsolmind.cheongyeonbe.global.properties.KakaoOAuthProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;

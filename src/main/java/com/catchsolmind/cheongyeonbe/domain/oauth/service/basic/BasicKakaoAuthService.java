@@ -13,7 +13,7 @@ import com.catchsolmind.cheongyeonbe.domain.user.dto.UserDto;
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.domain.user.mapper.UserMapper;
 import com.catchsolmind.cheongyeonbe.domain.user.service.UserService;
-import com.catchsolmind.cheongyeonbe.global.config.S3Properties;
+import com.catchsolmind.cheongyeonbe.global.properties.S3Properties;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

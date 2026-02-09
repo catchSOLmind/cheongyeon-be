@@ -11,7 +11,7 @@ package com.catchsolmind.cheongyeonbe.global.security.jwt;
 
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
-import com.catchsolmind.cheongyeonbe.global.config.JwtProperties;
+import com.catchsolmind.cheongyeonbe.global.properties.JwtProperties;
 import com.catchsolmind.cheongyeonbe.global.enums.JwtTokenType;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

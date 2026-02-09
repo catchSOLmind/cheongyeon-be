@@ -3,7 +3,7 @@ package com.catchsolmind.cheongyeonbe.domain.oauth.dto.data;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse;
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
-import com.catchsolmind.cheongyeonbe.global.config.S3Properties;
+import com.catchsolmind.cheongyeonbe.global.properties.S3Properties;
 import com.catchsolmind.cheongyeonbe.global.enums.AuthProvider;
 import lombok.RequiredArgsConstructor;
 

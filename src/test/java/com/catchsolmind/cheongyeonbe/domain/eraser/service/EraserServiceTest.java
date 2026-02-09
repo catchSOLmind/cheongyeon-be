@@ -17,7 +17,7 @@ import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.domain.user.repository.UserRepository;
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
-import com.catchsolmind.cheongyeonbe.global.config.S3Properties;
+import com.catchsolmind.cheongyeonbe.global.properties.S3Properties;
 import com.catchsolmind.cheongyeonbe.global.enums.SuggestionType;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
 import org.junit.jupiter.api.DisplayName;

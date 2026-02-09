@@ -31,10 +31,13 @@ public record FeedbackCreateRequest(
             @NotNull(message = "카테고리는 필수입니다.")
             TaskCategory category,
 
-            @Schema(description = "피드백 상세 내용")
+            @Schema(description = "사용자가 처음 쓴 글 (필수)")
             @NotNull(message = "내용을 입력해주세요.")
             @Size(min = 1, max = 200, message = "내용은 1자 이상 200자 이하로 작성해야 합니다.")
-            String content
+            String rawText,
+
+            @Schema(description = "AI가 바꿔준 글(없으면 null)")
+            String aiText
     ) {
     }
 }
