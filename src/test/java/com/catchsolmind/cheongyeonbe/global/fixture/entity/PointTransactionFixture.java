@@ -1,6 +1,6 @@
 package com.catchsolmind.cheongyeonbe.global.fixture.entity;
 
-import com.catchsolmind.cheongyeonbe.domain.point.PointTransaction;
+import com.catchsolmind.cheongyeonbe.domain.point.entity.PointTransaction;
 import com.catchsolmind.cheongyeonbe.global.enums.TransactionType;
 
 import java.time.LocalDateTime;
