@@ -13,6 +13,8 @@ import com.catchsolmind.cheongyeonbe.domain.eraser.repository.SuggestionTaskOpti
 import com.catchsolmind.cheongyeonbe.domain.eraser.repository.SuggestionTaskRepository;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.Group;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
+import com.catchsolmind.cheongyeonbe.domain.point.entity.PointTransaction;
+import com.catchsolmind.cheongyeonbe.domain.point.repository.PointTransactionRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskOccurrence;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskLogRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskOccurrenceRepository;
@@ -20,9 +22,10 @@ import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.domain.user.repository.UserRepository;
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
-import com.catchsolmind.cheongyeonbe.global.properties.S3Properties;
 import com.catchsolmind.cheongyeonbe.global.enums.SuggestionType;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
+import com.catchsolmind.cheongyeonbe.global.enums.TransactionType;
+import com.catchsolmind.cheongyeonbe.global.properties.S3Properties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +52,7 @@ public class EraserService {
     private final UserRepository userRepository;
     private final SuggestionTaskOptionRepository suggestionTaskOptionRepository;
     private final ReservationRepository reservationRepository;
+    private final PointTransactionRepository pointTransactionRepository;
 
     private final S3Properties s3Properties;
 
@@ -305,6 +309,15 @@ public class EraserService {
         }
         if (usedPoint > 0) {
             user.setPointBalance(currentPoint - usedPoint);
+
+            PointTransaction transaction = PointTransaction.builder()
+                    .user(user)
+                    .amount(-usedPoint)
+                    .transactionType(TransactionType.USE_MAGIC_ERASER)
+                    .taskLog(null)
+                    .build();
+
+            pointTransactionRepository.save(transaction);
         }
 
         // 예약 저장
@@ -313,7 +326,7 @@ public class EraserService {
                 .totalPrice(totalPrice)
                 .usedPoint(usedPoint)
                 .finalPrice(finalPrice)
-                .status(TaskStatus.RESOLVED_BY_ERASER) // 예약 확정 상태
+                .status(TaskStatus.RESOLVED_BY_ERASER)
                 .build();
 
         for (ReservationItem item : reservationItems) {
