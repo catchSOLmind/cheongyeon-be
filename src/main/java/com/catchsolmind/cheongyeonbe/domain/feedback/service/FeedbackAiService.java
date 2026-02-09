@@ -17,7 +17,6 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Slf4j
 public class FeedbackAiService {
 
@@ -25,7 +24,6 @@ public class FeedbackAiService {
     private final RestTemplate restTemplate;
 
     // 병렬로 동시에 변환
-    @Transactional
     public List<String> refineBatch(List<String> rawContents) {
         if (rawContents == null || rawContents.isEmpty()) {
             return List.of();
