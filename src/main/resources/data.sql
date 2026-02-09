@@ -485,3 +485,6 @@ VALUES (5, 2, 5, 'OWNER', 'JOINED', NOW(), NULL);
 INSERT
 IGNORE INTO housework_test (user_id, result_type, created_at)
 VALUES (5, 'PERFECTIONIST', NOW());
+
+INSERT INTO group_member (group_id, user_id, role, status, joined_at, agreed_at)
+VALUES (100, 5, 'OWNER', 'JOINED', NOW(), NULL);
