@@ -404,3 +404,77 @@ INSERT
 IGNORE INTO housework_test_choice (question_id, choice_type, content, active_score, clean_score, routine_score, sloppy_score)
 VALUES (9, 'A', '웬만하면 끝까지 청소를 마무리', 2, 5, 2, -6),
        (9, 'B', '적당히 된 것 같으면 그만', 0, -3, 0, 6);
+
+-- ============================================================
+-- 사용자 더미 데이터
+-- ============================================================
+-- ============================================================
+-- 1. 그룹 생성 (심지영의 청연 하우스)
+-- ============================================================
+INSERT
+IGNORE INTO `group` (group_id, name, owner_user_id, created_at, updated_at)
+VALUES (1, '심지영의 청연 하우스', 1, NOW(), NOW());
+
+-- ============================================================
+-- 2. 그룹 멤버 구성 (심지영: 오너, 나머지: 멤버, 전원 AGREED)
+-- ============================================================
+
+-- User 1: 심지영 (OWNER)
+INSERT
+IGNORE INTO group_member (group_member_id, group_id, user_id, role, status, joined_at, agreed_at)
+VALUES (1, 1, 1, 'OWNER', 'AGREED', NOW(), NOW());
+
+-- User 2: 권유정 (MEMBER)
+INSERT
+IGNORE INTO group_member (group_member_id, group_id, user_id, role, status, joined_at, agreed_at)
+VALUES (2, 1, 2, 'MEMBER', 'AGREED', NOW(), NOW());
+
+-- User 3: 안중원 (MEMBER)
+INSERT
+IGNORE INTO group_member (group_member_id, group_id, user_id, role, status, joined_at, agreed_at)
+VALUES (3, 1, 3, 'MEMBER', 'AGREED', NOW(), NOW());
+
+-- User 4: 문지우 (MEMBER)
+INSERT
+IGNORE INTO group_member (group_member_id, group_id, user_id, role, status, joined_at, agreed_at)
+VALUES (4, 1, 4, 'MEMBER', 'AGREED', NOW(), NOW());
+
+-- ============================================================
+-- 3. 협약서 데이터 (AGREED 상태를 위한 기반 데이터)
+-- ============================================================
+
+-- 협약서 본문 (확정 상태)
+INSERT
+IGNORE INTO agreement (agreement_id, group_id, title, status, deadline, created_at, confirmed_at)
+VALUES (1, 1, '우리 집 가사 분담 규칙', 'CONFIRMED', DATE_ADD(NOW(), INTERVAL 7 DAY), NOW(), NOW());
+
+-- 협약서 서명 (멤버 4명 전원 서명 완료)
+INSERT
+IGNORE INTO agreement_sign (agreement_id, member_id, signed_at)
+VALUES (1, 1, NOW()), -- 심지영 서명
+       (1, 2, NOW()), -- 권유정 서명
+       (1, 3, NOW()), -- 안중원 서명
+       (1, 4, NOW()); -- 문지우 서명
+
+-- ============================================================
+-- 4. 가사 성향 테스트 결과 (4가지 타입 골고루 분배)
+-- ============================================================
+-- User 1 (심지영) -> PERFECTIONIST (완벽주의 뽀득이)
+INSERT
+IGNORE INTO housework_test (user_id, result_type, created_at)
+VALUES (1, 'PERFECTIONIST', NOW());
+
+-- User 2 (권유정) -> RELAXED (여유로운 느긋이)
+INSERT
+IGNORE INTO housework_test (user_id, result_type, created_at)
+VALUES (2, 'RELAXED', NOW());
+
+-- User 3 (안중원) -> EFFICIENT (합리적인 효율이)
+INSERT
+IGNORE INTO housework_test (user_id, result_type, created_at)
+VALUES (3, 'EFFICIENT', NOW());
+
+-- User 4 (문지우) -> PROCRASTINATOR (미래위임 내일이)
+INSERT
+IGNORE INTO housework_test (user_id, result_type, created_at)
+VALUES (4, 'PROCRASTINATOR', NOW());
