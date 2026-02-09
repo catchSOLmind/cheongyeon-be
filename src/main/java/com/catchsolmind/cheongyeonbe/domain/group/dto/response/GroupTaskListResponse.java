@@ -2,6 +2,7 @@ package com.catchsolmind.cheongyeonbe.domain.group.dto.response;
 
 import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,6 +13,8 @@ import java.util.List;
 @Builder
 public class GroupTaskListResponse {
 
+    @JsonProperty("isSoloGroup")
+    private boolean isSoloGroup;
     private LocalDate weekStart;
     private LocalDate weekEnd;
     private List<LocalDate> weekDates;

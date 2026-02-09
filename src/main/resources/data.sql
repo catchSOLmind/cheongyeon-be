@@ -466,3 +466,25 @@ INSERT
 IGNORE INTO housework_test (user_id, result_type, created_at) VALUES (3, 'EFFICIENT', NOW());
 INSERT
 IGNORE INTO housework_test (user_id, result_type, created_at) VALUES (4, 'PROCRASTINATOR', NOW());
+
+-- ============================================================
+-- 사용자 더미 데이터 (1인 그룹 유저)
+-- ============================================================
+INSERT
+IGNORE INTO user (user_id, nickname, email, provider, provider_id, profile_img, point_balance, created_at, updated_at)
+VALUES (5, '청연이', 'cheongyeon@cheongyeon.com', 'KAKAO', 9999999999, 'https://cheongyeon-fe-solmind.s3.ap-northeast-2.amazonaws.com/assets/default-profile.png', 1000, NOW(), NOW());
+
+INSERT
+IGNORE INTO `group` (group_id, name, owner_user_id, created_at, updated_at)
+VALUES (100, '청연이의 우리 집', 5, NOW(), NOW());
+
+INSERT
+IGNORE INTO group_member (group_member_id, group_id, user_id, role, status, joined_at, agreed_at)
+VALUES (5, 2, 5, 'OWNER', 'JOINED', NOW(), NULL);
+
+INSERT
+IGNORE INTO housework_test (user_id, result_type, created_at)
+VALUES (5, 'PERFECTIONIST', NOW());
+
+INSERT INTO group_member (group_id, user_id, role, status, joined_at, agreed_at)
+VALUES (100, 5, 'OWNER', 'JOINED', NOW(), NULL);
