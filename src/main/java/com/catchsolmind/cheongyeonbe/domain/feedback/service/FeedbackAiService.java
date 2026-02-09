@@ -52,6 +52,7 @@ public class FeedbackAiService {
             String userPrompt = String.format(
                     "다음 문장을 기분 나쁘지 않게, 부드럽고 귀여운 '청유형(부탁하는 말투)'으로 바꿔줘. " +
                             "이모지를 적절하게 1개 꼭 넣어줘. " +
+                            "바꾼 문장은 최대 200자를 넘으면 안돼. " +
                             "설명 없이 바꾼 문장만 딱 출력해.\n\n" +
                             "문장: \"%s\"",
                     rawText
