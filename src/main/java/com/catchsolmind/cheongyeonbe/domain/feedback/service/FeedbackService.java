@@ -112,8 +112,9 @@ public class FeedbackService {
             improvementEntities = request.improvements().stream()
                     .map(dto -> ImprovementFeedback.builder()
                             .category(dto.category())
-                            .rawText(dto.content())
-                            .aiStatus(AiStatus.UNCOMPLETED) // 초기값 설정
+                            .rawText(dto.rawText())    // 원본 저장
+                            .aiText(dto.aiText())      // AI 텍스트 저장 (사용자가 변환 안 했으면 null일 수 있음)
+                            .aiStatus(dto.aiStatus() != null ? dto.aiStatus() : AiStatus.UNCOMPLETED)
                             .build())
                     .toList();
         }
@@ -124,7 +125,7 @@ public class FeedbackService {
                 .author(author)
                 .target(target)
                 .praiseTypes(request.praiseTypes())
-                .improvements(new ArrayList<>(improvementEntities))
+                .improvements(improvementEntities)
                 .build();
 
         // 저장
