@@ -32,14 +32,7 @@ public class GroupTaskQueryService {
 
     public GroupTaskListResponse getGroupTasks(Long groupId, LocalDate selectedDate) {
         long memberCount = groupMemberRepository.countByGroup_GroupIdAndStatus(groupId, MemberStatus.JOINED);
-        if (memberCount < 2) {
-            return GroupTaskListResponse.builder()
-                    .isSoloGroup(true)
-                    .selectedDate(selectedDate)
-                    .items(List.of())
-                    .weekDates(List.of())
-                    .build();
-        }
+        boolean isSoloGroup = memberCount < 2;
 
         LocalDate weekStart = selectedDate.with(DayOfWeek.MONDAY);
         LocalDate weekEnd = weekStart.plusDays(6);
@@ -75,7 +68,7 @@ public class GroupTaskQueryService {
                 .collect(Collectors.toList());
 
         return GroupTaskListResponse.builder()
-                .isSoloGroup(false)
+                .isSoloGroup(isSoloGroup)
                 .weekStart(weekStart)
                 .weekEnd(weekEnd)
                 .weekDates(weekDates)
