@@ -9,11 +9,17 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class MyTaskCreateRequest {
-    private LocalDate date;
-    private List<Long> taskTypeIds;
-    private String time;               // "11:00"
-    private Long assigneeMemberId;
-    private RepeatDto repeat;
+    private List<TaskItemDto> tasks;
+
+    @Getter
+    @NoArgsConstructor
+    public static class TaskItemDto {
+        private LocalDate date;
+        private Long taskTypeId;
+        private String time;               // "11:00"
+        private Long assigneeMemberId;
+        private RepeatDto repeat;
+    }
 
     @Getter
     @NoArgsConstructor
