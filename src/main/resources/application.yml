@@ -56,3 +56,8 @@ security:
     secret: ${JWT_SECRET_KEY}
     access-token-expiration: 9000000 # 15분
     refresh-token-expiration: 1209600000 # 14일
+
+openai:
+  api-key: ${OPEN_AI_API_KEY}
+  model: gpt-4o-mini
+  url: https://api.openai.com/v1/chat/completions
