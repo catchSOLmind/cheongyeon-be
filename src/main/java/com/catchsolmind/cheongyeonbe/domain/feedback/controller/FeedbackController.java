@@ -1,8 +1,11 @@
 package com.catchsolmind.cheongyeonbe.domain.feedback.controller;
 
 import com.catchsolmind.cheongyeonbe.domain.feedback.dto.request.FeedbackCreateRequest;
+import com.catchsolmind.cheongyeonbe.domain.feedback.dto.request.FeedbackRefineRequest;
+import com.catchsolmind.cheongyeonbe.domain.feedback.dto.response.FeedbackRefineResponse;
 import com.catchsolmind.cheongyeonbe.domain.feedback.dto.response.FeedbackResponse;
 import com.catchsolmind.cheongyeonbe.domain.feedback.dto.response.ReportResponse;
+import com.catchsolmind.cheongyeonbe.domain.feedback.service.FeedbackAiService;
 import com.catchsolmind.cheongyeonbe.domain.feedback.service.FeedbackService;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
 import com.catchsolmind.cheongyeonbe.global.security.jwt.JwtUserDetails;
@@ -11,11 +14,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/feedback")
 public class FeedbackController implements FeedbackApi {
     private final FeedbackService feedbackService;
+    private final FeedbackAiService feedbackAiService;
 
     @Override
     @GetMapping
@@ -34,6 +40,16 @@ public class FeedbackController implements FeedbackApi {
         feedbackService.postFeedback(principal.user().getUserId(), request);
 
         return ApiResponse.success("피드백 제출 성공", null);
+    }
+
+    @Override
+    @PostMapping("/refine")
+    public ApiResponse<FeedbackRefineResponse> refineFeedback(@AuthenticationPrincipal JwtUserDetails principal,
+                                                              @Valid @RequestBody FeedbackRefineRequest request) {
+
+        List<String> refinedContents = feedbackAiService.refineBatch(request.contents());
+
+        return ApiResponse.success("AI 변환 성공", new FeedbackRefineResponse(refinedContents));
     }
 
     @Override

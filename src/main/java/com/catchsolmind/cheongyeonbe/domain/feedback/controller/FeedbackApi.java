@@ -1,6 +1,8 @@
 package com.catchsolmind.cheongyeonbe.domain.feedback.controller;
 
 import com.catchsolmind.cheongyeonbe.domain.feedback.dto.request.FeedbackCreateRequest;
+import com.catchsolmind.cheongyeonbe.domain.feedback.dto.request.FeedbackRefineRequest;
+import com.catchsolmind.cheongyeonbe.domain.feedback.dto.response.FeedbackRefineResponse;
 import com.catchsolmind.cheongyeonbe.domain.feedback.dto.response.FeedbackResponse;
 import com.catchsolmind.cheongyeonbe.domain.feedback.dto.response.ReportResponse;
 import com.catchsolmind.cheongyeonbe.global.ApiResponse;
@@ -14,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Tag(name = "Feedback", description = "피드백")
 public interface FeedbackApi {
     @Operation(
-            summary = "피드백 작성",
+            summary = "피드백 작성 페이지 조회",
             description = "피드백 작성 페이지를 로드한다.\n\n" +
                     "성향테스트 결과가 없을 경우 NULL을 반환한다.\n\n" +
                     "칭찬 스탬프: \n\n" +
@@ -30,12 +32,22 @@ public interface FeedbackApi {
     );
 
     @Operation(
-            summary = "피드백 제출",
-            description = "칭찬 스티커(필수)와 개선 피드백(선택)을 제출한다."
+            summary = "피드백 제출 (최종 저장)",
+            description = "칭찬 스티커(필수)와 개선 피드백(선택, 원본+AU 변환본)을 제출한다."
     )
     ApiResponse<Void> postFeedback(
             @Parameter(hidden = true) JwtUserDetails principal,
             @RequestBody @Valid FeedbackCreateRequest request
+    );
+
+    @Operation(
+            summary = "AI 피드백 정제",
+            description = "작성한 피드백 내용을 AI가 부드럽게 변환해줍니다. (DB 저장 X)\n\n" +
+                    "반환된 리스트는 요청한 순서와 동일합니다."
+    )
+    ApiResponse<FeedbackRefineResponse> refineFeedback(
+            @Parameter(hidden = true) JwtUserDetails principal,
+            @RequestBody @Valid FeedbackRefineRequest request
     );
 
     @Operation(
