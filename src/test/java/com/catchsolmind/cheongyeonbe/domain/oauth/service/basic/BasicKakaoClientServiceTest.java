@@ -2,7 +2,7 @@ package com.catchsolmind.cheongyeonbe.domain.oauth.service.basic;
 
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoTokenResponse;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.response.KakaoUserResponse;
-import com.catchsolmind.cheongyeonbe.global.config.KakaoOAuthProperties;
+import com.catchsolmind.cheongyeonbe.global.properties.KakaoOAuthProperties;
 import com.catchsolmind.cheongyeonbe.global.fixture.dto.oauth.KakaoTokenResponseFixture;
 import com.catchsolmind.cheongyeonbe.global.fixture.dto.oauth.KakaoUserResponseFixture;
 import org.junit.jupiter.api.DisplayName;

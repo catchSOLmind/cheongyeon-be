@@ -1,4 +1,4 @@
-package com.catchsolmind.cheongyeonbe.global.config;
+package com.catchsolmind.cheongyeonbe.global.properties;
 
 import lombok.Getter;
 import lombok.Setter;
