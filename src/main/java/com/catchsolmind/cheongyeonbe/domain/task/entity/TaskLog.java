@@ -1,7 +1,7 @@
 package com.catchsolmind.cheongyeonbe.domain.task.entity;
 
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
-import com.catchsolmind.cheongyeonbe.domain.point.PointTransaction;
+import com.catchsolmind.cheongyeonbe.domain.point.entity.PointTransaction;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

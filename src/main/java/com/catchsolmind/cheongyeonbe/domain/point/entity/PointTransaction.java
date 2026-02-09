@@ -1,4 +1,4 @@
-package com.catchsolmind.cheongyeonbe.domain.point;
+package com.catchsolmind.cheongyeonbe.domain.point.entity;
 
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskLog;
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;

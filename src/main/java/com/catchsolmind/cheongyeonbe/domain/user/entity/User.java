@@ -2,7 +2,7 @@ package com.catchsolmind.cheongyeonbe.domain.user.entity;
 
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.oauth.dto.data.OAuthUserInfo;
-import com.catchsolmind.cheongyeonbe.domain.point.PointTransaction;
+import com.catchsolmind.cheongyeonbe.domain.point.entity.PointTransaction;
 import com.catchsolmind.cheongyeonbe.global.enums.AuthProvider;
 import jakarta.persistence.*;
 import lombok.*;
