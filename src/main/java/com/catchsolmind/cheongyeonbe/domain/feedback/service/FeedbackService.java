@@ -110,12 +110,16 @@ public class FeedbackService {
         List<ImprovementFeedback> improvementEntities = new ArrayList<>();
         if (request.improvements() != null && !request.improvements().isEmpty()) {
             improvementEntities = request.improvements().stream()
-                    .map(dto -> ImprovementFeedback.builder()
-                            .category(dto.category())
-                            .rawText(dto.rawText())    // 원본 저장
-                            .aiText(dto.aiText())      // AI 텍스트 저장 (사용자가 변환 안 했으면 null일 수 있음)
-                            .aiStatus(dto.aiStatus() != null ? dto.aiStatus() : AiStatus.UNCOMPLETED)
-                            .build())
+                    .map(dto -> {
+                        boolean hasAiText = dto.aiText() != null && !dto.aiText().isBlank();
+
+                        return ImprovementFeedback.builder()
+                                .category(dto.category())
+                                .rawText(dto.rawText())
+                                .aiText(dto.aiText())
+                                .aiStatus(hasAiText ? AiStatus.COMPLETED : AiStatus.UNCOMPLETED)
+                                .build();
+                    })
                     .toList();
         }
 

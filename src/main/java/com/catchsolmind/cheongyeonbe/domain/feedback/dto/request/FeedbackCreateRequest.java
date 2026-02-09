@@ -1,6 +1,5 @@
 package com.catchsolmind.cheongyeonbe.domain.feedback.dto.request;
 
-import com.catchsolmind.cheongyeonbe.global.enums.AiStatus;
 import com.catchsolmind.cheongyeonbe.global.enums.PraiseType;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,10 +37,7 @@ public record FeedbackCreateRequest(
             String rawText,
 
             @Schema(description = "AI가 바꿔준 글(없으면 null)")
-            String aiText,
-
-            @Schema(description = "FE에서 변환 성공했으면 COMPLETED, 실패했으면 UNCOMPLETED")
-            AiStatus aiStatus
+            String aiText
     ) {
     }
 }
