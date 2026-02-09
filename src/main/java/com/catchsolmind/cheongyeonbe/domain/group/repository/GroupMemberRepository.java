@@ -38,4 +38,7 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
     // 특정 상태인 그룹 멤버 목록 찾기
     @EntityGraph(attributePaths = {"user"})
     List<GroupMember> findByGroup_GroupIdAndStatus(Long groupId, MemberStatus status);
+
+    // 특정 그룹의 활성 멤버 수 카운트 (LEFT 상태 제외)
+    long countByGroup_GroupIdAndStatus(Long groupId, MemberStatus status);
 }

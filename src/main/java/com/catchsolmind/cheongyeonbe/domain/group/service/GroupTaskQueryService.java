@@ -4,10 +4,12 @@ import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskCalendar
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskDetailResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskListResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
+import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.Task;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskOccurrence;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskOccurrenceRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskTakeoverRepository;
+import com.catchsolmind.cheongyeonbe.global.enums.MemberStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,8 +28,19 @@ public class GroupTaskQueryService {
 
     private final TaskOccurrenceRepository occurrenceRepository;
     private final TaskTakeoverRepository takeoverRepository;
+    private final GroupMemberRepository groupMemberRepository;
 
     public GroupTaskListResponse getGroupTasks(Long groupId, LocalDate selectedDate) {
+        long memberCount = groupMemberRepository.countByGroup_GroupIdAndStatus(groupId, MemberStatus.JOINED);
+        if (memberCount < 2) {
+            return GroupTaskListResponse.builder()
+                    .isSoloGroup(true)
+                    .selectedDate(selectedDate)
+                    .items(List.of())
+                    .weekDates(List.of())
+                    .build();
+        }
+
         LocalDate weekStart = selectedDate.with(DayOfWeek.MONDAY);
         LocalDate weekEnd = weekStart.plusDays(6);
 
@@ -62,6 +75,7 @@ public class GroupTaskQueryService {
                 .collect(Collectors.toList());
 
         return GroupTaskListResponse.builder()
+                .isSoloGroup(false)
                 .weekStart(weekStart)
                 .weekEnd(weekEnd)
                 .weekDates(weekDates)
@@ -140,14 +154,22 @@ public class GroupTaskQueryService {
 
     private String convertToFullDayName(String shortDay) {
         switch (shortDay.toUpperCase()) {
-            case "MO": return "MON";
-            case "TU": return "TUE";
-            case "WE": return "WED";
-            case "TH": return "THU";
-            case "FR": return "FRI";
-            case "SA": return "SAT";
-            case "SU": return "SUN";
-            default: return shortDay;
+            case "MO":
+                return "MON";
+            case "TU":
+                return "TUE";
+            case "WE":
+                return "WED";
+            case "TH":
+                return "THU";
+            case "FR":
+                return "FRI";
+            case "SA":
+                return "SAT";
+            case "SU":
+                return "SUN";
+            default:
+                return shortDay;
         }
     }
 }

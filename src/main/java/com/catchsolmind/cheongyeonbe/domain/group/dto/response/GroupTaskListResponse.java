@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 public class GroupTaskListResponse {
 
+    private boolean isSoloGroup;
     private LocalDate weekStart;
     private LocalDate weekEnd;
     private List<LocalDate> weekDates;
