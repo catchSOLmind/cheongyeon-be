@@ -7,7 +7,7 @@ import lombok.Builder;
 @Schema(description = "매니저 호출(예약) 정보")
 public record ManagerCallResponse(
         @Schema(description = "예약 ID")
-        Long reservationId,
+        Long reservationItemId,
 
         @Schema(description = "서비스명 (예: 주방 청소)")
         String serviceName,
