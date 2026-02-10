@@ -1,5 +1,7 @@
 package com.catchsolmind.cheongyeonbe.domain.task.service;
 
+import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.ManagerCallResponse;
+import com.catchsolmind.cheongyeonbe.domain.eraser.service.EraserService;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.task.dto.data.MyTaskItemDto;
 import com.catchsolmind.cheongyeonbe.domain.task.dto.response.MyTaskCalendarResponse;
@@ -28,6 +30,7 @@ public class MyTaskQueryService {
 
     private final TaskOccurrenceRepository occurrenceRepository;
     private final TaskTakeoverRepository takeoverRepository;
+    private final EraserService eraserService;
 
     public MyTaskListResponse getMyTasks(GroupMember member, LocalDate selectedDate) {
         LocalDate weekStart = selectedDate.with(DayOfWeek.MONDAY);
@@ -59,12 +62,16 @@ public class MyTaskQueryService {
                 })
                 .collect(Collectors.toList());
 
+        Long groupId = member.getGroup().getGroupId();
+        List<ManagerCallResponse> managerCalls = eraserService.getManagerCalls(groupId, selectedDate);
+
         return MyTaskListResponse.builder()
                 .weekStart(weekStart)
                 .weekEnd(weekEnd)
                 .weekDates(weekDates)
                 .selectedDate(selectedDate)
                 .items(items)
+                .managerCall(managerCalls)
                 .build();
     }
 

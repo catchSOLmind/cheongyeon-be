@@ -2,6 +2,8 @@ package com.catchsolmind.cheongyeonbe.domain.group.service;
 
 import com.catchsolmind.cheongyeonbe.domain.agreement.entity.Agreement;
 import com.catchsolmind.cheongyeonbe.domain.agreement.repository.AgreementRepository;
+import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.ManagerCallResponse;
+import com.catchsolmind.cheongyeonbe.domain.eraser.service.EraserService;
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskCalendarResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskDetailResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskListResponse;
@@ -32,6 +34,7 @@ public class GroupTaskQueryService {
     private final TaskTakeoverRepository takeoverRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final AgreementRepository agreementRepository;
+    private final EraserService eraserService;
 
     public GroupTaskListResponse getGroupTasks(Long groupId, LocalDate selectedDate) {
         long memberCount = groupMemberRepository.countByGroup_GroupIdAndStatus(groupId, MemberStatus.JOINED);
@@ -81,6 +84,8 @@ public class GroupTaskQueryService {
                 })
                 .collect(Collectors.toList());
 
+        List<ManagerCallResponse> managerCalls = eraserService.getManagerCalls(groupId, selectedDate);
+
         return GroupTaskListResponse.builder()
                 .soloGroup(isSoloGroup)
                 .agreementStatus(agreementStatus)
@@ -89,6 +94,7 @@ public class GroupTaskQueryService {
                 .weekDates(weekDates)
                 .selectedDate(selectedDate)
                 .items(items)
+                .managerCall(managerCalls)
                 .build();
     }
 
