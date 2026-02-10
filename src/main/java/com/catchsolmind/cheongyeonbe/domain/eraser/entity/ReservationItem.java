@@ -34,6 +34,10 @@ public class ReservationItem {
     @Column(name = "price_at_reservation", nullable = false)
     private Integer price; // 예약 당시 가격 (스냅샷)
 
+    @Column(name = "reward_point", nullable = false)
+    @Builder.Default
+    private Integer rewardPoint = 0;
+
     @Column(name = "visit_date", nullable = false)
     private LocalDate visitDate;
 
