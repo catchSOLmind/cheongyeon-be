@@ -16,8 +16,7 @@ public interface ReservationItemRepository extends JpaRepository<ReservationItem
             "JOIN FETCH ri.reservation r " +
             "JOIN FETCH r.user u " +
             "WHERE u.userId IN (" +
-            "   SELECT gm.user.userId FROM GroupMember gm WHERE gm.group.groupId = :groupId" +
-            ") " +
+            "SELECT gm.user.userId FROM GroupMember gm WHERE gm.group.groupId = :groupId AND gm.status <> 'LEFT') " +
             "AND ri.visitDate = :date " +
             "ORDER BY ri.visitTime ASC")
     List<ReservationItem> findByGroupIdAndDate(
