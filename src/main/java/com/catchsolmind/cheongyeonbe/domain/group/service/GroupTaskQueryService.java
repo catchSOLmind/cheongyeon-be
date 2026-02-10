@@ -1,5 +1,7 @@
 package com.catchsolmind.cheongyeonbe.domain.group.service;
 
+import com.catchsolmind.cheongyeonbe.domain.agreement.entity.Agreement;
+import com.catchsolmind.cheongyeonbe.domain.agreement.repository.AgreementRepository;
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskCalendarResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskDetailResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskListResponse;
@@ -29,10 +31,21 @@ public class GroupTaskQueryService {
     private final TaskOccurrenceRepository occurrenceRepository;
     private final TaskTakeoverRepository takeoverRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final AgreementRepository agreementRepository;
 
     public GroupTaskListResponse getGroupTasks(Long groupId, LocalDate selectedDate) {
         long memberCount = groupMemberRepository.countByGroup_GroupIdAndStatus(groupId, MemberStatus.JOINED);
         boolean isSoloGroup = memberCount < 2;
+
+        Agreement agreement = agreementRepository.findByGroup_GroupIdAndDeletedAtIsNull(groupId)
+                .orElse(null);
+
+        String agreementStatus;
+        if (agreement == null) {
+            agreementStatus = "NONE";
+        } else {
+            agreementStatus = agreement.getStatus().name();
+        }
 
         LocalDate weekStart = selectedDate.with(DayOfWeek.MONDAY);
         LocalDate weekEnd = weekStart.plusDays(6);
@@ -42,6 +55,7 @@ public class GroupTaskQueryService {
 
         List<TaskOccurrence> occurrences =
                 occurrenceRepository.findByGroup_GroupIdAndOccurDate(groupId, selectedDate);
+
 
         List<GroupTaskListResponse.GroupTaskItemDto> items = occurrences.stream()
                 .map(occ -> {
@@ -69,6 +83,7 @@ public class GroupTaskQueryService {
 
         return GroupTaskListResponse.builder()
                 .soloGroup(isSoloGroup)
+                .agreementStatus(agreementStatus)
                 .weekStart(weekStart)
                 .weekEnd(weekEnd)
                 .weekDates(weekDates)
