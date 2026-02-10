@@ -28,7 +28,7 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
     // 그룹 전체 멤버 목록
     List<GroupMember> findByGroup_GroupId(Long groupId);
 
-    @Query("SELECT gm.group FROM GroupMember gm WHERE gm.user.userId = :userId AND gm.status = 'JOINED'")
+    @Query("SELECT gm.group FROM GroupMember gm WHERE gm.user.userId = :userId AND gm.status = 'AGREED'")
     Optional<Group> findGroupByUserId(@Param("userId") Long userId);
 
     // 특정 상태인 내 정보 찾기 (피드백 작성 가능한지 보기 위해)
