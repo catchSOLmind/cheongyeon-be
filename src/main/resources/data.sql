@@ -488,3 +488,7 @@ VALUES (100, '청연이의 우리 집', 5, NOW(), NOW());
 INSERT
 IGNORE INTO housework_test (user_id, result_type, created_at)
 VALUES (5, 'PERFECTIONIST', NOW());
+
+INSERT
+IGNORE INTO group_member (group_member_id, group_id, user_id, role, status, joined_at, agreed_at)
+VALUES (5, 100, 5, 'OWNER', 'AGREED', NOW(), NOW());
