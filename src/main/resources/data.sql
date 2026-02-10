@@ -408,12 +408,12 @@ VALUES (9, 'A', '웬만하면 끝까지 청소를 마무리', 2, 5, 2, -6),
 -- ============================================================
 -- 사용자 더미 데이터
 -- ============================================================
--- INSERT
--- IGNORE INTO user (user_id, nickname, email, provider, provider_id, profile_img, point_balance, created_at, updated_at) VALUES
--- (1, '심지영', 'jysim07@naver.com', 'KAKAO', 4724437918, 'https://cheongyeon-fe-solmind.s3.ap-northeast-2.amazonaws.com/backend/profile/default-profile.png', 0, '2026-02-09 16:16:59', '2026-02-09 16:16:59'),
--- (2, '권유정', 'tokuj0908@naver.com', 'KAKAO', 4741880402, 'http://k.kakaocdn.net/dn/dQMeJB/dJMcahwmr1q/SvdcastklbaSfjFekPG8M0/img_640x640.jpg', 0, '2026-02-09 16:20:04', '2026-02-09 16:20:04'),
--- (3, '안중원', 'sara970517@kakao.com', 'KAKAO', 4723590211, 'http://k.kakaocdn.net/dn/ik3Ad/dJMcagxBqDt/qYK1kpkHZu2tp8yBy3K5aK/img_640x640.jpg', 0, '2026-02-09 16:20:52', '2026-02-09 16:20:52'),
--- (4, '문지우', 'jeewoozzang@naver.com', 'KAKAO', 4741882071, 'http://k.kakaocdn.net/dn/XoAVT/dJMb81UhErB/WJ4IDLkPNDPKiOlNhzqAnK/img_640x640.jpg', 0, '2026-02-09 16:20:58', '2026-02-09 16:20:58');
+INSERT
+IGNORE INTO user (user_id, nickname, email, provider, provider_id, profile_img, point_balance, created_at, updated_at) VALUES
+(1, '심지영', 'jysim07@naver.com', 'KAKAO', 4724437918, 'https://cheongyeon-fe-solmind.s3.ap-northeast-2.amazonaws.com/backend/profile/default-profile.png', 0, '2026-02-09 16:16:59', '2026-02-09 16:16:59'),
+(2, '권유정', 'tokuj0908@naver.com', 'KAKAO', 4741880402, 'http://k.kakaocdn.net/dn/dQMeJB/dJMcahwmr1q/SvdcastklbaSfjFekPG8M0/img_640x640.jpg', 0, '2026-02-09 16:20:04', '2026-02-09 16:20:04'),
+(3, '안중원', 'sara970517@kakao.com', 'KAKAO', 4723590211, 'http://k.kakaocdn.net/dn/ik3Ad/dJMcagxBqDt/qYK1kpkHZu2tp8yBy3K5aK/img_640x640.jpg', 0, '2026-02-09 16:20:52', '2026-02-09 16:20:52'),
+(4, '문지우', 'jeewoozzang@naver.com', 'KAKAO', 4741882071, 'http://k.kakaocdn.net/dn/XoAVT/dJMb81UhErB/WJ4IDLkPNDPKiOlNhzqAnK/img_640x640.jpg', 0, '2026-02-09 16:20:58', '2026-02-09 16:20:58');
 
 -- 1) 그룹 생성 (하나만 생성)
 INSERT
@@ -486,13 +486,5 @@ IGNORE INTO `group` (group_id, name, owner_user_id, created_at, updated_at)
 VALUES (100, '청연이의 우리 집', 5, NOW(), NOW());
 
 INSERT
-IGNORE INTO group_member (group_member_id, group_id, user_id, role, status, joined_at, agreed_at)
-VALUES (5, 2, 5, 'OWNER', 'JOINED', NOW(), NULL);
-
-INSERT
 IGNORE INTO housework_test (user_id, result_type, created_at)
 VALUES (5, 'PERFECTIONIST', NOW());
-
-INSERT
-IGNORE INTO group_member (group_id, user_id, role, status, joined_at, agreed_at)
-VALUES (100, 5, 'OWNER', 'JOINED', NOW(), NULL);
