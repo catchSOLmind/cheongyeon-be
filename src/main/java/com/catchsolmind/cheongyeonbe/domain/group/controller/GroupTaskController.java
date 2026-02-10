@@ -45,7 +45,8 @@ public class GroupTaskController {
     }
 
     @GetMapping
-    @Operation(summary = "전체 할일 목록 조회")
+    @Operation(summary = "전체 할일 목록 조회",
+            description = "AgreementStatus -  NONE(협약서 없음), DRAFT(초안), CONFIRMED(확정)")
     public GroupTaskListResponse getGroupTasks(
             @RequestParam Long groupId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
