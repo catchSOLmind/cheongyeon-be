@@ -28,7 +28,7 @@ public class GroupService {
     private final GroupMemberRepository groupMemberRepository;
     private final GroupInvitationRepository groupInvitationRepository;
 
-    @Value("${app.base-url:https://cheongyeon.app}")
+    @Value("${cloud.aws.s3.base-url}")
     private String baseUrl;
 
     /**
