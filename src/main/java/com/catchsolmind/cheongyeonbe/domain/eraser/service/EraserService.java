@@ -2,12 +2,14 @@ package com.catchsolmind.cheongyeonbe.domain.eraser.service;
 
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.request.ReservationRequest;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.EraserTaskOptionsResponse;
+import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.ManagerCallResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.PaymentInfoResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.RecommendationResponse;
 import com.catchsolmind.cheongyeonbe.domain.eraser.entity.Reservation;
 import com.catchsolmind.cheongyeonbe.domain.eraser.entity.ReservationItem;
 import com.catchsolmind.cheongyeonbe.domain.eraser.entity.SuggestionTask;
 import com.catchsolmind.cheongyeonbe.domain.eraser.entity.SuggestionTaskOption;
+import com.catchsolmind.cheongyeonbe.domain.eraser.repository.ReservationItemRepository;
 import com.catchsolmind.cheongyeonbe.domain.eraser.repository.ReservationRepository;
 import com.catchsolmind.cheongyeonbe.domain.eraser.repository.SuggestionTaskOptionRepository;
 import com.catchsolmind.cheongyeonbe.domain.eraser.repository.SuggestionTaskRepository;
@@ -53,6 +55,7 @@ public class EraserService {
     private final SuggestionTaskOptionRepository suggestionTaskOptionRepository;
     private final ReservationRepository reservationRepository;
     private final PointTransactionRepository pointTransactionRepository;
+    private final ReservationItemRepository reservationItemRepository;
 
     private final S3Properties s3Properties;
 
@@ -295,6 +298,7 @@ public class EraserService {
                     .taskTitle(option.getSuggestionTask().getTitle())
                     .optionCount(option.getCount())
                     .price(option.getPrice())
+                    .rewardPoint(option.getSuggestionTask().getRewardPoint())
                     .visitDate(itemReq.visitDate())
                     .visitTime(itemReq.visitTime())
                     .build();
@@ -336,6 +340,20 @@ public class EraserService {
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return savedReservation.getReservationId();
+    }
+
+    // 특정 그룹, 특정 날짜의 매니저 호출 목록 조회
+    public List<ManagerCallResponse> getManagerCalls(Long groupId, LocalDate date) {
+        List<ReservationItem> items = reservationItemRepository.findByGroupIdAndDate(groupId, date);
+
+        return items.stream()
+                .map(item -> ManagerCallResponse.builder()
+                        .reservationId(item.getReservationItemId())
+                        .serviceName(item.getTaskTitle())
+                        .visitTime(item.getVisitTime())
+                        .point(item.getRewardPoint())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     // 헬퍼 메서드
