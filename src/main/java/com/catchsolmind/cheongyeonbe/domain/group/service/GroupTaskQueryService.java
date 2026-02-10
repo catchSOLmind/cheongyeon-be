@@ -68,7 +68,7 @@ public class GroupTaskQueryService {
                 .collect(Collectors.toList());
 
         return GroupTaskListResponse.builder()
-                .isSoloGroup(isSoloGroup)
+                .soloGroup(isSoloGroup)
                 .weekStart(weekStart)
                 .weekEnd(weekEnd)
                 .weekDates(weekDates)

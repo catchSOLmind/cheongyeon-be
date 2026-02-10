@@ -14,7 +14,7 @@ import java.util.List;
 public class GroupTaskListResponse {
 
     @JsonProperty("isSoloGroup")
-    private boolean isSoloGroup;
+    private boolean soloGroup;
     private LocalDate weekStart;
     private LocalDate weekEnd;
     private List<LocalDate> weekDates;
