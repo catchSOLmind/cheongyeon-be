@@ -348,7 +348,7 @@ public class EraserService {
 
         return items.stream()
                 .map(item -> ManagerCallResponse.builder()
-                        .reservationId(item.getReservationItemId())
+                        .reservationItemId(item.getReservationItemId())
                         .serviceName(item.getTaskTitle())
                         .visitTime(item.getVisitTime())
                         .point(item.getRewardPoint())
