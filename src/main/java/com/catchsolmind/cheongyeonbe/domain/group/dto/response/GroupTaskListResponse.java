@@ -1,5 +1,6 @@
 package com.catchsolmind.cheongyeonbe.domain.group.dto.response;
 
+import com.catchsolmind.cheongyeonbe.domain.eraser.dto.response.ManagerCallResponse;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,6 +22,7 @@ public class GroupTaskListResponse {
     private List<LocalDate> weekDates;
     private LocalDate selectedDate;
     private List<GroupTaskItemDto> items;
+    private List<ManagerCallResponse> managerCall;
 
     @Getter
     @Builder
