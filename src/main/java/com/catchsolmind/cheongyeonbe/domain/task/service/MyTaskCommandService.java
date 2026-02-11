@@ -3,11 +3,15 @@ package com.catchsolmind.cheongyeonbe.domain.task.service;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.Group;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
+import com.catchsolmind.cheongyeonbe.domain.point.entity.PointTransaction;
+import com.catchsolmind.cheongyeonbe.domain.point.repository.PointTransactionRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.dto.request.*;
 import com.catchsolmind.cheongyeonbe.domain.task.dto.response.*;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.*;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.*;
+import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
+import com.catchsolmind.cheongyeonbe.global.enums.TransactionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +34,7 @@ public class MyTaskCommandService {
     private final TaskPostponeLogRepository taskPostponeLogRepository;
     private final TaskIncompleteLogRepository taskIncompleteLogRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final PointTransactionRepository pointTransactionRepository;
 
     public MyTaskCreateResponse createMyTasks(GroupMember member, MyTaskCreateRequest req) {
         Group group = member.getGroup();
@@ -116,13 +121,29 @@ public class MyTaskCommandService {
             occ.setStatus(TaskStatus.COMPLETED);
 
             if (!taskLogRepository.existsByOccurrence_OccurrenceId(occurrenceId)) {
-                taskLogRepository.save(
+                TaskLog taskLog = taskLogRepository.save(
                         TaskLog.builder()
                                 .occurrence(occ)
                                 .doneByMember(member)
                                 .memo(null)
                                 .build()
                 );
+
+                // 포인트 적립
+                Integer earnedPoint = occ.getTask().getTaskType().getPoint();
+                if (earnedPoint != null && earnedPoint > 0) {
+                    User user = member.getUser();
+                    user.setPointBalance(user.getPointBalance() + earnedPoint);
+
+                    pointTransactionRepository.save(
+                            PointTransaction.builder()
+                                    .user(user)
+                                    .amount(earnedPoint)
+                                    .transactionType(TransactionType.EARN_TASK)
+                                    .taskLog(taskLog)
+                                    .build()
+                    );
+                }
             }
 
         } else {
@@ -343,8 +364,9 @@ public class MyTaskCommandService {
         occurrenceRepository.save(occ);
 
         // TaskLog 저장 (완료 기록)
+        TaskLog taskLog = null;
         if (!taskLogRepository.existsByOccurrence_OccurrenceId(occurrenceId)) {
-            taskLogRepository.save(
+            taskLog = taskLogRepository.save(
                     TaskLog.builder()
                             .occurrence(occ)
                             .doneByMember(member)
@@ -353,8 +375,21 @@ public class MyTaskCommandService {
             );
         }
 
-        // 포인트 조회
+        // 포인트 적립
         Integer earnedPoint = occ.getTask().getTaskType().getPoint();
+        if (earnedPoint != null && earnedPoint > 0) {
+            User user = member.getUser();
+            user.setPointBalance(user.getPointBalance() + earnedPoint);
+
+            pointTransactionRepository.save(
+                    PointTransaction.builder()
+                            .user(user)
+                            .amount(earnedPoint)
+                            .transactionType(TransactionType.EARN_TASK)
+                            .taskLog(taskLog)
+                            .build()
+            );
+        }
 
         return MyTaskCompleteResponse.builder()
                 .occurrenceId(occurrenceId)
