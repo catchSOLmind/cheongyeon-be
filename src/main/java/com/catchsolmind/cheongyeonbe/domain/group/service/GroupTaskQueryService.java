@@ -21,8 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -94,6 +93,22 @@ public class GroupTaskQueryService {
                 })
                 .collect(Collectors.toList());
 
+        // 멤버별 요약: occurrences를 assignee 기준으로 그룹핑
+        Map<Long, List<TaskOccurrence>> byMember = occurrences.stream()
+                .collect(Collectors.groupingBy(occ -> occ.getPrimaryAssignedMember().getGroupMemberId()));
+
+        List<GroupTaskListResponse.MemberTaskSummaryDto> memberSummaries = byMember.entrySet().stream()
+                .map(entry -> {
+                    GroupMember member = entry.getValue().get(0).getPrimaryAssignedMember();
+                    return GroupTaskListResponse.MemberTaskSummaryDto.builder()
+                            .memberId(member.getGroupMemberId())
+                            .nickname(member.getUser().getNickname())
+                            .profileImageUrl(member.getUser().getProfileImg())
+                            .taskCount(entry.getValue().size())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
         List<ManagerCallResponse> managerCalls = eraserService.getManagerCalls(groupId, selectedDate);
 
         return GroupTaskListResponse.builder()
@@ -104,6 +119,9 @@ public class GroupTaskQueryService {
                 .weekEnd(weekEnd)
                 .weekDates(weekDates)
                 .selectedDate(selectedDate)
+                .totalTaskCount(occurrences.size())
+                .assignedMemberCount(byMember.size())
+                .memberSummaries(memberSummaries)
                 .items(items)
                 .managerCall(managerCalls)
                 .build();

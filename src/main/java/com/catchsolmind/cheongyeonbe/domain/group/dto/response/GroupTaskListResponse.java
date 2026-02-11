@@ -23,8 +23,20 @@ public class GroupTaskListResponse {
     private LocalDate weekEnd;
     private List<LocalDate> weekDates;
     private LocalDate selectedDate;
+    private int totalTaskCount;
+    private int assignedMemberCount;
+    private List<MemberTaskSummaryDto> memberSummaries;
     private List<GroupTaskItemDto> items;
     private List<ManagerCallResponse> managerCall;
+
+    @Getter
+    @Builder
+    public static class MemberTaskSummaryDto {
+        private Long memberId;
+        private String nickname;
+        private String profileImageUrl;
+        private int taskCount;
+    }
 
     @Getter
     @Builder
