@@ -78,6 +78,12 @@ public class AgreementService {
                 .build();
         agreementRepository.save(agreement);
 
+        AgreementSign ownerSign = AgreementSign.builder()
+                .agreement(agreement)
+                .member(member) // 현재 작성 중인 오너
+                .build();
+        agreementSignRepository.save(ownerSign);
+
         // 6. 규칙 항목 생성
         List<AgreementCreateResponse.RuleDto> ruleDtos = createRules(agreement, request.getRules());
 
@@ -193,6 +199,12 @@ public class AgreementService {
 
         // 5. 서명 초기화
         agreementSignRepository.deleteByAgreement_AgreementId(agreementId);
+
+        AgreementSign ownerSign = AgreementSign.builder()
+                .agreement(agreement)
+                .member(member)
+                .build();
+        agreementSignRepository.save(ownerSign);
 
         agreementRepository.save(agreement);
 

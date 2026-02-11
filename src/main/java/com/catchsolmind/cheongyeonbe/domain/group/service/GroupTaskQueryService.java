@@ -37,17 +37,27 @@ public class GroupTaskQueryService {
     private final EraserService eraserService;
 
     public GroupTaskListResponse getGroupTasks(Long groupId, LocalDate selectedDate) {
-        long memberCount = groupMemberRepository.countByGroup_GroupIdAndStatus(groupId, MemberStatus.JOINED);
-        boolean isSoloGroup = memberCount < 2;
+        long activeMemberCount = groupMemberRepository.countByGroup_GroupIdAndStatusNot(groupId, MemberStatus.LEFT);
+        boolean isSoloGroup = activeMemberCount < 2;
+
 
         Agreement agreement = agreementRepository.findByGroup_GroupIdAndDeletedAtIsNull(groupId)
                 .orElse(null);
-
         String agreementStatus;
         if (agreement == null) {
             agreementStatus = "NONE";
         } else {
             agreementStatus = agreement.getStatus().name();
+        }
+
+        boolean isAllMembersAgreed = false;
+        if (agreement != null) {
+            agreementStatus = agreement.getStatus().name();
+
+            int signedCount = agreement.getSigns().size();
+            if (signedCount >= activeMemberCount && activeMemberCount > 0) {
+                isAllMembersAgreed = true;
+            }
         }
 
         LocalDate weekStart = selectedDate.with(DayOfWeek.MONDAY);
@@ -88,6 +98,7 @@ public class GroupTaskQueryService {
 
         return GroupTaskListResponse.builder()
                 .soloGroup(isSoloGroup)
+                .allMembersAgreed(isAllMembersAgreed)
                 .agreementStatus(agreementStatus)
                 .weekStart(weekStart)
                 .weekEnd(weekEnd)
