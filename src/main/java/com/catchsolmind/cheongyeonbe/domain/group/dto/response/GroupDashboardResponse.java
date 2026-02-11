@@ -27,9 +27,9 @@ public class GroupDashboardResponse {
     @Builder
     public static class PostponeRankDto {
         private Integer rank;
-        private Long memberId;
-        private String nickname;
-        private String profileImageUrl;
-        private Long postponeCount;
+        private Long memberId; // null
+        private String nickname; // TaskCategory
+        private String profileImageUrl; // null
+        private Long postponeCount; // 완료한 개수
     }
 }
