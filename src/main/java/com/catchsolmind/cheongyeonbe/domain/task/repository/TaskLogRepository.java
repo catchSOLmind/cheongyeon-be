@@ -1,6 +1,7 @@
 package com.catchsolmind.cheongyeonbe.domain.task.repository;
 
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskLog;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -36,4 +37,14 @@ public interface TaskLogRepository extends JpaRepository<TaskLog, Long> {
             "GROUP BY t.taskType.taskTypeId")
     List<Object[]> findLastDoneDatesByGroupAndTaskTypes(@Param("groupId") Long groupId,
                                                         @Param("taskTypeIds") List<Long> taskTypeIds);
+
+    @Query("SELECT tt.category, COUNT(tl) " +
+            "FROM TaskLog tl " +
+            "JOIN tl.occurrence occ " +
+            "JOIN occ.task t " +
+            "JOIN t.taskType tt " +
+            "WHERE occ.group.groupId = :groupId " +
+            "GROUP BY tt.category " +
+            "ORDER BY COUNT(tl) DESC")
+    List<Object[]> findCategoryRankStats(@Param("groupId") Long groupId, Pageable pageable);
 }

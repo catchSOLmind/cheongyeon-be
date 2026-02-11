@@ -2,19 +2,21 @@ package com.catchsolmind.cheongyeonbe.domain.group.service;
 
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupDashboardResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
-import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskOccurrence;
+import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskLogRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskOccurrenceRepository;
-import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskPostponeLogRepository;
-import com.catchsolmind.cheongyeonbe.global.enums.MemberStatus;
+import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,8 +25,7 @@ import java.util.stream.Collectors;
 public class GroupDashboardService {
 
     private final TaskOccurrenceRepository occurrenceRepository;
-    private final GroupMemberRepository groupMemberRepository;
-    private final TaskPostponeLogRepository postponeLogRepository;
+    private final TaskLogRepository taskLogRepository;
 
     public GroupDashboardResponse getDashboard(Long groupId) {
         LocalDate today = LocalDate.now();
@@ -124,36 +125,24 @@ public class GroupDashboardService {
     }
 
     private List<GroupDashboardResponse.PostponeRankDto> calculatePostponeTop3(Long groupId) {
-        List<GroupMember> members = groupMemberRepository.findByGroup_GroupIdAndStatusNot(
-                groupId, MemberStatus.LEFT
-        );
+        List<Object[]> results = taskLogRepository.findCategoryRankStats(groupId, PageRequest.of(0, 3));
 
-        List<GroupDashboardResponse.PostponeRankDto> allMembers = members.stream()
-                .map(member -> {
-                    long postponeCount = postponeLogRepository.countByMember_GroupMemberId(member.getGroupMemberId());
-                    return GroupDashboardResponse.PostponeRankDto.builder()
-                            .memberId(member.getGroupMemberId())
-                            .nickname(member.getUser().getNickname())
-                            .profileImageUrl(member.getUser().getProfileImg())
-                            .postponeCount(postponeCount)
-                            .build();
-                })
-                .sorted(Comparator.comparingLong(GroupDashboardResponse.PostponeRankDto::getPostponeCount).reversed())
-                .limit(3)
-                .collect(Collectors.toList());
+        List<GroupDashboardResponse.PostponeRankDto> rankList = new ArrayList<>();
+        int rank = 1;
 
-        List<GroupDashboardResponse.PostponeRankDto> rankedList = new ArrayList<>();
-        for (int i = 0; i < allMembers.size(); i++) {
-            GroupDashboardResponse.PostponeRankDto dto = allMembers.get(i);
-            rankedList.add(GroupDashboardResponse.PostponeRankDto.builder()
-                    .rank(i + 1)
-                    .memberId(dto.getMemberId())
-                    .nickname(dto.getNickname())
-                    .profileImageUrl(dto.getProfileImageUrl())
-                    .postponeCount(dto.getPostponeCount())
+        for (Object[] row : results) {
+            TaskCategory category = (TaskCategory) row[0]; // 카테고리
+            Long count = (Long) row[1]; // 횟수
+
+            rankList.add(GroupDashboardResponse.PostponeRankDto.builder()
+                    .rank(rank++) // 순위 (1, 2, 3...)
+                    .memberId(null) // null 고정
+                    .nickname(category.name()) // 카테고리 이름을 닉네임 필드에 매핑
+                    .profileImageUrl(null) // null 고정
+                    .postponeCount(count)// 완료 횟수를 postponeCount 필드에 매핑
                     .build());
         }
 
-        return rankedList;
+        return rankList;
     }
 }
