@@ -78,6 +78,9 @@ public class User {
     }
 
     public void deductPoint(int amount) {
+        if (amount < 0) {
+            throw new BusinessException(ErrorCode.INVALID_POINT);
+        }
         int currentBalance = (this.pointBalance != null) ? this.pointBalance : 0;
         if (currentBalance < amount) {
             throw new BusinessException(ErrorCode.POINT_NOT_ENOUGH);
