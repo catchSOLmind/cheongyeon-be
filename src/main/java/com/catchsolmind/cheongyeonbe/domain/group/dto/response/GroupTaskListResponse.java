@@ -16,6 +16,8 @@ public class GroupTaskListResponse {
 
     @JsonProperty("isSoloGroup")
     private boolean soloGroup;
+    @JsonProperty("isAllMembersAgreed")
+    private boolean allMembersAgreed;
     private String agreementStatus;
     private LocalDate weekStart;
     private LocalDate weekEnd;
