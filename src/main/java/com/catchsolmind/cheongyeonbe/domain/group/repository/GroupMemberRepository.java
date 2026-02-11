@@ -40,5 +40,5 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
     List<GroupMember> findByGroup_GroupIdAndStatus(Long groupId, MemberStatus status);
 
     // 특정 그룹의 활성 멤버 수 카운트
-    long countByGroup_GroupIdAndStatus(Long groupId, MemberStatus status);
+    long countByGroup_GroupIdAndStatusNot(Long groupId, MemberStatus status);
 }
