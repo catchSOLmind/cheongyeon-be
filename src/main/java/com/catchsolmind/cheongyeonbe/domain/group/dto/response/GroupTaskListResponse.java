@@ -1,5 +1,6 @@
 package com.catchsolmind.cheongyeonbe.domain.group.dto.response;
 
+import com.catchsolmind.cheongyeonbe.global.enums.GroupScreenType;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskCategory;
 import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,13 +14,26 @@ import java.util.List;
 @Builder
 public class GroupTaskListResponse {
 
+    private GroupScreenType screenType;
     @JsonProperty("isSoloGroup")
     private boolean isSoloGroup;
     private LocalDate weekStart;
     private LocalDate weekEnd;
     private List<LocalDate> weekDates;
     private LocalDate selectedDate;
+    private int totalTaskCount;
+    private int assignedMemberCount;
+    private List<MemberTaskSummaryDto> memberSummaries;
     private List<GroupTaskItemDto> items;
+
+    @Getter
+    @Builder
+    public static class MemberTaskSummaryDto {
+        private Long memberId;
+        private String nickname;
+        private String profileImageUrl;
+        private int taskCount;
+    }
 
     @Getter
     @Builder

@@ -1,5 +1,7 @@
 package com.catchsolmind.cheongyeonbe.domain.group.service;
 
+import com.catchsolmind.cheongyeonbe.domain.agreement.entity.Agreement;
+import com.catchsolmind.cheongyeonbe.domain.agreement.repository.AgreementRepository;
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskCalendarResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskDetailResponse;
 import com.catchsolmind.cheongyeonbe.domain.group.dto.response.GroupTaskListResponse;
@@ -9,6 +11,8 @@ import com.catchsolmind.cheongyeonbe.domain.task.entity.Task;
 import com.catchsolmind.cheongyeonbe.domain.task.entity.TaskOccurrence;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskOccurrenceRepository;
 import com.catchsolmind.cheongyeonbe.domain.task.repository.TaskTakeoverRepository;
+import com.catchsolmind.cheongyeonbe.global.enums.AgreementStatus;
+import com.catchsolmind.cheongyeonbe.global.enums.GroupScreenType;
 import com.catchsolmind.cheongyeonbe.global.enums.MemberStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,8 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,10 +32,31 @@ public class GroupTaskQueryService {
     private final TaskOccurrenceRepository occurrenceRepository;
     private final TaskTakeoverRepository takeoverRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final AgreementRepository agreementRepository;
 
     public GroupTaskListResponse getGroupTasks(Long groupId, LocalDate selectedDate) {
-        long memberCount = groupMemberRepository.countByGroup_GroupIdAndStatus(groupId, MemberStatus.JOINED);
-        boolean isSoloGroup = memberCount < 2;
+        // 멤버 수 (JOINED + AGREED 모두 활성 멤버로 카운트)
+        long activeCount = groupMemberRepository.countByGroup_GroupIdAndStatusNot(groupId, MemberStatus.LEFT);
+        boolean isSoloGroup = activeCount < 2;
+
+        // 협약서 조회 (deadline 만료된 DRAFT는 없는 것으로 취급)
+        Optional<Agreement> agreementOpt = agreementRepository.findByGroup_GroupIdAndDeletedAtIsNull(groupId);
+        boolean hasValidAgreement = agreementOpt.isPresent()
+                && !(agreementOpt.get().getStatus() == AgreementStatus.DRAFT
+                     && agreementOpt.get().getDeadline() != null
+                     && agreementOpt.get().getDeadline().isBefore(LocalDate.now()));
+
+        // screenType 판별
+        GroupScreenType screenType;
+        if (isSoloGroup && !hasValidAgreement) {
+            screenType = GroupScreenType.SOLO_OWNER;          // 화면3: 1인 오너, 멤버X, 협약서X
+        } else if (!hasValidAgreement) {
+            screenType = GroupScreenType.NO_AGREEMENT;        // 화면2: 멤버 있지만 협약서 없음/만료
+        } else if (agreementOpt.get().getStatus() == AgreementStatus.DRAFT) {
+            screenType = GroupScreenType.PENDING_APPROVAL;    // 화면1: 협약서 초안 존재, 미확정
+        } else {
+            screenType = GroupScreenType.NORMAL;              // 정상: 협약서 확정 완료
+        }
 
         LocalDate weekStart = selectedDate.with(DayOfWeek.MONDAY);
         LocalDate weekEnd = weekStart.plusDays(6);
@@ -67,12 +91,32 @@ public class GroupTaskQueryService {
                 })
                 .collect(Collectors.toList());
 
+        // 멤버별 요약: occurrences를 assignee 기준으로 그룹핑
+        Map<Long, List<TaskOccurrence>> byMember = occurrences.stream()
+                .collect(Collectors.groupingBy(occ -> occ.getPrimaryAssignedMember().getGroupMemberId()));
+
+        List<GroupTaskListResponse.MemberTaskSummaryDto> memberSummaries = byMember.entrySet().stream()
+                .map(entry -> {
+                    GroupMember member = entry.getValue().get(0).getPrimaryAssignedMember();
+                    return GroupTaskListResponse.MemberTaskSummaryDto.builder()
+                            .memberId(member.getGroupMemberId())
+                            .nickname(member.getUser().getNickname())
+                            .profileImageUrl(member.getUser().getProfileImg())
+                            .taskCount(entry.getValue().size())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
         return GroupTaskListResponse.builder()
+                .screenType(screenType)
                 .isSoloGroup(isSoloGroup)
                 .weekStart(weekStart)
                 .weekEnd(weekEnd)
                 .weekDates(weekDates)
                 .selectedDate(selectedDate)
+                .totalTaskCount(occurrences.size())
+                .assignedMemberCount(byMember.size())
+                .memberSummaries(memberSummaries)
                 .items(items)
                 .build();
     }

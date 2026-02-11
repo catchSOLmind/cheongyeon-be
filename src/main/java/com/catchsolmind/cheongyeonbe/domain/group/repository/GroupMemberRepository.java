@@ -41,4 +41,8 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
 
     // 특정 그룹의 활성 멤버 수 카운트
     long countByGroup_GroupIdAndStatus(Long groupId, MemberStatus status);
+
+    // 특정 상태가 아닌 멤버 수 카운트 (LEFT 제외 활성 멤버 수)
+    long countByGroup_GroupIdAndStatusNot(Long groupId, MemberStatus status);
+
 }
