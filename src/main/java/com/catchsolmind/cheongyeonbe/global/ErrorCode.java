@@ -25,6 +25,7 @@ public enum ErrorCode {
     // Group
     GROUP_NOT_FOUND("GROUP001", "그룹을 찾을 수 없습니다."),
     NOT_SAME_GROUP("GROUP002", "같은 그룹이 아닙니다."),
+    NOT_ENOUGH_GROUP_MEMBERS("GROUP003", "협약서 확정을 위해 최소 2명 이상의 멤버가 필요합니다."),
 
     // Member
     MEMBER_NOT_FOUND("MEMBER001", "멤버를 찾을 수 없습니다."),
