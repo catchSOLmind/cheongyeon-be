@@ -9,6 +9,9 @@ public record ManagerCallResponse(
         @Schema(description = "예약 ID")
         Long reservationItemId,
 
+        @Schema(description = "매니저 프로필 이미지 url")
+        String imgUrl,
+
         @Schema(description = "서비스명 (예: 주방 청소)")
         String serviceName,
 
