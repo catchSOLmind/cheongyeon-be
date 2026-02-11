@@ -41,6 +41,14 @@ public class FeedbackAiService {
 
     public String getRefinedText(String rawText) {
         try {
+            // 디버깅용 로그
+            String key = openAiProperties.getApiKey();
+            if (key == null || key.isBlank()) {
+                log.error("[피드백] API Key 없음");
+            } else {
+                log.info("API Key: {}...", key.substring(0, Math.min(key.length(), 5)));
+            }
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(openAiProperties.getApiKey());
