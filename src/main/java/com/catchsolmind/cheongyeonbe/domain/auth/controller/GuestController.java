@@ -18,7 +18,7 @@ public class GuestController {
 
     private final GuestService guestService;
 
-    @Operation(summary = "게스트 로그인", description = "유저/그룹/가사/협약서를 모두 자동 생성하고 토큰을 발급합니다.")
+    @Operation(summary = "게스트 로그인", description = "유저/그룹/가사/협약서 및 모든 데이터를 모두 자동 생성하고 토큰을 발급합니다.")
     @PostMapping
     public ApiResponse<GuestLoginResponse> guestLogin() {
         GuestLoginResponse response = guestService.enterGuestMode();
