@@ -1,8 +1,10 @@
 package com.catchsolmind.cheongyeonbe.domain.user.entity;
 
-import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.auth.dto.data.OAuthUserInfo;
+import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.point.entity.PointTransaction;
+import com.catchsolmind.cheongyeonbe.global.BusinessException;
+import com.catchsolmind.cheongyeonbe.global.ErrorCode;
 import com.catchsolmind.cheongyeonbe.global.enums.AuthProvider;
 import jakarta.persistence.*;
 import lombok.*;
@@ -73,5 +75,16 @@ public class User {
                 .nickname(info.nickname())
                 .profileImg(info.profileImageUrl())
                 .build();
+    }
+
+    public void deductPoint(int amount) {
+        if (this.pointBalance < amount) {
+            throw new BusinessException(ErrorCode.POINT_NOT_ENOUGH);
+        }
+        this.pointBalance = this.pointBalance - amount;
+    }
+
+    public void addPoint(int amount) {
+        this.pointBalance += amount;
     }
 }
