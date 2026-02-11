@@ -51,6 +51,9 @@ cloud:
       region: ap-northeast-2
       base-url: ${AWS_BASE_URL}
 
+invitation:
+  base-url: https://d288u0ybsqpwmr.cloudfront.net
+
 security:
   jwt:
     secret: ${JWT_SECRET_KEY}
