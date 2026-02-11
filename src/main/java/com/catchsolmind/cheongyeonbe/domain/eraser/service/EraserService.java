@@ -29,6 +29,7 @@ import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
 import com.catchsolmind.cheongyeonbe.global.enums.TransactionType;
 import com.catchsolmind.cheongyeonbe.global.properties.S3Properties;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,8 +45,10 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class EraserService {
     public static final int MAX_USABLE_POINT = 20000;
+    public static final String MANAGER_PROFILE_IMG = "/backend/profile/manager.png";
 
     private final GroupMemberRepository groupMemberRepository;
     private final TaskOccurrenceRepository taskOccurrenceRepository;
@@ -346,9 +349,14 @@ public class EraserService {
     public List<ManagerCallResponse> getManagerCalls(Long groupId, LocalDate date) {
         List<ReservationItem> items = reservationItemRepository.findByGroupIdAndDate(groupId, date);
 
+        String fullImgUrl = Optional.ofNullable(s3Properties.getBaseUrl())
+                .map(base -> base + MANAGER_PROFILE_IMG)
+                .orElseThrow(() -> new BusinessException(ErrorCode.S3_CONFIG_ERROR));
+
         return items.stream()
                 .map(item -> ManagerCallResponse.builder()
                         .reservationItemId(item.getReservationItemId())
+                        .imgUrl(fullImgUrl)
                         .serviceName(item.getTaskTitle())
                         .visitTime(item.getVisitTime())
                         .point(item.getRewardPoint())
