@@ -137,10 +137,6 @@ public class EraserService {
             }
 
             if (shouldRecommend) {
-                // 시즌이어서 들어왔는데 주기도 지났을 수 있으니 태그 보정
-                if (isSeason) {
-                    currentTags.add(SuggestionType.GENERAL);
-                }
 
                 String fullImgUrl = Optional.ofNullable(s3Properties.getBaseUrl())
                         .map(base -> base + "/" + product.getImgUrl())
