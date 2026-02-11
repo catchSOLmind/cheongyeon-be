@@ -34,6 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/housework-test/**").permitAll() // 가사성향테스트
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/oauth/**").permitAll() // 카카오 로그인
+                        .requestMatchers("/api/auth/guest").permitAll() // 게스트 로그인
 
                         .requestMatchers("/api/profile/**").authenticated() // 프로필은 인증된 사용자만
 

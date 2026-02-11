@@ -1,6 +1,6 @@
 package com.catchsolmind.cheongyeonbe.global.fixture.dto.oauth;
 
-import com.catchsolmind.cheongyeonbe.domain.oauth.dto.data.OAuthUserInfo;
+import com.catchsolmind.cheongyeonbe.domain.auth.dto.data.OAuthUserInfo;
 import com.catchsolmind.cheongyeonbe.global.enums.AuthProvider;
 
 public class OAuthUserInfoFixture {

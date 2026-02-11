@@ -4,7 +4,7 @@ import com.catchsolmind.cheongyeonbe.domain.group.entity.Group;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupRepository;
-import com.catchsolmind.cheongyeonbe.domain.oauth.dto.data.OAuthUserInfo;
+import com.catchsolmind.cheongyeonbe.domain.auth.dto.data.OAuthUserInfo;
 import com.catchsolmind.cheongyeonbe.domain.user.dto.UserDto;
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.domain.user.mapper.UserMapper;
