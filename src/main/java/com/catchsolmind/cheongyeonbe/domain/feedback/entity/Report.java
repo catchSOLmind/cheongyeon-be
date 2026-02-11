@@ -1,4 +1,4 @@
-package com.catchsolmind.cheongyeonbe.domain.report.entity;
+package com.catchsolmind.cheongyeonbe.domain.feedback.entity;
 
 import com.catchsolmind.cheongyeonbe.domain.group.entity.Group;
 import com.catchsolmind.cheongyeonbe.global.enums.PeriodType;
