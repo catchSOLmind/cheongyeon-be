@@ -14,10 +14,7 @@ import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
 import com.catchsolmind.cheongyeonbe.global.BusinessException;
 import com.catchsolmind.cheongyeonbe.global.ErrorCode;
-import com.catchsolmind.cheongyeonbe.global.enums.AgreementStatus;
-import com.catchsolmind.cheongyeonbe.global.enums.MemberRole;
-import com.catchsolmind.cheongyeonbe.global.enums.MemberStatus;
-import com.catchsolmind.cheongyeonbe.global.enums.SignStatus;
+import com.catchsolmind.cheongyeonbe.global.enums.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -251,6 +248,10 @@ public class AgreementService {
         int totalCount = activeMembers.size();
         boolean allSigned = signedCount == totalCount;
 
+        if (allSigned && member.getUser().getProvider() == AuthProvider.GUEST) {
+            processConfirmation(agreement, group, activeMembers);
+        }
+
         return AgreementSignResponse.builder()
                 .agreementId(agreementId)
                 .memberId(member.getGroupMemberId())
@@ -342,5 +343,23 @@ public class AgreementService {
                             .build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    private void processConfirmation(Agreement agreement, Group group, List<GroupMember> activeMembers) {
+        LocalDateTime now = LocalDateTime.now();
+
+        agreement.setStatus(AgreementStatus.CONFIRMED);
+        agreement.setConfirmedAt(now);
+        agreementRepository.save(agreement);
+
+        group.setName(agreement.getHouseName());
+
+        for (GroupMember m : activeMembers) {
+            if (m.getStatus() == MemberStatus.JOINED) {
+                m.setStatus(MemberStatus.AGREED);
+                m.setAgreedAt(now);
+                groupMemberRepository.save(m);
+            }
+        }
     }
 }
