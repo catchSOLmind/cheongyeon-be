@@ -95,8 +95,17 @@ public class EraserService {
                 if (isDelayed || isOverdue) {
                     shouldRecommend = true;
                     currentTags.add(SuggestionType.DELAYED);
+                    long overdueDays = ChronoUnit.DAYS.between(matchedOccurrence.getOccurDate(), LocalDate.now());
+                    String delayText;
+
+                    if (overdueDays >= 1) {
+                        delayText = overdueDays + "일";
+                    } else {
+                        delayText = matchedOccurrence.getPostponeCount() + "번";
+                    }
+
                     description = product.getDescDelayed()
-                            .replace("{delay_period}", "며칠")
+                            .replace("{delay_period}", delayText)
                             .replace("{time}", (product.getDefaultEstimatedMinutes() / 60) + "시간");
                 }
             }
@@ -150,7 +159,6 @@ public class EraserService {
         }
 
         // 우선순위 점수로 정렬하되, 같은 점수 내에서는 섞이도록 하거나 아예 셔플
-
         List<RecommendationResponse> delayed = new ArrayList<>();
         List<RecommendationResponse> others = new ArrayList<>();
 
