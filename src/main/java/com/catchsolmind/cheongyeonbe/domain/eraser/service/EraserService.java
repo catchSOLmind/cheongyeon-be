@@ -29,7 +29,6 @@ import com.catchsolmind.cheongyeonbe.global.enums.TaskStatus;
 import com.catchsolmind.cheongyeonbe.global.enums.TransactionType;
 import com.catchsolmind.cheongyeonbe.global.properties.S3Properties;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +44,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-@Slf4j
 public class EraserService {
     public static final int MAX_USABLE_POINT = 20000;
     public static final String MANAGER_PROFILE_IMG = "/backend/profile/manager.png";
@@ -63,34 +61,21 @@ public class EraserService {
     private final S3Properties s3Properties;
 
     public List<RecommendationResponse> getRecommendations(Long userId) {
-        // 1. 유저의 그룹 찾기
+        // 유저의 그룹 찾기
         Group group = groupMemberRepository.findGroupByUserId(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.GROUP_NOT_FOUND));
 
-        // 2. 데이터 조회
         List<TaskOccurrence> unfinishedTasks = taskOccurrenceRepository.findUnfinishedByGroupId(group.getGroupId());
         List<SuggestionTask> products = suggestionTaskRepository.findAll();
 
+        List<Long> productTaskTypeIds = products.stream().map(p -> p.getTaskType().getTaskTypeId()).toList();
+        List<Object[]> lastDoneLogs = taskLogRepository.findLastDoneDatesByGroupAndTaskTypes(group.getGroupId(), productTaskTypeIds);
+        Map<Long, LocalDateTime> lastDoneMap = lastDoneLogs.stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> (LocalDateTime) row[1]));
+
         List<RecommendationResponse> recommendations = new ArrayList<>();
 
-        // 2-1. 상품들의 TaskTypeId 목록 추출
-        List<Long> productTaskTypeIds = products.stream()
-                .map(p -> p.getTaskType().getTaskTypeId())
-                .toList();
-
-        // 2-2. 해당 TaskType들에 대한 마지막 수행일 일괄 조회 (쿼리 1번 실행)
-        List<Object[]> lastDoneLogs = taskLogRepository.findLastDoneDatesByGroupAndTaskTypes(group.getGroupId(), productTaskTypeIds);
-
-        // 2-3. 조회 결과를 Map으로 변환 (Key: TaskTypeId, Value: LastDoneDate) -> O(1) 검색 속도
-        Map<Long, LocalDateTime> lastDoneMap = lastDoneLogs.stream()
-                .collect(Collectors.toMap(
-                        row -> (Long) row[0],
-                        row -> (LocalDateTime) row[1]
-                        // 주의: H2나 MySQL 버전에 따라 Timestamp로 반환될 수 있으므로,
-                        // ClassCastException 발생 시 ((Timestamp) row[1]).toLocalDateTime() 으로 변경 필요
-                ));
-
-        // 3. 상품별 추천 여부 검사
+        // 상품별 추천 여부 검사
         for (SuggestionTask product : products) {
             TaskOccurrence matchedOccurrence = unfinishedTasks.stream()
                     .filter(o -> o.getTask().getTaskType().equals(product.getTaskType()))
@@ -102,63 +87,61 @@ public class EraserService {
             List<SuggestionType> currentTags = new ArrayList<>();
             String description = "";
 
-            // [Case A] 일정에 있는 경우 (미루기 감지)
+            // [Case A] 일정에 있는 경우 (미루기/지남) - 우선순위 최상
             if (matchedOccurrence != null) {
-                boolean isTooManyPostpones = matchedOccurrence.getPostponeCount() >= 3;
-                long overdueDays = ChronoUnit.DAYS.between(matchedOccurrence.getOccurDate(), LocalDate.now());
-                boolean isLongOverdue = overdueDays >= 7;
+                boolean isDelayed = matchedOccurrence.getPostponeCount() > 0;
+                boolean isOverdue = matchedOccurrence.getOccurDate().isBefore(LocalDate.now());
 
-                if (isTooManyPostpones || isLongOverdue) {
+                if (isDelayed || isOverdue) {
                     shouldRecommend = true;
                     currentTags.add(SuggestionType.DELAYED);
+                    long overdueDays = ChronoUnit.DAYS.between(matchedOccurrence.getOccurDate(), LocalDate.now());
+                    String delayText;
 
-                    String period = overdueDays >= 14 ? "2주" : (overdueDays + "일");
-                    String time = (product.getDefaultEstimatedMinutes() / 60) + "시간";
+                    if (overdueDays >= 1) {
+                        delayText = overdueDays + "일";
+                    } else {
+                        delayText = matchedOccurrence.getPostponeCount() + "번";
+                    }
+
                     description = product.getDescDelayed()
-                            .replace("{delay_period}", period)
-                            .replace("{time}", time);
-                }
-
-                if (isSeason) {
-                    currentTags.add(SuggestionType.GENERAL);
+                            .replace("{delay_period}", delayText)
+                            .replace("{time}", (product.getDefaultEstimatedMinutes() / 60) + "시간");
                 }
             }
 
-            // [Case B] 일정에 없는 경우 (주기/시즌 체크)
+            // [Case B] 일정에 없는 경우
             else {
-                // 1. 주기가 설정된 상품인지 확인
-                if (product.getRecommendationCycleDays() != null) {
-                    LocalDateTime lastDoneAt = lastDoneMap.get(product.getTaskType().getTaskTypeId());
-
-                    // 마지막 기록을 기준으로 경과일 계산
-                    long daysSinceLast = lastDoneAt == null ?
-                            9999 : ChronoUnit.DAYS.between(lastDoneAt.toLocalDate(), LocalDate.now());
-
-                    // 주기가 지났으면 무담당 작업
-                    if (daysSinceLast >= product.getRecommendationCycleDays()) {
-                        shouldRecommend = true;
-                        currentTags.add(SuggestionType.NO_ASSIGNEE);
-
-                        description = product.getDescNoAssignee()
-                                .replace("{task_name}", product.getTitle())
-                                .replace("{season}", getCurrentSeasonName());
-
-                        if (isSeason) {
-                            currentTags.add(SuggestionType.GENERAL);
-                        }
-                    }
-                }
-                // 2. 주기는 없지만(혹은 안 지났지만) 시즌 상품인 경우 -> 시즌 추천만 띄움
-                else if (isSeason) {
+                // 시즌 여부를 가장 먼저 체크 (주기 설정 여부와 상관없이)
+                if (isSeason) {
                     shouldRecommend = true;
-                    currentTags.add(SuggestionType.GENERAL);
+                    currentTags.add(SuggestionType.GENERAL); // 시즌 태그
                     description = product.getDescGeneral()
                             .replace("{season}", getCurrentSeasonName());
                 }
+
+                // 시즌이 아니라면, 주기가 지났는지 체크
+                else if (product.getRecommendationCycleDays() != null) {
+                    LocalDateTime lastDoneAt = lastDoneMap.get(product.getTaskType().getTaskTypeId());
+                    long daysSinceLast = lastDoneAt == null ?
+                            9999 : ChronoUnit.DAYS.between(lastDoneAt.toLocalDate(), LocalDate.now());
+
+                    if (daysSinceLast >= product.getRecommendationCycleDays()) {
+                        shouldRecommend = true;
+                        currentTags.add(SuggestionType.NO_ASSIGNEE);
+                        description = product.getDescNoAssignee()
+                                .replace("{task_name}", product.getTitle())
+                                .replace("{season}", getCurrentSeasonName());
+                    }
+                }
             }
 
-            // [결과] 추천 대상이면 리스트 추가
             if (shouldRecommend) {
+                // 시즌이어서 들어왔는데 주기도 지났을 수 있으니 태그 보정
+                if (isSeason) {
+                    currentTags.add(SuggestionType.GENERAL);
+                }
+
                 String fullImgUrl = Optional.ofNullable(s3Properties.getBaseUrl())
                         .map(base -> base + "/" + product.getImgUrl())
                         .orElseThrow(() -> new BusinessException(ErrorCode.S3_CONFIG_ERROR));
@@ -175,20 +158,32 @@ public class EraserService {
             }
         }
 
-        return recommendations.stream()
-                .sorted((r1, r2) -> {
-                    // 우선순위 점수 계산 (낮을수록 높음)
-                    int score1 = getPriorityScore(r1.tags());
-                    int score2 = getPriorityScore(r2.tags());
-                    return Integer.compare(score1, score2);
-                })
-                .limit(3) // 최대 3개까지만 자름
+        // 우선순위 점수로 정렬하되, 같은 점수 내에서는 섞이도록 하거나 아예 셔플
+        List<RecommendationResponse> delayed = new ArrayList<>();
+        List<RecommendationResponse> others = new ArrayList<>();
+
+        for (RecommendationResponse r : recommendations) {
+            if (r.tags().contains(SuggestionType.DELAYED)) {
+                delayed.add(r);
+            } else {
+                others.add(r);
+            }
+        }
+
+        // 나머지는 랜덤으로 섞음 (무담당, 시즌이 골고루 섞임)
+        java.util.Collections.shuffle(others);
+
+        List<RecommendationResponse> finalResult = new ArrayList<>();
+        finalResult.addAll(delayed); // 미룬 일 우선
+        finalResult.addAll(others);  // 나머지 랜덤
+
+        return finalResult.stream()
+                .limit(3)
                 .collect(Collectors.toList());
     }
 
     public List<EraserTaskOptionsResponse> getTaskOptions(List<Long> suggestionTaskId, Long userId
     ) {
-        // 요청 suggestionTaskId로 DB(SuggestionTask)를 조회해서 해당 상품들 한 번에 조회 (findAllById)
         if (suggestionTaskId == null || suggestionTaskId.isEmpty()) {
             return List.of();
         }
@@ -202,7 +197,7 @@ public class EraserService {
                             .map(base -> base + "/" + task.getImgUrl())
                             .orElseThrow(() -> new BusinessException(ErrorCode.S3_CONFIG_ERROR));
 
-                    // 옵션 매핑 
+                    // 옵션 매핑
                     List<EraserTaskOptionsResponse.OptionDetail> optionDetails = task.getOptions().stream()
                             .map(opt -> new EraserTaskOptionsResponse.OptionDetail(
                                     opt.getOptionId(),
@@ -272,6 +267,7 @@ public class EraserService {
         // 예약 아이템 생성 및 총액 계산
         List<ReservationItem> reservationItems = new ArrayList<>();
         int totalPrice = 0;
+        int totalRewardPoint = 0;
 
         List<TaskStatus> targetStatuses = List.of(
                 TaskStatus.WAITING,
@@ -284,6 +280,10 @@ public class EraserService {
                     .orElseThrow(() -> new BusinessException(ErrorCode.OPTION_NOT_FOUND));
 
             totalPrice += option.getPrice();
+
+            // 상품별 보상 포인트 합산
+            int reward = option.getSuggestionTask().getRewardPoint();
+            totalRewardPoint += reward;
 
             // 청연 지우개 로직 (예약한 상품과 관련된 미완료 집안일 상태 변경)
             Long targetTaskTypeId = option.getSuggestionTask().getTaskType().getTaskTypeId();
@@ -301,9 +301,9 @@ public class EraserService {
                     .taskTitle(option.getSuggestionTask().getTitle())
                     .optionCount(option.getCount())
                     .price(option.getPrice())
-                    .rewardPoint(option.getSuggestionTask().getRewardPoint())
                     .visitDate(itemReq.visitDate())
                     .visitTime(itemReq.visitTime())
+                    .rewardPoint(reward)
                     .build();
 
             reservationItems.add(item);
@@ -315,7 +315,7 @@ public class EraserService {
             throw new BusinessException(ErrorCode.INVALID_PAYMENT_AMOUNT);
         }
         if (usedPoint > 0) {
-            user.setPointBalance(currentPoint - usedPoint);
+            user.deductPoint(usedPoint);
 
             PointTransaction transaction = PointTransaction.builder()
                     .user(user)
@@ -325,6 +325,20 @@ public class EraserService {
                     .build();
 
             pointTransactionRepository.save(transaction);
+        }
+
+        // 포인트 저장
+        if (totalRewardPoint > 0) {
+            user.addPoint(totalRewardPoint);
+
+            PointTransaction rewardTransaction = PointTransaction.builder()
+                    .user(user)
+                    .amount(totalRewardPoint)
+                    .transactionType(TransactionType.EARN_MAGIC_ERASER)
+                    .taskLog(null)
+                    .build();
+
+            pointTransactionRepository.save(rewardTransaction);
         }
 
         // 예약 저장

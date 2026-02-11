@@ -16,7 +16,7 @@ public enum ErrorCode {
     // 포인트
     POINT_NOT_ENOUGH("POINT001", "포인트가 부족합니다."),
     INVALID_POINT_AMOUNT("POINT002", "최대 사용 포인트보다 많습니다."),
-    INVALID_POINT("POINT003", "잘못된 포인트 (음수 포인트 불가)"),
+    INVALID_POINT("POINT003", "잘못된 포인트"),
 
     // 예약
     OPTION_NOT_FOUND("RESERVATION003", "옵션이 없습니다."),
