@@ -2,6 +2,7 @@ package com.catchsolmind.cheongyeonbe.domain.user.service;
 
 import com.catchsolmind.cheongyeonbe.domain.user.entity.User;
 import com.catchsolmind.cheongyeonbe.domain.user.repository.UserRepository;
+import com.catchsolmind.cheongyeonbe.global.properties.S3Properties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,11 +17,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProfileImageService {
 
-    private static final String BUCKET = "cheongyeon-fe-solmind";
-    private static final String REGION = "ap-northeast-2";
-
     private final UserRepository userRepository;
     private final S3Client s3Client;
+    private final S3Properties s3Properties;
 
     public String upload(User user, MultipartFile image) {
         validate(image);
@@ -30,10 +29,9 @@ public class ProfileImageService {
 
         try {
             PutObjectRequest request = PutObjectRequest.builder()
-                    .bucket(BUCKET)
+                    .bucket(s3Properties.getBucket())
                     .key(key)
                     .contentType(image.getContentType())
-                    // .acl(ObjectCannedACL.PUBLIC_READ)
                     .build();
 
             s3Client.putObject(
@@ -45,7 +43,8 @@ public class ProfileImageService {
             throw new RuntimeException("프로필 이미지 업로드 실패", e);
         }
 
-        String imageUrl = "https://" + BUCKET + ".s3." + REGION + ".amazonaws.com/" + key;
+        // CloudFront 경유 URL (다른 이미지들과 동일한 방식)
+        String imageUrl = s3Properties.getBaseUrl() + "/" + key;
 
         user.setProfileImg(imageUrl);
         userRepository.save(user);
