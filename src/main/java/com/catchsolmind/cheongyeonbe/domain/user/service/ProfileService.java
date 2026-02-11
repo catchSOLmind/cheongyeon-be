@@ -82,10 +82,8 @@ public class ProfileService {
                     .collect(Collectors.toList());
             completedTaskCount = myCompletedOccurrences.size();
 
-            // 총 포인트 계산
-            totalPoints = myCompletedOccurrences.stream()
-                    .mapToInt(occ -> occ.getTask().getTaskType().getPoint())
-                    .sum();
+            // 총 포인트: User.pointBalance (적립 - 사용 반영된 실제 잔액)
+            totalPoints = user.getPointBalance();
 
             // 연속 달성 일수 계산 (오늘부터 역순으로)
             streakDays = calculateStreakDays(member.getGroupMemberId(), groupId, today, monthStart);
