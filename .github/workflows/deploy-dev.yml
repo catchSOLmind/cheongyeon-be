@@ -30,4 +30,5 @@ jobs:
 
           script: |
             cd /home/ubuntu/cheongyeon-be
-            bash scripts/deploy-dev.sh
+            export OPEN_AI_API_KEY=$OPEN_AI_API_KEY
+            OPEN_AI_API_KEY=$OPEN_AI_API_KEY bash scripts/deploy-dev.sh
