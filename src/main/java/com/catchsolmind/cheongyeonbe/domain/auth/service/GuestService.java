@@ -118,6 +118,7 @@ public class GuestService {
         return groupMemberRepository.save(member);
     }
 
+    // 
     private void createDummyAgreement(Group group) {
         Agreement agreement = Agreement.builder()
                 .group(group)
