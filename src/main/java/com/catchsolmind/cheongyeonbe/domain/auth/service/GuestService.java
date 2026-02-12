@@ -76,7 +76,7 @@ public class GuestService {
         // 멤버 연결 (게스트는 JOINED 상태로 시작)
         GroupMember solMember = joinMember(group, sol, MemberRole.OWNER, MemberStatus.AGREED);
         GroupMember mollyMember = joinMember(group, molly, MemberRole.MEMBER, MemberStatus.AGREED);
-        GroupMember guestMember = joinMember(group, guest, MemberRole.MEMBER, MemberStatus.JOINED);
+        GroupMember guestMember = joinMember(group, guest, MemberRole.MEMBER, MemberStatus.AGREED);
 
 
         // 협약서
@@ -152,7 +152,7 @@ public class GuestService {
                 .houseName("캐치SOL하우스")
                 .monthlyGoal("청소 3번 미루는 사람이 오마카세 쏘기")
                 .deadline(LocalDate.now().plusMonths(1))
-                .status(AgreementStatus.DRAFT) // 게스트 동의 대기
+                .status(AgreementStatus.CONFIRMED) // 게스트 동의 대기
                 .confirmedAt(LocalDateTime.now().minusDays(1))
                 .build();
         agreementRepository.save(agreement);
