@@ -12,10 +12,9 @@ import com.catchsolmind.cheongyeonbe.domain.agreement.repository.AgreementSignRe
 import com.catchsolmind.cheongyeonbe.domain.group.entity.Group;
 import com.catchsolmind.cheongyeonbe.domain.group.entity.GroupMember;
 import com.catchsolmind.cheongyeonbe.domain.group.repository.GroupMemberRepository;
-import com.catchsolmind.cheongyeonbe.global.enums.AgreementStatus;
-import com.catchsolmind.cheongyeonbe.global.enums.MemberRole;
-import com.catchsolmind.cheongyeonbe.global.enums.MemberStatus;
-import com.catchsolmind.cheongyeonbe.global.enums.SignStatus;
+import com.catchsolmind.cheongyeonbe.global.BusinessException;
+import com.catchsolmind.cheongyeonbe.global.ErrorCode;
+import com.catchsolmind.cheongyeonbe.global.enums.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -249,6 +248,10 @@ public class AgreementService {
         int totalCount = activeMembers.size();
         boolean allSigned = signedCount == totalCount;
 
+        if (allSigned && member.getUser().getProvider() == AuthProvider.GUEST) {
+            processConfirmation(agreement, group, activeMembers);
+        }
+
         return AgreementSignResponse.builder()
                 .agreementId(agreementId)
                 .memberId(member.getGroupMemberId())
@@ -282,10 +285,16 @@ public class AgreementService {
             throw new IllegalArgumentException("이미 확정된 협약서입니다.");
         }
 
-        // 4. 모든 멤버 서명 확인
+        // 4. 모든 멤버 서명 확인 및 최소 인원 검증
         List<GroupMember> activeMembers = groupMemberRepository.findByGroup_GroupIdAndStatusNot(
                 group.getGroupId(), MemberStatus.LEFT);
+
+        if (activeMembers.size() < 2) {
+            throw new BusinessException(ErrorCode.NOT_ENOUGH_GROUP_MEMBERS);
+        }
+
         long signedCount = agreementSignRepository.countByAgreement_AgreementId(agreementId);
+
         if (signedCount != activeMembers.size()) {
             throw new IllegalArgumentException("모든 멤버가 서명해야 확정할 수 있습니다. (서명: " + signedCount + "/" + activeMembers.size() + ")");
         }
@@ -334,5 +343,23 @@ public class AgreementService {
                             .build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    private void processConfirmation(Agreement agreement, Group group, List<GroupMember> activeMembers) {
+        LocalDateTime now = LocalDateTime.now();
+
+        agreement.setStatus(AgreementStatus.CONFIRMED);
+        agreement.setConfirmedAt(now);
+        agreementRepository.save(agreement);
+
+        group.setName(agreement.getHouseName());
+
+        for (GroupMember m : activeMembers) {
+            if (m.getStatus() == MemberStatus.JOINED) {
+                m.setStatus(MemberStatus.AGREED);
+                m.setAgreedAt(now);
+                groupMemberRepository.save(m);
+            }
+        }
     }
 }
